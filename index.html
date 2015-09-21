@@ -209,6 +209,96 @@
           
           
             
+              <a class="post-title-link" href="/2015/09/21/AVCaptureSession部分用法/" itemprop="url">
+                AVCaptureSession部分用法
+              </a>
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          发表于
+          <time itemprop="dateCreated" datetime="2015-09-21T13:58:46+08:00" content="2015-09-21">
+            2015-09-21
+          </time>
+        </span>
+
+        
+          <span class="post-category" >
+            &nbsp; | &nbsp; 分类于
+            
+              <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <a href="/categories/iOS/" itemprop="url" rel="index">
+                  <span itemprop="name">iOS</span>
+                </a>
+              </span>
+
+              
+              
+
+            
+          </span>
+        
+
+        
+          
+            <span class="post-comments-count">
+              &nbsp; | &nbsp;
+              <a href="/2015/09/21/AVCaptureSession部分用法/#comments" itemprop="discussionUrl">
+                <span class="post-comments-count ds-thread-count" data-thread-key="2015/09/21/AVCaptureSession部分用法/" itemprop="commentsCount"></span>
+              </a>
+            </span>
+          
+        
+      </div>
+    </header>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        
+          <h1 id="AVCaptureSession阻塞主线程问题">AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>仔细看了文档之后，发现问题出在<code>stopRunning</code>这里，<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2015/09/21/AVCaptureSession部分用法/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      
+      
+        <h1 class="post-title" itemprop="name headline">
+          
+          
+            
               <a class="post-title-link" href="/2015/09/07/跨平台书签同步-Xmarks/" itemprop="url">
                 跨平台书签同步:Xmarks
               </a>
@@ -409,7 +499,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">2</span>
+              <span class="site-state-item-count">3</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -423,7 +513,7 @@
 
           <div class="site-state-item site-state-tags">
             <a href="/tags">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">标签</span>
               </a>
           </div>

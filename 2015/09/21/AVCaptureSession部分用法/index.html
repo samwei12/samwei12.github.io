@@ -32,7 +32,7 @@
 
 
 
-  <meta name="keywords" content="Software," />
+  <meta name="keywords" content="AVCaptureSession," />
 
 
 
@@ -43,21 +43,19 @@
   <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.1" />
 
 
-<meta name="description" content="Xmarks简介Xmarks 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。
-有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Wi">
+<meta name="description" content="AVCaptureSession阻塞主线程问题前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在viewWillDisappear:中开销最大，这其中只调用了一个相机关闭的代码：
+123if ([[self.avCameraManager session] isRunning]) &amp;#123;			[">
 <meta property="og:type" content="article">
-<meta property="og:title" content="跨平台书签同步:Xmarks">
-<meta property="og:url" content="http://samwei12.gitcafe.io/2015/09/07/跨平台书签同步-Xmarks/index.html">
+<meta property="og:title" content="AVCaptureSession部分用法">
+<meta property="og:url" content="http://samwei12.gitcafe.io/2015/09/21/AVCaptureSession部分用法/index.html">
 <meta property="og:site_name" content="samwei12's blog">
-<meta property="og:description" content="Xmarks简介Xmarks 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。
-有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Wi">
-<meta property="og:image" content="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_001.png">
-<meta property="og:image" content="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_002.png">
-<meta property="og:updated_time" content="2015-09-07T11:45:22.000Z">
+<meta property="og:description" content="AVCaptureSession阻塞主线程问题前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在viewWillDisappear:中开销最大，这其中只调用了一个相机关闭的代码：
+123if ([[self.avCameraManager session] isRunning]) &amp;#123;			[">
+<meta property="og:updated_time" content="2015-09-21T12:08:59.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="跨平台书签同步:Xmarks">
-<meta name="twitter:description" content="Xmarks简介Xmarks 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。
-有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Wi">
+<meta name="twitter:title" content="AVCaptureSession部分用法">
+<meta name="twitter:description" content="AVCaptureSession阻塞主线程问题前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在viewWillDisappear:中开销最大，这其中只调用了一个相机关闭的代码：
+123if ([[self.avCameraManager session] isRunning]) &amp;#123;			[">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -67,7 +65,7 @@
   };
 </script>
 
-  <title> 跨平台书签同步:Xmarks | samwei12's blog </title>
+  <title> AVCaptureSession部分用法 | samwei12's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -213,7 +211,7 @@
           
           
             
-              跨平台书签同步:Xmarks
+              AVCaptureSession部分用法
             
           
         </h1>
@@ -222,8 +220,8 @@
       <div class="post-meta">
         <span class="post-time">
           发表于
-          <time itemprop="dateCreated" datetime="2015-09-07T19:04:08+08:00" content="2015-09-07">
-            2015-09-07
+          <time itemprop="dateCreated" datetime="2015-09-21T13:58:46+08:00" content="2015-09-21">
+            2015-09-21
           </time>
         </span>
 
@@ -232,8 +230,8 @@
             &nbsp; | &nbsp; 分类于
             
               <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                <a href="/categories/日常/" itemprop="url" rel="index">
-                  <span itemprop="name">日常</span>
+                <a href="/categories/iOS/" itemprop="url" rel="index">
+                  <span itemprop="name">iOS</span>
                 </a>
               </span>
 
@@ -248,8 +246,8 @@
           
             <span class="post-comments-count">
               &nbsp; | &nbsp;
-              <a href="/2015/09/07/跨平台书签同步-Xmarks/#comments" itemprop="discussionUrl">
-                <span class="post-comments-count ds-thread-count" data-thread-key="2015/09/07/跨平台书签同步-Xmarks/" itemprop="commentsCount"></span>
+              <a href="/2015/09/21/AVCaptureSession部分用法/#comments" itemprop="discussionUrl">
+                <span class="post-comments-count ds-thread-count" data-thread-key="2015/09/21/AVCaptureSession部分用法/" itemprop="commentsCount"></span>
               </a>
             </span>
           
@@ -263,19 +261,32 @@
       
 
       
-        <span itemprop="articleBody"><h1 id="Xmarks简介">Xmarks简介</h1><p><a href="https://www.xmarks.com" target="_blank" rel="external">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
-<p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>
-<a id="more"></a>
-<h1 id="多浏览器支持">多浏览器支持</h1><p> Xmarks 目前支持 Firefox、Chrome、IE、Safari 这几种常见浏览器，完全可以满足大部分用户需求。</p>
-<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_001.png" alt=""></p>
-<p>仅需要在官网上下载相对应的浏览器插件，登录 Xmarks 账号即可开始使用，十分便捷。</p>
-<h1 id="支持恢复已删除书签">支持恢复已删除书签</h1><p> Xmarks 会对用户每次的同步操作进行备份，同时可以很方便的进行查看和导出还原等操作。这个功能在多台设备间同步出错的时候十分实用</p>
-<p> <img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_002.png" alt=""></p>
-<p>同时还允许查找重复书签，十分人性化的功能，有时候经常一个页面添加到不同的书签文件夹里面，时间长了自己都忘记了，很适合我这种强迫症患者。</p>
-<h1 id="缺点">缺点</h1><p>Xmarks 有一个最大的缺点是与浏览器自带同步机制产生冲突，例如，Chrome 自带书签同步，同时 Xmarks 默认安装后是会隔一段时间或者每当书签发生变动时候进行自动同步，这时候问题就来了，即使没有任何书签变动，由于 Chrome 自己的同步机制，Xmarks 经常会产生另一份重复的书签，这时Xmarks 又会自动同步到服务器端，一不小心发现每个浏览器下面的书签文件夹都是好几份，只能使用直接下载覆盖，发现还是无法解决，最后使用杀手锏，恢复到之前正常的一个书签备份。</p>
-<p>被这个问题折磨了几次之后终于发现原来问题是出在浏览器自带的同步书签功能上面，最后我的解决办法是在 Chrome 的同步设置里面去除书签同步，反正每次重装 Chrome 时候，会自动同步 Xmarks 插件，这时进行下载覆盖本地书签即可。</p>
-<h1 id="总结">总结</h1><p>总的来说，对于多浏览器（尤其是包括 Safari 浏览器）的用户来说，Xmarks 是一个十分好用的同步工具。</p>
-<p>享受它的便捷性的同时，它带来的问题就是，无法使用浏览器自带的同步功能了，对于 Chrome 和 Firefox 来说，这个问题还不是很明显，但是对于 Mac 和 iPhone 用户来说，这相当于抛弃了 iCloud 自带的书签同步功能，手机上的书签就需要自己手动同步了。可以根据自己的需求来取舍。</p>
+        <span itemprop="articleBody"><h1 id="AVCaptureSession阻塞主线程问题">AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>仔细看了文档之后，发现问题出在<code>stopRunning</code>这里，<br><a id="more"></a><br>苹果文档描述如下：</p>
+<blockquote>
+<p>Clients invoke -stopRunning to stop the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    stopped.</p>
+</blockquote>
+<p>重点是这个函数在 session 完全停止下来之前会始终阻塞线程， 同样的，在<code>startRunning</code>中：</p>
+<blockquote>
+<p>Clients invoke -startRunning to start the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    started up or failed.  A failure to start running is reported through the AVCaptureSessionRuntimeErrorNotification<br>    mechanism.</p>
+</blockquote>
+<p>因此这里必须放在后台线程中处理，否则，就会导致界面不响应，iOS8之后应该在这里做了优化，即使放在主线程做也没有很卡顿的现象，但 iOS7中，尤其是测试设备为4s，界面卡死问题很严重。</p>
+<p>开启和关闭相机部分代码改为：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">		DDLogDebug(<span class="string">@"Function: %s,line : %d 开启相机"</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] startRunning];</span><br><span class="line">	&#125;);</span><br><span class="line">	</span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="keyword">void</span>) &#123;</span><br><span class="line">		DDLogDebug(<span class="string">@"Function: %s,line : %d 关闭相机"</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		<span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br></pre></td></tr></table></figure>
+<p>这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。</p>
+<h1 id="相机前后台切换问题">相机前后台切换问题</h1><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(startRunningSession) withObject:<span class="literal">nil</span> afterDelay:<span class="number">0.5</span>];</span><br></pre></td></tr></table></figure>
+<p>当时我很奇怪，这里为什么要加延时呢？进入到前台时不是应该直接开启相机吗？于是我直接把这里改成了：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span> startRunningSession];</span><br></pre></td></tr></table></figure>
+<p>没过多久，问题出现了，多次切换前后台之后发现，相机始终黑屏，这时，进入后台再回来，问题解决了，仔细加了 log 之后发现，出现黑屏的时候，确实也正确调用了启动 session，但是并没有收到系统相机启动成功的消息，反而收到了两次相机关闭的通知。</p>
+<p>那么之前代码中加了0.5秒延时的原因也就清楚了，是为了等待系统关闭相机之后，再调用开启相机，以免相机启动失败，但这种方式真的合理吗？其实并没有解决本质问题，如果0.5秒钟的时间并没有完全关闭系统相机呢？这里仍然会出现黑屏问题。</p>
+<p>于是继续查看系统文档，发现系统的 sampleCode AVCam-iOS中并没有专门用于前后台处理的逻辑，原来这里并不需要我们自己手动管理相机，系统会自动根据程序状态来判断是否需要关闭或者开启相机，如果按 home 进入<code>UIApplicationStateBackground</code> 状态，那么系统自动关闭相机并在进入<code>UIApplicationStateActive</code>状态时开启相机；如果是进入<code>UIApplicationStateInactive</code>状态，例如，双击 home 调出任务管理器，这时，相机并没有被关闭，仍然能够看到 preview 画面。</p>
+<p>我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。</p>
+<h1 id="收获">收获</h1><ul>
+<li>AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作</li>
+<li>前后台切换时，无需手动管理 CaptureSession</li>
+</ul>
 </span>
       
     </div>
@@ -284,7 +295,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Software/" rel="tag">#Software</a>
+            <a href="/tags/AVCaptureSession/" rel="tag">#AVCaptureSession</a>
           
         </div>
       
@@ -293,13 +304,11 @@
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/09/21/AVCaptureSession部分用法/" rel="prev">AVCaptureSession部分用法</a>
-            
           </div>
 
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/09/01/如何使用-Hexo-搭建个人博客/" rel="next">如何使用 Hexo 搭建个人博客</a>
+              <a href="/2015/09/07/跨平台书签同步-Xmarks/" rel="next">跨平台书签同步:Xmarks</a>
             
           </div>
         </div>
@@ -324,8 +333,8 @@
         
           <div class="comments" id="comments">
             
-              <div class="ds-thread" data-thread-key="2015/09/07/跨平台书签同步-Xmarks/"
-                   data-title="跨平台书签同步:Xmarks" data-url="http://samwei12.gitcafe.io/2015/09/07/跨平台书签同步-Xmarks/">
+              <div class="ds-thread" data-thread-key="2015/09/21/AVCaptureSession部分用法/"
+                   data-title="AVCaptureSession部分用法" data-url="http://samwei12.gitcafe.io/2015/09/21/AVCaptureSession部分用法/">
               </div>
             
           </div>
@@ -420,7 +429,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Xmarks简介"><span class="nav-number">1.</span> <span class="nav-text">Xmarks简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#多浏览器支持"><span class="nav-number">2.</span> <span class="nav-text">多浏览器支持</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#支持恢复已删除书签"><span class="nav-number">3.</span> <span class="nav-text">支持恢复已删除书签</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#缺点"><span class="nav-number">4.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#AVCaptureSession阻塞主线程问题"><span class="nav-number">1.</span> <span class="nav-text">AVCaptureSession阻塞主线程问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#相机前后台切换问题"><span class="nav-number">2.</span> <span class="nav-text">相机前后台切换问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#收获"><span class="nav-number">3.</span> <span class="nav-text">收获</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
