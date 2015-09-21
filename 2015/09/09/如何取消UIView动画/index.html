@@ -32,7 +32,7 @@
 
 
 
-  <meta name="keywords" content="Hexo,next" />
+  <meta name="keywords" content="Animation," />
 
 
 
@@ -43,15 +43,22 @@
   <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.1" />
 
 
-<meta name="description" content="Stay hungry, stay foolish">
-<meta property="og:type" content="website">
-<meta property="og:title" content="samwei12's blog">
-<meta property="og:url" content="http://samwei12.gitcafe.io/index.html">
+<meta name="description" content="最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？
+动画部分代码很简单，如下：
+12345678910self.transform = CGAffineTransformMakeScale(2.0f, 2.0f);    [UIView animat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何取消 UIView 动画？">
+<meta property="og:url" content="http://samwei12.gitcafe.io/2015/09/09/如何取消UIView动画/index.html">
 <meta property="og:site_name" content="samwei12's blog">
-<meta property="og:description" content="Stay hungry, stay foolish">
+<meta property="og:description" content="最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？
+动画部分代码很简单，如下：
+12345678910self.transform = CGAffineTransformMakeScale(2.0f, 2.0f);    [UIView animat">
+<meta property="og:updated_time" content="2015-09-21T12:36:08.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="samwei12's blog">
-<meta name="twitter:description" content="Stay hungry, stay foolish">
+<meta name="twitter:title" content="如何取消 UIView 动画？">
+<meta name="twitter:description" content="最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？
+动画部分代码很简单，如下：
+12345678910self.transform = CGAffineTransformMakeScale(2.0f, 2.0f);    [UIView animat">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -61,7 +68,7 @@
   };
 </script>
 
-  <title> samwei12's blog </title>
+  <title> 如何取消 UIView 动画？ | samwei12's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -89,9 +96,7 @@
 
 
 
-  <div class="container one-column 
-   page-home 
-">
+  <div class="container one-column page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -196,9 +201,9 @@
     <main id="main" class="main">
       <div class="main-inner">
         <div id="content" class="content"> 
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <header class="post-header">
@@ -209,99 +214,7 @@
           
           
             
-              <a class="post-title-link" href="/2015/09/21/AVCaptureSession部分用法/" itemprop="url">
-                AVCaptureSession部分用法
-              </a>
-            
-          
-        </h1>
-      
-
-      <div class="post-meta">
-        <span class="post-time">
-          发表于
-          <time itemprop="dateCreated" datetime="2015-09-21T13:58:46+08:00" content="2015-09-21">
-            2015-09-21
-          </time>
-        </span>
-
-        
-          <span class="post-category" >
-            &nbsp; | &nbsp; 分类于
-            
-              <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                <a href="/categories/iOS/" itemprop="url" rel="index">
-                  <span itemprop="name">iOS</span>
-                </a>
-              </span>
-
-              
-              
-
-            
-          </span>
-        
-
-        
-          
-            <span class="post-comments-count">
-              &nbsp; | &nbsp;
-              <a href="/2015/09/21/AVCaptureSession部分用法/#comments" itemprop="discussionUrl">
-                <span class="post-comments-count ds-thread-count" data-thread-key="2015/09/21/AVCaptureSession部分用法/" itemprop="commentsCount"></span>
-              </a>
-            </span>
-          
-        
-      </div>
-    </header>
-
-    <div class="post-body">
-
-      
-      
-
-      
-        
-          <h1 id="AVCaptureSession阻塞主线程问题">AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>仔细看了文档之后，发现问题出在<code>stopRunning</code>这里，<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2015/09/21/AVCaptureSession部分用法/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      
-      
-        <h1 class="post-title" itemprop="name headline">
-          
-          
-            
-              <a class="post-title-link" href="/2015/09/09/如何取消UIView动画/" itemprop="url">
-                如何取消 UIView 动画？
-              </a>
+              如何取消 UIView 动画？
             
           
         </h1>
@@ -351,218 +264,74 @@
       
 
       
-        
-          <p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
+        <span itemprop="articleBody"><p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
 <p>动画部分代码很简单，如下：</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">self</span><span class="variable">.transform</span> = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span><span class="variable">.transform</span> = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">						 <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">							 [<span class="keyword">self</span> hideFocus];</span><br><span class="line">						 &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
 <p>对焦框在0.3秒内进行两倍缩小到正常尺寸的一个动画，之后隐藏。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2015/09/09/如何取消UIView动画/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
+<a id="more"></a>
+<h1 id="旧代码分析">旧代码分析</h1><p>以前的代码在这部分的处理大致是这样的，</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:_touches];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UITouch</span> *touch = [_touches anyObject];</span><br><span class="line">    <span class="built_in">CGPoint</span> touchPoint = [touch locationInView:<span class="keyword">self</span><span class="variable">.view</span>];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    [<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(touchFocus:) withObject: touches afterDelay:<span class="number">0.3</span>f];</span><br><span class="line">    </span><br><span class="line">- (<span class="keyword">void</span>)touchFocus:(<span class="built_in">NSSet</span> *)touches &#123;</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:touches];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 以下为具体对焦框显示部分</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出，代码逻辑大致为，截获屏幕点击事件，之后加入一个0.3秒的延时方法，如果用户0.3秒内再次点击对焦，则取消上一次的对焦事件；否则，执行对焦框动画。</p>
+<p>这个逻辑看似解决了用户快速点击对焦的问题，实际上如果用户真正快速点击屏幕时，会出现一个很奇怪的现象，就是对焦框始终存在，并且不会变换位置，等到停止点击屏幕后，对焦框才会响应最新的触控位置进行动画，另一个问题就是对焦始终存在迟滞感，因为点击屏幕后需要等待0.3秒才能看到动画。</p>
+<h1 id="解决方案">解决方案</h1><p>那么有什么更好的办法呢？系统难道没有提供终止动画的接口嘛？当然不是，其实只需要在用户再次点击屏幕时候调用<code>[_focusView.layer removeAllAnimations];</code>即可，其中具体的 view 为正在做动画的 view。</p>
+<p>这样做还有另外一个好处，再也不需要烦人的滞后感了，屏幕对焦始终跟手，同时直接终止动画，里面的 completion 都会照常调用，不存在副作用，很好地解决了这个问题。</p>
+<h1 id="总结">总结</h1><ul>
+<li>学会了 <code>removeAllAnimations</code>接口用法</li>
+</ul>
+<p>尽管这个是很基础的系统 API 调用，但是我之前一直都不知道，在此记录下来，希望能给予其他人些许帮助。</p>
+</span>
       
     </div>
 
     <footer class="post-footer">
       
-
+        <div class="post-tags">
+          
+            <a href="/tags/Animation/" rel="tag">#Animation</a>
+          
+        </div>
       
 
       
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/09/21/AVCaptureSession部分用法/" rel="prev">AVCaptureSession部分用法</a>
+            
+          </div>
+
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/09/07/跨平台书签同步-Xmarks/" rel="next">跨平台书签同步:Xmarks</a>
+            
+          </div>
+        </div>
       
-        <div class="post-eof"></div>
+
+      
       
     </footer>
   </article>
 
 
-    
-      
 
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      
-      
-        <h1 class="post-title" itemprop="name headline">
-          
-          
-            
-              <a class="post-title-link" href="/2015/09/07/跨平台书签同步-Xmarks/" itemprop="url">
-                跨平台书签同步:Xmarks
-              </a>
-            
-          
-        </h1>
-      
-
-      <div class="post-meta">
-        <span class="post-time">
-          发表于
-          <time itemprop="dateCreated" datetime="2015-09-07T19:04:08+08:00" content="2015-09-07">
-            2015-09-07
-          </time>
-        </span>
-
-        
-          <span class="post-category" >
-            &nbsp; | &nbsp; 分类于
-            
-              <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                <a href="/categories/日常/" itemprop="url" rel="index">
-                  <span itemprop="name">日常</span>
-                </a>
-              </span>
-
-              
-              
-
-            
-          </span>
-        
-
-        
-          
-            <span class="post-comments-count">
-              &nbsp; | &nbsp;
-              <a href="/2015/09/07/跨平台书签同步-Xmarks/#comments" itemprop="discussionUrl">
-                <span class="post-comments-count ds-thread-count" data-thread-key="2015/09/07/跨平台书签同步-Xmarks/" itemprop="commentsCount"></span>
-              </a>
-            </span>
-          
-        
-      </div>
-    </header>
-
-    <div class="post-body">
-
-      
-      
-
-      
-        
-          <h1 id="Xmarks简介">Xmarks简介</h1><p><a href="https://www.xmarks.com">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
-<p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2015/09/07/跨平台书签同步-Xmarks/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
+    <div class="post-spread">
       
     </div>
+  </div>
 
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      
-      
-        <h1 class="post-title" itemprop="name headline">
-          
-          
-            
-              <a class="post-title-link" href="/2015/09/01/如何使用-Hexo-搭建个人博客/" itemprop="url">
-                如何使用 Hexo 搭建个人博客
-              </a>
-            
-          
-        </h1>
-      
-
-      <div class="post-meta">
-        <span class="post-time">
-          发表于
-          <time itemprop="dateCreated" datetime="2015-09-01T17:49:16+08:00" content="2015-09-01">
-            2015-09-01
-          </time>
-        </span>
-
-        
-          <span class="post-category" >
-            &nbsp; | &nbsp; 分类于
-            
-              <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                <a href="/categories/日常/" itemprop="url" rel="index">
-                  <span itemprop="name">日常</span>
-                </a>
-              </span>
-
-              
-              
-
-            
-          </span>
-        
-
-        
-          
-            <span class="post-comments-count">
-              &nbsp; | &nbsp;
-              <a href="/2015/09/01/如何使用-Hexo-搭建个人博客/#comments" itemprop="discussionUrl">
-                <span class="post-comments-count ds-thread-count" data-thread-key="2015/09/01/如何使用-Hexo-搭建个人博客/" itemprop="commentsCount"></span>
-              </a>
-            </span>
-          
-        
-      </div>
-    </header>
-
-    <div class="post-body">
-
-      
-      
-
-      
-        
-          <h2 id="什么是_Hexo_？">什么是 Hexo ？</h2><p><a href="https://hexo.io">Hexo</a> 是一个简单快速的静态博客框架，可以通过编辑 <a href="http://daringfireball.net/projects/markdown/">Markdown</a> 文档生成好看的静态博客。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2015/09/01/如何使用-Hexo-搭建个人博客/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-  </section>
-
-  
  </div>
 
         
 
+        
+          <div class="comments" id="comments">
+            
+              <div class="ds-thread" data-thread-key="2015/09/09/如何取消UIView动画/"
+                   data-title="如何取消 UIView 动画？" data-url="http://samwei12.gitcafe.io/2015/09/09/如何取消UIView动画/">
+              </div>
+            
+          </div>
         
       </div>
 
@@ -579,6 +348,15 @@
   <aside id="sidebar" class="sidebar">
     <div class="sidebar-inner">
 
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
       
 
       <section class="site-overview">
@@ -639,6 +417,17 @@
 
       </section>
 
+      
+        <section class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#旧代码分析"><span class="nav-number">1.</span> <span class="nav-text">旧代码分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解决方案"><span class="nav-number">2.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </section>
       
 
     </div>
@@ -721,6 +510,165 @@
   <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
 
   
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.1" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 0.4 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    var $tocContent = $('.post-toc-content');
+    if (isDesktop() && CONFIG.sidebar === 'post') {
+      if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+        displaySidebar();
+      }
+    }
+  });
+</script>
+
+
 
   <script type="text/javascript">
     $(document).ready(function () {
