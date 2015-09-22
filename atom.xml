@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title><![CDATA[samwei12's blog]]></title>
+  <subtitle><![CDATA[Stay hungry, stay foolish]]></subtitle>
+  <link href="/atom.xml" rel="self"/>
+  <link href="http://samwei12.gitcafe.io/"/>
+  <updated>2015-09-21T12:09:00.000Z</updated>
+  <id>http://samwei12.gitcafe.io/</id>
+  
+  <author>
+    <name><![CDATA[samwei12]]></name>
+    <email><![CDATA[samwei12@icloud.com]]></email>
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[AVCaptureSession部分用法]]></title>
+    <link href="http://samwei12.gitcafe.io/2015/09/21/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/"/>
+    <id>http://samwei12.gitcafe.io/2015/09/21/AVCaptureSession部分用法/</id>
+    <published>2015-09-21T05:58:46.000Z</published>
+    <updated>2015-09-21T12:09:00.000Z</updated>
+    <content type="html"><![CDATA[<h1 id="AVCaptureSession阻塞主线程问题">AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>仔细看了文档之后，发现问题出在<code>stopRunning</code>这里，<br><a id="more"></a><br>苹果文档描述如下：</p>
+<blockquote>
+<p>Clients invoke -stopRunning to stop the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    stopped.</p>
+</blockquote>
+<p>重点是这个函数在 session 完全停止下来之前会始终阻塞线程， 同样的，在<code>startRunning</code>中：</p>
+<blockquote>
+<p>Clients invoke -startRunning to start the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    started up or failed.  A failure to start running is reported through the AVCaptureSessionRuntimeErrorNotification<br>    mechanism.</p>
+</blockquote>
+<p>因此这里必须放在后台线程中处理，否则，就会导致界面不响应，iOS8之后应该在这里做了优化，即使放在主线程做也没有很卡顿的现象，但 iOS7中，尤其是测试设备为4s，界面卡死问题很严重。</p>
+<p>开启和关闭相机部分代码改为：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">		DDLogDebug(<span class="string">@"Function: %s,line : %d 开启相机"</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] startRunning];</span><br><span class="line">	&#125;);</span><br><span class="line">	</span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="keyword">void</span>) &#123;</span><br><span class="line">		DDLogDebug(<span class="string">@"Function: %s,line : %d 关闭相机"</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		<span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br></pre></td></tr></table></figure>
+<p>这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。</p>
+<h1 id="相机前后台切换问题">相机前后台切换问题</h1><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(startRunningSession) withObject:<span class="literal">nil</span> afterDelay:<span class="number">0.5</span>];</span><br></pre></td></tr></table></figure>
+<p>当时我很奇怪，这里为什么要加延时呢？进入到前台时不是应该直接开启相机吗？于是我直接把这里改成了：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span> startRunningSession];</span><br></pre></td></tr></table></figure>
+<p>没过多久，问题出现了，多次切换前后台之后发现，相机始终黑屏，这时，进入后台再回来，问题解决了，仔细加了 log 之后发现，出现黑屏的时候，确实也正确调用了启动 session，但是并没有收到系统相机启动成功的消息，反而收到了两次相机关闭的通知。</p>
+<p>那么之前代码中加了0.5秒延时的原因也就清楚了，是为了等待系统关闭相机之后，再调用开启相机，以免相机启动失败，但这种方式真的合理吗？其实并没有解决本质问题，如果0.5秒钟的时间并没有完全关闭系统相机呢？这里仍然会出现黑屏问题。</p>
+<p>于是继续查看系统文档，发现系统的 sampleCode AVCam-iOS中并没有专门用于前后台处理的逻辑，原来这里并不需要我们自己手动管理相机，系统会自动根据程序状态来判断是否需要关闭或者开启相机，如果按 home 进入<code>UIApplicationStateBackground</code> 状态，那么系统自动关闭相机并在进入<code>UIApplicationStateActive</code>状态时开启相机；如果是进入<code>UIApplicationStateInactive</code>状态，例如，双击 home 调出任务管理器，这时，相机并没有被关闭，仍然能够看到 preview 画面。</p>
+<p>我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。</p>
+<h1 id="收获">收获</h1><ul>
+<li>AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作</li>
+<li>前后台切换时，无需手动管理 CaptureSession</li>
+</ul>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h1 id="AVCaptureSession阻塞主线程问题">AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>仔细看了文档之后，发现问题出在<code>stopRunning</code>这里，<br>]]>
+    
+    </summary>
+    
+      <category term="AVCaptureSession" scheme="http://samwei12.gitcafe.io/tags/AVCaptureSession/"/>
+    
+      <category term="iOS" scheme="http://samwei12.gitcafe.io/categories/iOS/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[如何取消 UIView 动画？]]></title>
+    <link href="http://samwei12.gitcafe.io/2015/09/09/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/"/>
+    <id>http://samwei12.gitcafe.io/2015/09/09/如何取消UIView动画/</id>
+    <published>2015-09-09T06:28:02.000Z</published>
+    <updated>2015-09-21T12:36:08.000Z</updated>
+    <content type="html"><![CDATA[<p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
+<p>动画部分代码很简单，如下：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">self</span><span class="variable">.transform</span> = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span><span class="variable">.transform</span> = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">						 <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">							 [<span class="keyword">self</span> hideFocus];</span><br><span class="line">						 &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
+<p>对焦框在0.3秒内进行两倍缩小到正常尺寸的一个动画，之后隐藏。</p>
+<a id="more"></a>
+<h1 id="旧代码分析">旧代码分析</h1><p>以前的代码在这部分的处理大致是这样的，</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:_touches];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UITouch</span> *touch = [_touches anyObject];</span><br><span class="line">    <span class="built_in">CGPoint</span> touchPoint = [touch locationInView:<span class="keyword">self</span><span class="variable">.view</span>];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    [<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(touchFocus:) withObject: touches afterDelay:<span class="number">0.3</span>f];</span><br><span class="line">    </span><br><span class="line">- (<span class="keyword">void</span>)touchFocus:(<span class="built_in">NSSet</span> *)touches &#123;</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:touches];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 以下为具体对焦框显示部分</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出，代码逻辑大致为，截获屏幕点击事件，之后加入一个0.3秒的延时方法，如果用户0.3秒内再次点击对焦，则取消上一次的对焦事件；否则，执行对焦框动画。</p>
+<p>这个逻辑看似解决了用户快速点击对焦的问题，实际上如果用户真正快速点击屏幕时，会出现一个很奇怪的现象，就是对焦框始终存在，并且不会变换位置，等到停止点击屏幕后，对焦框才会响应最新的触控位置进行动画，另一个问题就是对焦始终存在迟滞感，因为点击屏幕后需要等待0.3秒才能看到动画。</p>
+<h1 id="解决方案">解决方案</h1><p>那么有什么更好的办法呢？系统难道没有提供终止动画的接口嘛？当然不是，其实只需要在用户再次点击屏幕时候调用<code>[_focusView.layer removeAllAnimations];</code>即可，其中具体的 view 为正在做动画的 view。</p>
+<p>这样做还有另外一个好处，再也不需要烦人的滞后感了，屏幕对焦始终跟手，同时直接终止动画，里面的 completion 都会照常调用，不存在副作用，很好地解决了这个问题。</p>
+<h1 id="总结">总结</h1><ul>
+<li>学会了 <code>removeAllAnimations</code>接口用法</li>
+</ul>
+<p>尽管这个是很基础的系统 API 调用，但是我之前一直都不知道，在此记录下来，希望能给予其他人些许帮助。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
+<p>动画部分代码很简单，如下：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">self</span><span class="variable">.transform</span> = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span><span class="variable">.transform</span> = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">						 <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">							 [<span class="keyword">self</span> hideFocus];</span><br><span class="line">						 &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
+<p>对焦框在0.3秒内进行两倍缩小到正常尺寸的一个动画，之后隐藏。</p>]]>
+    
+    </summary>
+    
+      <category term="Animation" scheme="http://samwei12.gitcafe.io/tags/Animation/"/>
+    
+      <category term="iOS" scheme="http://samwei12.gitcafe.io/categories/iOS/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[跨平台书签同步:Xmarks]]></title>
+    <link href="http://samwei12.gitcafe.io/2015/09/07/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/"/>
+    <id>http://samwei12.gitcafe.io/2015/09/07/跨平台书签同步-Xmarks/</id>
+    <published>2015-09-07T11:04:08.000Z</published>
+    <updated>2015-09-07T11:45:22.000Z</updated>
+    <content type="html"><![CDATA[<h1 id="Xmarks简介">Xmarks简介</h1><p><a href="https://www.xmarks.com" target="_blank" rel="external">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
+<p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>
+<a id="more"></a>
+<h1 id="多浏览器支持">多浏览器支持</h1><p> Xmarks 目前支持 Firefox、Chrome、IE、Safari 这几种常见浏览器，完全可以满足大部分用户需求。</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_001.png" alt=""></p>
+<p>仅需要在官网上下载相对应的浏览器插件，登录 Xmarks 账号即可开始使用，十分便捷。</p>
+<h1 id="支持恢复已删除书签">支持恢复已删除书签</h1><p> Xmarks 会对用户每次的同步操作进行备份，同时可以很方便的进行查看和导出还原等操作。这个功能在多台设备间同步出错的时候十分实用</p>
+<p> <img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_002.png" alt=""></p>
+<p>同时还允许查找重复书签，十分人性化的功能，有时候经常一个页面添加到不同的书签文件夹里面，时间长了自己都忘记了，很适合我这种强迫症患者。</p>
+<h1 id="缺点">缺点</h1><p>Xmarks 有一个最大的缺点是与浏览器自带同步机制产生冲突，例如，Chrome 自带书签同步，同时 Xmarks 默认安装后是会隔一段时间或者每当书签发生变动时候进行自动同步，这时候问题就来了，即使没有任何书签变动，由于 Chrome 自己的同步机制，Xmarks 经常会产生另一份重复的书签，这时Xmarks 又会自动同步到服务器端，一不小心发现每个浏览器下面的书签文件夹都是好几份，只能使用直接下载覆盖，发现还是无法解决，最后使用杀手锏，恢复到之前正常的一个书签备份。</p>
+<p>被这个问题折磨了几次之后终于发现原来问题是出在浏览器自带的同步书签功能上面，最后我的解决办法是在 Chrome 的同步设置里面去除书签同步，反正每次重装 Chrome 时候，会自动同步 Xmarks 插件，这时进行下载覆盖本地书签即可。</p>
+<h1 id="总结">总结</h1><p>总的来说，对于多浏览器（尤其是包括 Safari 浏览器）的用户来说，Xmarks 是一个十分好用的同步工具。</p>
+<p>享受它的便捷性的同时，它带来的问题就是，无法使用浏览器自带的同步功能了，对于 Chrome 和 Firefox 来说，这个问题还不是很明显，但是对于 Mac 和 iPhone 用户来说，这相当于抛弃了 iCloud 自带的书签同步功能，手机上的书签就需要自己手动同步了。可以根据自己的需求来取舍。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h1 id="Xmarks简介">Xmarks简介</h1><p><a href="https://www.xmarks.com">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
+<p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>]]>
+    
+    </summary>
+    
+      <category term="Software" scheme="http://samwei12.gitcafe.io/tags/Software/"/>
+    
+      <category term="日常" scheme="http://samwei12.gitcafe.io/categories/%E6%97%A5%E5%B8%B8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[如何使用 Hexo 搭建个人博客]]></title>
+    <link href="http://samwei12.gitcafe.io/2015/09/01/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"/>
+    <id>http://samwei12.gitcafe.io/2015/09/01/如何使用-Hexo-搭建个人博客/</id>
+    <published>2015-09-01T09:49:16.000Z</published>
+    <updated>2015-09-01T11:45:41.000Z</updated>
+    <content type="html"><![CDATA[<h2 id="什么是_Hexo_？">什么是 Hexo ？</h2><p><a href="https://hexo.io" target="_blank" rel="external">Hexo</a> 是一个简单快速的静态博客框架，可以通过编辑 <a href="http://daringfireball.net/projects/markdown/" target="_blank" rel="external">Markdown</a> 文档生成好看的静态博客。</p>
+<a id="more"></a>
+<h2 id="搭建_Hexo">搭建 Hexo</h2><h3 id="要求">要求</h3><p>安装 Hexo 十分简单，只需要 Node.js 和 Git 即可。</p>
+<ul>
+<li><a href="http://nodejs.org/" target="_blank" rel="external">Node.js</a></li>
+<li><a href="http://git-scm.com/" target="_blank" rel="external">Git</a></li>
+</ul>
+<h4 id="Node-js">Node.js</h4><p>最好的安装方式是使用 <a href="https://github.com/creationix/nvm" target="_blank" rel="external">nvm</a>，</p>
+<p>cURL：</p>
+<p><code>$ curl https://raw.github.com/creationix/nvm/master/install.sh | sh</code></p>
+<p>安装好 nvm 之后，重启终端，然后通过</p>
+<p><code>$ nvm install 0.12</code></p>
+<p>来安装 Node.js</p>
+<h4 id="Git">Git</h4><p>Mac 用户：<a href="http://mxcl.github.com/homebrew/" target="_blank" rel="external">Homebrew</a></p>
+<h3 id="安装_Hexo">安装 Hexo</h3><p><code>$ npm install -g hexo-cli</code></p>
+<blockquote>
+<p>需要注意的是，这里的 npm 相关命令，最好都使用管理员权限操作，否则可能会报错</p>
+</blockquote>
+<h2 id="如何使用_Hexo">如何使用 Hexo</h2><p>一旦安装完毕 Hexo，即可通过如下命令在指定文件夹中初始化 Hexo：</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ </span>hexo init &lt;folder&gt;</span><br><span class="line"><span class="variable">$ </span>cd &lt;folder&gt;</span><br><span class="line"><span class="variable">$ </span>npm install</span><br></pre></td></tr></table></figure>
+<h3 id="配置_Hexo">配置 Hexo</h3><figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor"># Hexo Configuration</span></span><br><span class="line"><span class="preprocessor"># Site</span></span><br><span class="line"><span class="label">title:</span> Hexo <span class="preprocessor">#博客标题</span></span><br><span class="line"><span class="label">subtitle:</span> <span class="preprocessor">#博客副标题</span></span><br><span class="line"><span class="label">description:</span> <span class="preprocessor">#博客描述</span></span><br><span class="line"><span class="label">author:</span> John Doe <span class="preprocessor">#作者名字</span></span><br><span class="line"><span class="label">email:</span> <span class="preprocessor">#邮箱地址</span></span><br><span class="line"><span class="label">language:</span> <span class="preprocessor">#语言 中国大陆简体中文的标准语系地区码是zh-CN 台灣是正體中文zh-TW </span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor"># URL</span></span><br><span class="line"><span class="label">url:</span> http://yoursite.com <span class="preprocessor">#博客地址</span></span><br><span class="line"><span class="label">root:</span> / <span class="preprocessor">#博客根目录</span></span><br><span class="line"><span class="label">permalink:</span> :year/:month/:day/:title/ <span class="preprocessor">#博客url地址结构  </span></span><br><span class="line"><span class="label">tag_dir:</span> tags </span><br><span class="line"><span class="label">archive_dir:</span> archives</span><br><span class="line"><span class="label">category_dir:</span> categories</span><br><span class="line"><span class="label">code_dir:</span> downloads/code</span><br><span class="line"><span class="label">permalink_defaults:</span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor"># Directory</span></span><br><span class="line"><span class="label">source_dir:</span> source</span><br><span class="line"><span class="label">public_dir:</span> public</span><br><span class="line"></span><br><span class="line"><span class="preprocessor"># Writing</span></span><br><span class="line"><span class="label">new_post_name:</span> :title.md <span class="preprocessor"># File name of new posts</span></span><br><span class="line"><span class="label">default_layout:</span> post</span><br><span class="line"><span class="label">titlecase:</span> false <span class="preprocessor"># Transform title into titlecase</span></span><br><span class="line"><span class="label">external_link:</span> true <span class="preprocessor"># Open external links in new tab</span></span><br><span class="line"><span class="label">filename_case:</span> <span class="number">0</span></span><br><span class="line"><span class="label">render_drafts:</span> false</span><br><span class="line"><span class="label">post_asset_folder:</span> false</span><br><span class="line"><span class="label">relative_link:</span> false</span><br><span class="line"><span class="label">highlight:</span></span><br><span class="line"><span class="label">enable:</span> true</span><br><span class="line"><span class="label">line_number:</span> true</span><br><span class="line"><span class="label">tab_replace:</span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor"># Category &amp; Tag</span></span><br><span class="line"><span class="label">default_category:</span> uncategorized</span><br><span class="line"><span class="label">category_map:</span></span><br><span class="line"><span class="label">tag_map:</span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor"># Archives</span></span><br><span class="line"><span class="label">archive:</span> <span class="number">1</span> <span class="preprocessor">#设置为1 是全部展示</span></span><br><span class="line"><span class="label">category:</span> <span class="number">2</span></span><br><span class="line"><span class="label">tag:</span> <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor"># Server</span></span><br><span class="line"><span class="label">port:</span> <span class="number">4000</span> <span class="preprocessor">#本地服务器端口是4000</span></span><br><span class="line"><span class="label">server_ip:</span> localhost <span class="preprocessor">#本地服务器地址</span></span><br><span class="line"><span class="label">logger:</span> false</span><br><span class="line"><span class="label">logger_format:</span> dev</span><br><span class="line"></span><br><span class="line"><span class="preprocessor"># Date / Time format</span></span><br><span class="line"><span class="label">date_format:</span> MMM D YYYY <span class="preprocessor">#日期格式</span></span><br><span class="line"><span class="label">time_format:</span> H:mm:ss <span class="preprocessor">#时间格式</span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor"># Pagination</span></span><br><span class="line"><span class="preprocessor">## Set per_page to 0 to disable pagination</span></span><br><span class="line"><span class="label">per_page:</span> <span class="number">10</span></span><br><span class="line"><span class="label">pagination_dir:</span> page</span><br><span class="line"></span><br><span class="line"><span class="preprocessor"># Disqus</span></span><br><span class="line"><span class="label">disqus_shortname:</span> <span class="preprocessor">#disqus的用户名称</span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor"># Extensions</span></span><br><span class="line"><span class="label">theme:</span> landscape <span class="preprocessor">#主题设置</span></span><br><span class="line"><span class="label">exclude_generator:</span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor"># Deployment</span></span><br><span class="line"><span class="label">deploy:</span></span><br><span class="line">  type:</span><br></pre></td></tr></table></figure>
+<h4 id="完善页面">完善页面</h4><figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo <span class="keyword">new</span> page <span class="string">"about"</span></span><br></pre></td></tr></table></figure>
+<p>用于创建 about 页面</p>
+<h4 id="主题">主题</h4><p> Alex</p>
+<h3 id="Hexo_常用插件">Hexo 常用插件</h3><p><a href="https://github.com/hexojs/hexo/wiki/Plugins" target="_blank" rel="external">Plugins</a>, Hexo官方插件列表地址</p>
+<h4 id="RSS">RSS</h4><p>安装hexo-generator-feed插件即可</p>
+<p><code>npm install hexo-generator-feed</code></p>
+<h4 id="Sitemap">Sitemap</h4><p>给搜索引擎使用</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm <span class="keyword">install</span> hexo-generator-sitemap</span><br></pre></td></tr></table></figure>
+<p>装完之后 记得在全局配置里面开启插件</p>
+<figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">plugins:</span><br><span class="line">-<span class="ruby"> hexo-generator-feed</span><br><span class="line"></span>-<span class="ruby"> hexo-generator-sitemap</span></span><br></pre></td></tr></table></figure>
+<h4 id="Git-1">Git</h4><p>用于发布</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm <span class="operator"><span class="keyword">install</span> hexo-deployer-git <span class="comment">--save</span></span></span><br></pre></td></tr></table></figure>
+<h4 id="baidu_sitemap">baidu sitemap</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-generator-baidu-sitemap@<span class="number">0.1</span><span class="number">.1</span> --save</span><br></pre></td></tr></table></figure>
+<h4 id="Disqus评论系统">Disqus评论系统</h4><ul>
+<li>登录<code>http://disqus.com/</code>网站，申请一个新网站的shortname，配置到<code>_config.yml</code>中，格式为：<code>disqus_shortname: samwei12</code></li>
+<li>之后再 Disqus 中申请接入评论系统</li>
+</ul>
+<p><img src="http://blog.fens.me/wp-content/uploads/2014/05/disqus.png" alt=""></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="title">div</span> <span class="attribute">id</span>=<span class="value">"disqus_thread"</span>&gt;</span><span class="tag">&lt;/<span class="title">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">script</span> <span class="attribute">type</span>=<span class="value">"text/javascript"</span>&gt;</span><span class="javascript"></span><br><span class="line">    <span class="comment">/* * * CONFIGURATION VARIABLES * * */</span></span><br><span class="line">    <span class="keyword">var</span> disqus_shortname = <span class="string">'samwei12'</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/* * * DON'T EDIT BELOW THIS LINE * * */</span></span><br><span class="line">    (<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> dsq = <span class="built_in">document</span>.createElement(<span class="string">'script'</span>); dsq.type = <span class="string">'text/javascript'</span>; dsq.async = <span class="literal">true</span>;</span><br><span class="line">        dsq.src = <span class="string">'//'</span> + disqus_shortname + <span class="string">'.disqus.com/embed.js'</span>;</span><br><span class="line">        (<span class="built_in">document</span>.getElementsByTagName(<span class="string">'head'</span>)[<span class="number">0</span>] || <span class="built_in">document</span>.getElementsByTagName(<span class="string">'body'</span>)[<span class="number">0</span>]).appendChild(dsq);</span><br><span class="line">    &#125;)();</span><br><span class="line"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">noscript</span>&gt;</span>Please enable JavaScript to view the <span class="tag">&lt;<span class="title">a</span> <span class="attribute">href</span>=<span class="value">"https://disqus.com/?ref_noscript"</span> <span class="attribute">rel</span>=<span class="value">"nofollow"</span>&gt;</span>comments powered by Disqus.<span class="tag">&lt;/<span class="title">a</span>&gt;</span><span class="tag">&lt;/<span class="title">noscript</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>然后选择 universal code,将生成的 js保存下来，新建<code>themes/主题名称/layout/_partial/comment.ejs</code>，将代码拷贝到里面</li>
+</ul>
+<h2 id="发布到_GitCafe">发布到 GitCafe</h2><h3 id="拥有自己的_GitPage">拥有自己的 GitPage</h3><ol>
+<li>创建一个与自己用户名相同的项目</li>
+<li>随便上传个文件，上传 master 分支</li>
+<li>新建 gitcafe-pages 分支，并切换到该分支，推送到远程</li>
+</ol>
+<h3 id="发布">发布</h3><ul>
+<li>配置里，新增</li>
+</ul>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">deploy</span>:</span><br><span class="line">  <span class="attribute">type</span>: git</span><br><span class="line">  <span class="attribute">repo</span>: <span class="attribute">https</span>:<span class="comment">//gitcafe.com/samwei12/samwei12.git</span></span><br><span class="line">  <span class="attribute">branch</span>: gitcafe-pages</span><br></pre></td></tr></table></figure>
+<ul>
+<li>然后</li>
+</ul>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 生成静态文件</span></span><br><span class="line">hexo <span class="keyword">g</span></span><br><span class="line"><span class="comment">// 发布</span></span><br><span class="line">hexo <span class="literal">d</span></span><br></pre></td></tr></table></figure>
+<p>即可</p>
+<h2 id="参考文档：">参考文档：</h2><ul>
+<li><a href="http://segmentfault.com/a/1190000002538363" target="_blank" rel="external">Hexo静态博客使用指南</a></li>
+<li><a href="http://blog.fens.me/hexo-blog-github/" target="_blank" rel="external">Hexo在github上构建免费的Web应用</a></li>
+<li><a href="http://www.jianshu.com/p/05289a4bc8b2" target="_blank" rel="external">如何搭建一个独立博客——简明Github Pages与Hexo教程</a></li>
+</ul>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h2 id="什么是_Hexo_？">什么是 Hexo ？</h2><p><a href="https://hexo.io">Hexo</a> 是一个简单快速的静态博客框架，可以通过编辑 <a href="http://daringfireball.net/projects/markdown/">Markdown</a> 文档生成好看的静态博客。</p>]]>
+    
+    </summary>
+    
+      <category term="日常" scheme="http://samwei12.gitcafe.io/categories/%E6%97%A5%E5%B8%B8/"/>
+    
+  </entry>
+  
+</feed>
