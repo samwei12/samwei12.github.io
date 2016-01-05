@@ -2,23 +2,23 @@
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     
     <sitemap>
-        <loc>http://samwei12.gitcafe.io/post-sitemap.xml</loc>
+        <loc>http://samwei12.github.io/post-sitemap.xml</loc>
         <lastmod>2015-09-28T05:59:19.000Z</lastmod>
     </sitemap>
     
     <sitemap>
-        <loc>http://samwei12.gitcafe.io/page-sitemap.xml</loc>
+        <loc>http://samwei12.github.io/page-sitemap.xml</loc>
         <lastmod>2015-09-10T09:04:49.000Z</lastmod>
     </sitemap>
     
     <sitemap>
-        <loc>http://samwei12.gitcafe.io/category-sitemap.xml</loc>
-        <lastmod>2015-09-07T11:45:22.000Z</lastmod>
+        <loc>http://samwei12.github.io/category-sitemap.xml</loc>
+        <lastmod>2015-09-07T11:44:37.000Z</lastmod>
     </sitemap>
     
     <sitemap>
-        <loc>http://samwei12.gitcafe.io/tag-sitemap.xml</loc>
-        <lastmod>2015-09-07T11:45:22.000Z</lastmod>
+        <loc>http://samwei12.github.io/tag-sitemap.xml</loc>
+        <lastmod>2015-09-07T11:44:37.000Z</lastmod>
     </sitemap>
     
 </sitemapindex>

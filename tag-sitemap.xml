@@ -2,21 +2,21 @@
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
     <url>
-        <loc>http://samwei12.gitcafe.io/tags/Software/</loc>
-        <lastmod>2015-09-07T11:45:22.000Z</lastmod>
+        <loc>http://samwei12.github.io/tags/Software/</loc>
+        <lastmod>2015-09-07T11:44:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
-        <loc>http://samwei12.gitcafe.io/tags/AVCaptureSession/</loc>
+        <loc>http://samwei12.github.io/tags/AVCaptureSession/</loc>
         <lastmod>2015-09-21T12:09:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
-        <loc>http://samwei12.gitcafe.io/tags/Animation/</loc>
+        <loc>http://samwei12.github.io/tags/Animation/</loc>
         <lastmod>2015-09-28T05:59:19.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>

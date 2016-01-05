@@ -3,9 +3,9 @@
   <title><![CDATA[samwei12's blog]]></title>
   <subtitle><![CDATA[Stay hungry, stay foolish]]></subtitle>
   <link href="/atom.xml" rel="self"/>
-  <link href="http://samwei12.gitcafe.io/"/>
+  <link href="http://samwei12.github.io/"/>
   <updated>2015-09-21T12:09:00.000Z</updated>
-  <id>http://samwei12.gitcafe.io/</id>
+  <id>http://samwei12.github.io/</id>
   
   <author>
     <name><![CDATA[samwei12]]></name>
@@ -16,8 +16,8 @@
   
   <entry>
     <title><![CDATA[AVCaptureSession部分用法]]></title>
-    <link href="http://samwei12.gitcafe.io/2015/09/21/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/"/>
-    <id>http://samwei12.gitcafe.io/2015/09/21/AVCaptureSession部分用法/</id>
+    <link href="http://samwei12.github.io/2015/09/21/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/"/>
+    <id>http://samwei12.github.io/2015/09/21/AVCaptureSession部分用法/</id>
     <published>2015-09-21T05:58:46.000Z</published>
     <updated>2015-09-21T12:09:00.000Z</updated>
     <content type="html"><![CDATA[<h1 id="AVCaptureSession阻塞主线程问题">AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
@@ -54,16 +54,16 @@
     
     </summary>
     
-      <category term="AVCaptureSession" scheme="http://samwei12.gitcafe.io/tags/AVCaptureSession/"/>
+      <category term="AVCaptureSession" scheme="http://samwei12.github.io/tags/AVCaptureSession/"/>
     
-      <category term="iOS" scheme="http://samwei12.gitcafe.io/categories/iOS/"/>
+      <category term="iOS" scheme="http://samwei12.github.io/categories/iOS/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[如何取消 UIView 动画？]]></title>
-    <link href="http://samwei12.gitcafe.io/2015/09/09/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/"/>
-    <id>http://samwei12.gitcafe.io/2015/09/09/如何取消UIView动画/</id>
+    <link href="http://samwei12.github.io/2015/09/09/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/"/>
+    <id>http://samwei12.github.io/2015/09/09/如何取消UIView动画/</id>
     <published>2015-09-09T06:28:02.000Z</published>
     <updated>2015-09-28T05:59:19.000Z</updated>
     <content type="html"><![CDATA[<p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
@@ -93,18 +93,18 @@
     
     </summary>
     
-      <category term="Animation" scheme="http://samwei12.gitcafe.io/tags/Animation/"/>
+      <category term="Animation" scheme="http://samwei12.github.io/tags/Animation/"/>
     
-      <category term="iOS" scheme="http://samwei12.gitcafe.io/categories/iOS/"/>
+      <category term="iOS" scheme="http://samwei12.github.io/categories/iOS/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[跨平台书签同步:Xmarks]]></title>
-    <link href="http://samwei12.gitcafe.io/2015/09/07/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/"/>
-    <id>http://samwei12.gitcafe.io/2015/09/07/跨平台书签同步-Xmarks/</id>
+    <link href="http://samwei12.github.io/2015/09/07/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/"/>
+    <id>http://samwei12.github.io/2015/09/07/跨平台书签同步-Xmarks/</id>
     <published>2015-09-07T11:04:08.000Z</published>
-    <updated>2015-09-07T11:45:22.000Z</updated>
+    <updated>2015-09-07T11:44:37.000Z</updated>
     <content type="html"><![CDATA[<h1 id="Xmarks简介">Xmarks简介</h1><p><a href="https://www.xmarks.com" target="_blank" rel="external">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
 <p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>
 <a id="more"></a>
@@ -125,16 +125,16 @@
     
     </summary>
     
-      <category term="Software" scheme="http://samwei12.gitcafe.io/tags/Software/"/>
+      <category term="Software" scheme="http://samwei12.github.io/tags/Software/"/>
     
-      <category term="日常" scheme="http://samwei12.gitcafe.io/categories/%E6%97%A5%E5%B8%B8/"/>
+      <category term="日常" scheme="http://samwei12.github.io/categories/%E6%97%A5%E5%B8%B8/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[如何使用 Hexo 搭建个人博客]]></title>
-    <link href="http://samwei12.gitcafe.io/2015/09/01/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"/>
-    <id>http://samwei12.gitcafe.io/2015/09/01/如何使用-Hexo-搭建个人博客/</id>
+    <link href="http://samwei12.github.io/2015/09/01/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"/>
+    <id>http://samwei12.github.io/2015/09/01/如何使用-Hexo-搭建个人博客/</id>
     <published>2015-09-01T09:49:16.000Z</published>
     <updated>2015-09-01T11:45:41.000Z</updated>
     <content type="html"><![CDATA[<h2 id="什么是_Hexo_？">什么是 Hexo ？</h2><p><a href="https://hexo.io" target="_blank" rel="external">Hexo</a> 是一个简单快速的静态博客框架，可以通过编辑 <a href="http://daringfireball.net/projects/markdown/" target="_blank" rel="external">Markdown</a> 文档生成好看的静态博客。</p>
@@ -205,7 +205,7 @@
     
     </summary>
     
-      <category term="日常" scheme="http://samwei12.gitcafe.io/categories/%E6%97%A5%E5%B8%B8/"/>
+      <category term="日常" scheme="http://samwei12.github.io/categories/%E6%97%A5%E5%B8%B8/"/>
     
   </entry>
   

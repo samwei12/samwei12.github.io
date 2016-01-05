@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="sitemap.xsl"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>http://samwei12.gitcafe.io</loc>
+        <loc>http://samwei12.github.io</loc>
         <changefreq>daily</changefreq>
         <priority>1</priority>
     </url>
 
     <url>
-        <loc>http://samwei12.gitcafe.io/2015/09/09/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/</loc>
+        <loc>http://samwei12.github.io/2015/09/09/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/</loc>
         <lastmod>2015-09-28T05:59:19.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
     </url>
 
     <url>
-        <loc>http://samwei12.gitcafe.io/2015/09/21/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/</loc>
+        <loc>http://samwei12.github.io/2015/09/21/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/</loc>
         <lastmod>2015-09-21T12:09:00.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
     </url>
 
     <url>
-        <loc>http://samwei12.gitcafe.io/2015/09/07/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/</loc>
-        <lastmod>2015-09-07T11:45:22.000Z</lastmod>
+        <loc>http://samwei12.github.io/2015/09/07/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/</loc>
+        <lastmod>2015-09-07T11:44:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
     </url>
 
     <url>
-        <loc>http://samwei12.gitcafe.io/2015/09/01/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</loc>
+        <loc>http://samwei12.github.io/2015/09/01/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</loc>
         <lastmod>2015-09-01T11:45:41.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
