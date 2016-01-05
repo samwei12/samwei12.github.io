@@ -262,7 +262,7 @@
 
       
         
-          <h1 id="AVCaptureSession阻塞主线程问题">AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
+          <h1 id="AVCaptureSession_u963B_u585E_u4E3B_u7EBF_u7A0B_u95EE_u9898"><a href="#AVCaptureSession_u963B_u585E_u4E3B_u7EBF_u7A0B_u95EE_u9898" class="headerlink" title="AVCaptureSession阻塞主线程问题"></a>AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>仔细看了文档之后，发现问题出在<code>stopRunning</code>这里，<br>
           <div class="post-more-link text-center">
@@ -443,7 +443,7 @@
 
       
         
-          <h1 id="Xmarks简介">Xmarks简介</h1><p><a href="https://www.xmarks.com">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
+          <h1 id="Xmarks_u7B80_u4ECB"><a href="#Xmarks_u7B80_u4ECB" class="headerlink" title="Xmarks简介"></a>Xmarks简介</h1><p><a href="https://www.xmarks.com">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
 <p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>
           <div class="post-more-link text-center">
             <a class="btn" href="/2015/09/07/跨平台书签同步-Xmarks/#more" rel="contents">
@@ -532,7 +532,7 @@
 
       
         
-          <h2 id="什么是_Hexo_？">什么是 Hexo ？</h2><p><a href="https://hexo.io">Hexo</a> 是一个简单快速的静态博客框架，可以通过编辑 <a href="http://daringfireball.net/projects/markdown/">Markdown</a> 文档生成好看的静态博客。</p>
+          <h2 id="u4EC0_u4E48_u662F_Hexo__uFF1F"><a href="#u4EC0_u4E48_u662F_Hexo__uFF1F" class="headerlink" title="什么是 Hexo ？"></a>什么是 Hexo ？</h2><p><a href="https://hexo.io">Hexo</a> 是一个简单快速的静态博客框架，可以通过编辑 <a href="http://daringfireball.net/projects/markdown/">Markdown</a> 文档生成好看的静态博客。</p>
           <div class="post-more-link text-center">
             <a class="btn" href="/2015/09/01/如何使用-Hexo-搭建个人博客/#more" rel="contents">
               阅读全文 &raquo;

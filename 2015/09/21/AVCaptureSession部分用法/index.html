@@ -261,7 +261,7 @@
       
 
       
-        <span itemprop="articleBody"><h1 id="AVCaptureSession阻塞主线程问题">AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
+        <span itemprop="articleBody"><h1 id="AVCaptureSession_u963B_u585E_u4E3B_u7EBF_u7A0B_u95EE_u9898"><a href="#AVCaptureSession_u963B_u585E_u4E3B_u7EBF_u7A0B_u95EE_u9898" class="headerlink" title="AVCaptureSession阻塞主线程问题"></a>AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>仔细看了文档之后，发现问题出在<code>stopRunning</code>这里，<br><a id="more"></a><br>苹果文档描述如下：</p>
 <blockquote>
@@ -275,7 +275,7 @@
 <p>开启和关闭相机部分代码改为：</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">		DDLogDebug(<span class="string">@"Function: %s,line : %d 开启相机"</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] startRunning];</span><br><span class="line">	&#125;);</span><br><span class="line">	</span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="keyword">void</span>) &#123;</span><br><span class="line">		DDLogDebug(<span class="string">@"Function: %s,line : %d 关闭相机"</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		<span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br></pre></td></tr></table></figure>
 <p>这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。</p>
-<h1 id="相机前后台切换问题">相机前后台切换问题</h1><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p>
+<h1 id="u76F8_u673A_u524D_u540E_u53F0_u5207_u6362_u95EE_u9898"><a href="#u76F8_u673A_u524D_u540E_u53F0_u5207_u6362_u95EE_u9898" class="headerlink" title="相机前后台切换问题"></a>相机前后台切换问题</h1><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(startRunningSession) withObject:<span class="literal">nil</span> afterDelay:<span class="number">0.5</span>];</span><br></pre></td></tr></table></figure>
 <p>当时我很奇怪，这里为什么要加延时呢？进入到前台时不是应该直接开启相机吗？于是我直接把这里改成了：</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span> startRunningSession];</span><br></pre></td></tr></table></figure>
@@ -283,7 +283,7 @@
 <p>那么之前代码中加了0.5秒延时的原因也就清楚了，是为了等待系统关闭相机之后，再调用开启相机，以免相机启动失败，但这种方式真的合理吗？其实并没有解决本质问题，如果0.5秒钟的时间并没有完全关闭系统相机呢？这里仍然会出现黑屏问题。</p>
 <p>于是继续查看系统文档，发现系统的 sampleCode AVCam-iOS中并没有专门用于前后台处理的逻辑，原来这里并不需要我们自己手动管理相机，系统会自动根据程序状态来判断是否需要关闭或者开启相机，如果按 home 进入<code>UIApplicationStateBackground</code> 状态，那么系统自动关闭相机并在进入<code>UIApplicationStateActive</code>状态时开启相机；如果是进入<code>UIApplicationStateInactive</code>状态，例如，双击 home 调出任务管理器，这时，相机并没有被关闭，仍然能够看到 preview 画面。</p>
 <p>我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。</p>
-<h1 id="收获">收获</h1><ul>
+<h1 id="u6536_u83B7"><a href="#u6536_u83B7" class="headerlink" title="收获"></a>收获</h1><ul>
 <li>AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作</li>
 <li>前后台切换时，无需手动管理 CaptureSession</li>
 </ul>
@@ -429,7 +429,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#AVCaptureSession阻塞主线程问题"><span class="nav-number">1.</span> <span class="nav-text">AVCaptureSession阻塞主线程问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#相机前后台切换问题"><span class="nav-number">2.</span> <span class="nav-text">相机前后台切换问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#收获"><span class="nav-number">3.</span> <span class="nav-text">收获</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#AVCaptureSession_u963B_u585E_u4E3B_u7EBF_u7A0B_u95EE_u9898"><span class="nav-number">1.</span> <span class="nav-text">AVCaptureSession阻塞主线程问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u76F8_u673A_u524D_u540E_u53F0_u5207_u6362_u95EE_u9898"><span class="nav-number">2.</span> <span class="nav-text">相机前后台切换问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u6536_u83B7"><span class="nav-number">3.</span> <span class="nav-text">收获</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
