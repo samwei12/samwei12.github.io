@@ -77,16 +77,6 @@
 <![endif]-->
   
 
-  <script type="text/javascript">
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "//hm.baidu.com/hm.js?9a154c0e096bb1c9705a8a313f98f0e6";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
-
 
 
   <div class="container one-column 
@@ -263,7 +253,7 @@
       
         
           <h1 id="AVCaptureSession_u963B_u585E_u4E3B_u7EBF_u7A0B_u95EE_u9898"><a href="#AVCaptureSession_u963B_u585E_u4E3B_u7EBF_u7A0B_u95EE_u9898" class="headerlink" title="AVCaptureSession阻塞主线程问题"></a>AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">truetruetrue[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>仔细看了文档之后，发现问题出在<code>stopRunning</code>这里，<br>
           <div class="post-more-link text-center">
             <a class="btn" href="/2015/09/21/AVCaptureSession部分用法/#more" rel="contents">
@@ -354,7 +344,7 @@
         
           <p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
 <p>动画部分代码很简单，如下：</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">self</span><span class="variable">.transform</span> = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span><span class="variable">.transform</span> = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">						 <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">							 [<span class="keyword">self</span> hideFocus];</span><br><span class="line">						 &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">self</span><span class="variable">.transform</span> = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span><span class="variable">.transform</span> = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">truetruetruetruetruetrue <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">truetruetruetruetruetruetrue [<span class="keyword">self</span> hideFocus];</span><br><span class="line">truetruetruetruetruetrue &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
 <p>对焦框在0.3秒内进行两倍缩小到正常尺寸的一个动画，之后隐藏。</p>
           <div class="post-more-link text-center">
             <a class="btn" href="/2015/09/09/如何取消UIView动画/#more" rel="contents">

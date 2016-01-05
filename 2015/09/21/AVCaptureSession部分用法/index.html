@@ -44,18 +44,18 @@
 
 
 <meta name="description" content="AVCaptureSession阻塞主线程问题前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在viewWillDisappear:中开销最大，这其中只调用了一个相机关闭的代码：
-123if ([[self.avCameraManager session] isRunning]) &amp;#123;			[">
+123if ([[self.avCameraManager session] isRunning]) &amp;#123;true">
 <meta property="og:type" content="article">
 <meta property="og:title" content="AVCaptureSession部分用法">
 <meta property="og:url" content="http://samwei12.github.io/2015/09/21/AVCaptureSession部分用法/index.html">
 <meta property="og:site_name" content="samwei12's blog">
 <meta property="og:description" content="AVCaptureSession阻塞主线程问题前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在viewWillDisappear:中开销最大，这其中只调用了一个相机关闭的代码：
-123if ([[self.avCameraManager session] isRunning]) &amp;#123;			[">
+123if ([[self.avCameraManager session] isRunning]) &amp;#123;true">
 <meta property="og:updated_time" content="2015-09-21T12:09:00.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AVCaptureSession部分用法">
 <meta name="twitter:description" content="AVCaptureSession阻塞主线程问题前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在viewWillDisappear:中开销最大，这其中只调用了一个相机关闭的代码：
-123if ([[self.avCameraManager session] isRunning]) &amp;#123;			[">
+123if ([[self.avCameraManager session] isRunning]) &amp;#123;true">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -80,16 +80,6 @@
   </div>
 <![endif]-->
   
-
-  <script type="text/javascript">
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "//hm.baidu.com/hm.js?9a154c0e096bb1c9705a8a313f98f0e6";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
 
 
 
@@ -262,7 +252,7 @@
 
       
         <span itemprop="articleBody"><h1 id="AVCaptureSession_u963B_u585E_u4E3B_u7EBF_u7A0B_u95EE_u9898"><a href="#AVCaptureSession_u963B_u585E_u4E3B_u7EBF_u7A0B_u95EE_u9898" class="headerlink" title="AVCaptureSession阻塞主线程问题"></a>AVCaptureSession阻塞主线程问题</h1><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">truetruetrue[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>仔细看了文档之后，发现问题出在<code>stopRunning</code>这里，<br><a id="more"></a><br>苹果文档描述如下：</p>
 <blockquote>
 <p>Clients invoke -stopRunning to stop the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    stopped.</p>
@@ -273,7 +263,7 @@
 </blockquote>
 <p>因此这里必须放在后台线程中处理，否则，就会导致界面不响应，iOS8之后应该在这里做了优化，即使放在主线程做也没有很卡顿的现象，但 iOS7中，尤其是测试设备为4s，界面卡死问题很严重。</p>
 <p>开启和关闭相机部分代码改为：</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">		DDLogDebug(<span class="string">@"Function: %s,line : %d 开启相机"</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] startRunning];</span><br><span class="line">	&#125;);</span><br><span class="line">	</span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="keyword">void</span>) &#123;</span><br><span class="line">		DDLogDebug(<span class="string">@"Function: %s,line : %d 关闭相机"</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		<span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">truetrueDDLogDebug(<span class="string">@"Function: %s,line : %d 开启相机"</span>,__FUNCTION__,__LINE__);</span><br><span class="line">truetrue[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] startRunning];</span><br><span class="line">true&#125;);</span><br><span class="line">true</span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="keyword">void</span>) &#123;</span><br><span class="line">truetrueDDLogDebug(<span class="string">@"Function: %s,line : %d 关闭相机"</span>,__FUNCTION__,__LINE__);</span><br><span class="line">truetrue<span class="keyword">if</span> ([[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] isRunning]) &#123;</span><br><span class="line">truetruetrue[[<span class="keyword">self</span><span class="variable">.avCameraManager</span> session] stopRunning];</span><br><span class="line">truetrue&#125;</span><br><span class="line">true&#125;);</span><br></pre></td></tr></table></figure>
 <p>这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。</p>
 <h1 id="u76F8_u673A_u524D_u540E_u53F0_u5207_u6362_u95EE_u9898"><a href="#u76F8_u673A_u524D_u540E_u53F0_u5207_u6362_u95EE_u9898" class="headerlink" title="相机前后台切换问题"></a>相机前后台切换问题</h1><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(startRunningSession) withObject:<span class="literal">nil</span> afterDelay:<span class="number">0.5</span>];</span><br></pre></td></tr></table></figure>
