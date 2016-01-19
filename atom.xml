@@ -4,7 +4,7 @@
   <subtitle><![CDATA[Stay hungry, stay foolish]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://samwei12.github.io/"/>
-  <updated>2016-01-19T15:41:23.000Z</updated>
+  <updated>2016-01-19T15:58:24.000Z</updated>
   <id>http://samwei12.github.io/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://samwei12.github.io/2016/01/19/Mac%E4%B8%8B%E5%A6%82%E4%BD%95%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E7%9B%AE%E5%BD%95%E5%88%B0%E4%B8%83%E7%89%9B%E4%BA%91/"/>
     <id>http://samwei12.github.io/2016/01/19/Mac下如何自动备份目录到七牛云/</id>
     <published>2016-01-19T14:54:58.000Z</published>
-    <updated>2016-01-19T15:41:23.000Z</updated>
+    <updated>2016-01-19T15:58:24.000Z</updated>
     <content type="html"><![CDATA[<p>七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.</p>
 <a id="more"></a>
 <h1 id="QRSBox_u7B80_u4ECB"><a href="#QRSBox_u7B80_u4ECB" class="headerlink" title="QRSBox简介"></a>QRSBox简介</h1><p>这里为什么要使用QRSBox呢,主要有两方面原因:</p>
@@ -40,7 +40,7 @@
 </ul>
 ]]></content>
     <summary type="html">
-    <![CDATA[你对本页的描述]]>
+    <![CDATA[<p>七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.</p>]]>
     
     </summary>
     
