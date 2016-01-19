@@ -4,7 +4,7 @@
   <subtitle><![CDATA[Stay hungry, stay foolish]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://samwei12.github.io/"/>
-  <updated>2015-09-21T12:09:00.000Z</updated>
+  <updated>2016-01-19T15:40:08.000Z</updated>
   <id>http://samwei12.github.io/</id>
   
   <author>
@@ -13,6 +13,40 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[ Mac 下如何自动备份目录到七牛云?]]></title>
+    <link href="http://samwei12.github.io/2016/01/19/Mac%E4%B8%8B%E5%A6%82%E4%BD%95%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E7%9B%AE%E5%BD%95%E5%88%B0%E4%B8%83%E7%89%9B%E4%BA%91/"/>
+    <id>http://samwei12.github.io/2016/01/19/Mac下如何自动备份目录到七牛云/</id>
+    <published>2016-01-19T14:54:58.000Z</published>
+    <updated>2016-01-19T15:40:08.000Z</updated>
+    <content type="html"><![CDATA[<p>七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.</p>
+<a id="more"></a>
+<h1 id="QRSBox_u7B80_u4ECB"><a href="#QRSBox_u7B80_u4ECB" class="headerlink" title="QRSBox简介"></a>QRSBox简介</h1><p>这里为什么要使用QRSBox呢,主要有两方面原因:</p>
+<ol>
+<li>QRSBox 支持增量同步, 这样上传过后的文件就可以立刻删掉了,对于笔记本来说,硬盘空间毕竟还是很宝贵的.</li>
+<li>QRSBox 不会同步文件的删除操作,因为我通常是使用七牛来作为图床使用,基本都是上传博客图片在里面,所以不太需要删除操作的同步.</li>
+</ol>
+<h1 id="u4E0B_u8F7D_u5B89_u88C5"><a href="#u4E0B_u8F7D_u5B89_u88C5" class="headerlink" title="下载安装"></a>下载安装</h1><p>下载链接:<a href="http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz" target="_blank" rel="external">http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz</a>, 这里我只裂了 Mac 版本,其他版本都可以在官网进行下载.</p>
+<h1 id="u4F7F_u7528_u65B9_u6CD5"><a href="#u4F7F_u7528_u65B9_u6CD5" class="headerlink" title="使用方法"></a>使用方法</h1><p>下载解压后,得到一堆Unix可执行程序, 将其中的<code>qrsboxcli</code>拷贝到<code>$PATH</code>里任意路径即可,在这里,我拷贝到了<code>/usr/local/bin</code>路径下,之后重启终端,即可全局使用<code>qrsboxcli</code>命令.</p>
+<p>接下来,进入<a href="https://portal.qiniu.com/setting/key" target="_blank" rel="external">开发者自主平台</a>, 查看自己的 AccessKey 和 SecretKey, 命令行输入如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--注意这里没有尖括号,使用自己的AccessKey, SecretKey替换下方尖括号里的内容--&gt;</span><br><span class="line">qrsboxcli init &lt;AccessKey&gt; &lt;SecretKey&gt; &lt;同步文件夹&gt; &lt;空间名称&gt;</span><br></pre></td></tr></table></figure>
+<p>完整的命令列表如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">qrsboxcli</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  qrsboxcli init &lt;AccessKey&gt; &lt;SecretKey&gt; &lt;SyncDir&gt; &lt;Bucket&gt;  - Init qrsbox conf</span><br><span class="line">  qrsboxcli sync &amp;                                           - Watch &lt;SyncDir&gt; and sync files</span><br><span class="line">  qrsboxcli status [&lt;Path&gt;]                                  - View path status</span><br><span class="line">  qrsboxcli <span class="built_in">log</span>                                              - View sync <span class="built_in">log</span></span><br><span class="line">  qrsboxcli stop                                             - Kill qrsboxcli sync process</span><br><span class="line"></span><br><span class="line">BuildVersion:</span><br><span class="line">  qrsboxcli v3.<span class="number">0.20150529</span></span><br></pre></td></tr></table></figure>
+<p>至此,就可以开心的使用七牛图床啦.</p>
+<p>参考文档:</p>
+<ul>
+<li><a href="http://developer.qiniu.com/docs/v6/tools/qrsbox.html" target="_blank" rel="external">http://developer.qiniu.com/docs/v6/tools/qrsbox.html</a></li>
+</ul>
+]]></content>
+    <summary type="html">
+    <![CDATA[你对本页的描述]]>
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://samwei12.github.io/categories/iOS/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[AVCaptureSession部分用法]]></title>
