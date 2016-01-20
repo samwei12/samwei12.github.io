@@ -45,13 +45,14 @@
 
 <meta name="description" content="七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.">
 <meta property="og:type" content="article">
-<meta property="og:title" content=" Mac 下如何自动备份目录到七牛云?">
+<meta property="og:title" content="Mac下如何自动备份目录到七牛云?">
 <meta property="og:url" content="http://samwei12.github.io/2016/01/19/Mac下如何自动备份目录到七牛云/index.html">
 <meta property="og:site_name" content="samwei12's blog">
 <meta property="og:description" content="七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.">
-<meta property="og:updated_time" content="2016-01-19T15:58:24.000Z">
+<meta property="og:image" content="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-20_21-47-47.png">
+<meta property="og:updated_time" content="2016-01-20T15:46:25.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content=" Mac 下如何自动备份目录到七牛云?">
+<meta name="twitter:title" content="Mac下如何自动备份目录到七牛云?">
 <meta name="twitter:description" content="七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.">
 
 
@@ -62,7 +63,7 @@
   };
 </script>
 
-  <title>  Mac 下如何自动备份目录到七牛云? | samwei12's blog </title>
+  <title> Mac下如何自动备份目录到七牛云? | samwei12's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -198,7 +199,7 @@
           
           
             
-               Mac 下如何自动备份目录到七牛云?
+              Mac下如何自动备份目录到七牛云?
             
           
         </h1>
@@ -262,9 +263,16 @@
 <p>完整的命令列表如下:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">qrsboxcli</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  qrsboxcli init &lt;AccessKey&gt; &lt;SecretKey&gt; &lt;SyncDir&gt; &lt;Bucket&gt;  - Init qrsbox conf</span><br><span class="line">  qrsboxcli sync &amp;                                           - Watch &lt;SyncDir&gt; and sync files</span><br><span class="line">  qrsboxcli status [&lt;Path&gt;]                                  - View path status</span><br><span class="line">  qrsboxcli <span class="built_in">log</span>                                              - View sync <span class="built_in">log</span></span><br><span class="line">  qrsboxcli stop                                             - Kill qrsboxcli sync process</span><br><span class="line"></span><br><span class="line">BuildVersion:</span><br><span class="line">  qrsboxcli v3.<span class="number">0.20150529</span></span><br></pre></td></tr></table></figure>
 <p>至此,就可以开心的使用七牛图床啦.</p>
+<h1 id="u66F4_u6539_u622A_u56FE_u8DEF_u5F84"><a href="#u66F4_u6539_u622A_u56FE_u8DEF_u5F84" class="headerlink" title="更改截图路径"></a>更改截图路径</h1><p>Mac 上自带的截图就十分好用, 我们可以通过变更系统快捷键来让它更加实用. 打开系统设置-&gt;键盘-&gt;快捷键, 之后选中屏幕快照,更改快捷键即可.</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-20_21-47-47.png" alt=""></p>
+<p>有些同学可能觉得这样仍然不够方便,毕竟,系统默认是保存截图到桌面的,还需要我们把它拷贝到自动上传目录下才行,那么我们还可以变更系统默认截屏路径. 打开终端,并输入下面的命令:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">`defaults write com.apple.screencapture location /path/`</span><br></pre></td></tr></table></figure>
+<p>这里其中的<code>path</code>部分就是你想要变更的截图路径,需要注意的是, 输入命令时候记得前后各有一个`符号,我当时输错了好多次才注意到这点.</p>
+<p>这里我们将截图路径设置为七牛云自动上传路径, 以后就可以快速截图加上传,只要打开图床网站获取外部链接即可直接使用在博客之类的地方,是不是很方便呢?</p>
 <p>参考文档:</p>
 <ul>
 <li><a href="http://developer.qiniu.com/docs/v6/tools/qrsbox.html" target="_blank" rel="external">http://developer.qiniu.com/docs/v6/tools/qrsbox.html</a></li>
+<li><a href="http://www.cnblogs.com/ygm900/p/4237593.html" target="_blank" rel="external">如何修改Mac截屏保存路径</a></li>
 </ul>
 </span>
       
@@ -313,7 +321,7 @@
           <div class="comments" id="comments">
             
               <div class="ds-thread" data-thread-key="2016/01/19/Mac下如何自动备份目录到七牛云/"
-                   data-title=" Mac 下如何自动备份目录到七牛云?" data-url="http://samwei12.github.io/2016/01/19/Mac下如何自动备份目录到七牛云/">
+                   data-title="Mac下如何自动备份目录到七牛云?" data-url="http://samwei12.github.io/2016/01/19/Mac下如何自动备份目录到七牛云/">
               </div>
             
           </div>
@@ -408,7 +416,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#QRSBox_u7B80_u4ECB"><span class="nav-number">1.</span> <span class="nav-text">QRSBox简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u4E0B_u8F7D_u5B89_u88C5"><span class="nav-number">2.</span> <span class="nav-text">下载安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u4F7F_u7528_u65B9_u6CD5"><span class="nav-number">3.</span> <span class="nav-text">使用方法</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#QRSBox_u7B80_u4ECB"><span class="nav-number">1.</span> <span class="nav-text">QRSBox简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u4E0B_u8F7D_u5B89_u88C5"><span class="nav-number">2.</span> <span class="nav-text">下载安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u4F7F_u7528_u65B9_u6CD5"><span class="nav-number">3.</span> <span class="nav-text">使用方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u66F4_u6539_u622A_u56FE_u8DEF_u5F84"><span class="nav-number">4.</span> <span class="nav-text">更改截图路径</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
