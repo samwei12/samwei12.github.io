@@ -43,20 +43,20 @@
   <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.1" />
 
 
-<meta name="description" content="实现 State Preservation最近在看ios programming - the big nerd ranch guide 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 UINavigationController 来进行保存和还原状态, 然后额外的练习题部分是 UITabbarController 的状态保存和恢复,">
+<meta name="description" content="最近在看ios programming - the big nerd ranch guide 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 UINavigationController 来进行保存和还原状态, 然后额外的练习题部分是 UITabbarController 的状态保存和恢复,可是在这里却一直遇到问题. 以下内容基于该">
 <meta property="og:type" content="article">
 <meta property="og:title" content="如何实现 UITabbarController 的 State Preservation?">
 <meta property="og:url" content="http://samwei12.github.io/2016/01/19/UITabbarController-State-Preservation/index.html">
 <meta property="og:site_name" content="samwei12's blog">
-<meta property="og:description" content="实现 State Preservation最近在看ios programming - the big nerd ranch guide 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 UINavigationController 来进行保存和还原状态, 然后额外的练习题部分是 UITabbarController 的状态保存和恢复,">
+<meta property="og:description" content="最近在看ios programming - the big nerd ranch guide 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 UINavigationController 来进行保存和还原状态, 然后额外的练习题部分是 UITabbarController 的状态保存和恢复,可是在这里却一直遇到问题. 以下内容基于该">
 <meta property="og:image" content="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-19_22-49-48.png">
 <meta property="og:image" content="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-19_22-49-13.png">
 <meta property="og:image" content="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-20_22-26-09.png">
 <meta property="og:image" content="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-20_23-42-29.png">
-<meta property="og:updated_time" content="2016-01-27T15:54:52.000Z">
+<meta property="og:updated_time" content="2016-01-27T15:56:55.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何实现 UITabbarController 的 State Preservation?">
-<meta name="twitter:description" content="实现 State Preservation最近在看ios programming - the big nerd ranch guide 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 UINavigationController 来进行保存和还原状态, 然后额外的练习题部分是 UITabbarController 的状态保存和恢复,">
+<meta name="twitter:description" content="最近在看ios programming - the big nerd ranch guide 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 UINavigationController 来进行保存和还原状态, 然后额外的练习题部分是 UITabbarController 的状态保存和恢复,可是在这里却一直遇到问题. 以下内容基于该">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -252,7 +252,7 @@
       
 
       
-        <span itemprop="articleBody"><h1 id="u5B9E_u73B0_State_Preservation"><a href="#u5B9E_u73B0_State_Preservation" class="headerlink" title="实现 State Preservation"></a>实现 State Preservation</h1><p>最近在看<strong>ios programming - the big nerd ranch guide</strong> 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 <code>UINavigationController</code> 来进行保存和还原状态, 然后额外的练习题部分是 <code>UITabbarController</code> 的状态保存和恢复,可是在这里却一直遇到问题. 以下内容基于该项目, 代码放在:</p>
+        <span itemprop="articleBody"><p>最近在看<strong>ios programming - the big nerd ranch guide</strong> 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 <code>UINavigationController</code> 来进行保存和还原状态, 然后额外的练习题部分是 <code>UITabbarController</code> 的状态保存和恢复,可是在这里却一直遇到问题. 以下内容基于该项目, 代码放在:</p>
 <a id="more"></a>
 <p>首先, 我们需要告诉系统我们想要实现状态的保存和恢复, 在 AppDelegate 中实现如下两个方法:</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">BOOL</span>)application:(<span class="built_in">UIApplication</span> *)application shouldSaveApplicationState:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)application:(<span class="built_in">UIApplication</span> *)application shouldRestoreApplicationState:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -459,7 +459,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#u5B9E_u73B0_State_Preservation"><span class="nav-number">1.</span> <span class="nav-text">实现 State Preservation</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u95EE_u9898"><span class="nav-number">2.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u63A2_u7A76"><span class="nav-number">3.</span> <span class="nav-text">探究</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#View_Debug"><span class="nav-number">3.1.</span> <span class="nav-text">View Debug</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u67E5_u9605_u6587_u6863"><span class="nav-number">3.2.</span> <span class="nav-text">查阅文档</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u89E3_u51B3_u95EE_u9898"><span class="nav-number">4.</span> <span class="nav-text">解决问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u6269_u5C55"><span class="nav-number">5.</span> <span class="nav-text">扩展</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#u95EE_u9898"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u63A2_u7A76"><span class="nav-number">2.</span> <span class="nav-text">探究</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#View_Debug"><span class="nav-number">2.1.</span> <span class="nav-text">View Debug</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u67E5_u9605_u6587_u6863"><span class="nav-number">2.2.</span> <span class="nav-text">查阅文档</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u89E3_u51B3_u95EE_u9898"><span class="nav-number">3.</span> <span class="nav-text">解决问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u6269_u5C55"><span class="nav-number">4.</span> <span class="nav-text">扩展</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>

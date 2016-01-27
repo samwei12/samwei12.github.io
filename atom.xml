@@ -62,8 +62,8 @@
     <link href="http://samwei12.github.io/2016/01/19/UITabbarController-State-Preservation/"/>
     <id>http://samwei12.github.io/2016/01/19/UITabbarController-State-Preservation/</id>
     <published>2016-01-19T13:58:07.000Z</published>
-    <updated>2016-01-27T15:54:52.000Z</updated>
-    <content type="html"><![CDATA[<h1 id="u5B9E_u73B0_State_Preservation"><a href="#u5B9E_u73B0_State_Preservation" class="headerlink" title="实现 State Preservation"></a>实现 State Preservation</h1><p>最近在看<strong>ios programming - the big nerd ranch guide</strong> 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 <code>UINavigationController</code> 来进行保存和还原状态, 然后额外的练习题部分是 <code>UITabbarController</code> 的状态保存和恢复,可是在这里却一直遇到问题. 以下内容基于该项目, 代码放在:</p>
+    <updated>2016-01-27T15:56:55.000Z</updated>
+    <content type="html"><![CDATA[<p>最近在看<strong>ios programming - the big nerd ranch guide</strong> 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 <code>UINavigationController</code> 来进行保存和还原状态, 然后额外的练习题部分是 <code>UITabbarController</code> 的状态保存和恢复,可是在这里却一直遇到问题. 以下内容基于该项目, 代码放在:</p>
 <a id="more"></a>
 <p>首先, 我们需要告诉系统我们想要实现状态的保存和恢复, 在 AppDelegate 中实现如下两个方法:</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">BOOL</span>)application:(<span class="built_in">UIApplication</span> *)application shouldSaveApplicationState:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)application:(<span class="built_in">UIApplication</span> *)application shouldRestoreApplicationState:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -128,7 +128,7 @@
 </ul>
 ]]></content>
     <summary type="html">
-    <![CDATA[<h1 id="u5B9E_u73B0_State_Preservation"><a href="#u5B9E_u73B0_State_Preservation" class="headerlink" title="实现 State Preservation"></a>实现 State Preservation</h1><p>最近在看<strong>ios programming - the big nerd ranch guide</strong> 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 <code>UINavigationController</code> 来进行保存和还原状态, 然后额外的练习题部分是 <code>UITabbarController</code> 的状态保存和恢复,可是在这里却一直遇到问题. 以下内容基于该项目, 代码放在:</p>]]>
+    <![CDATA[<p>最近在看<strong>ios programming - the big nerd ranch guide</strong> 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 <code>UINavigationController</code> 来进行保存和还原状态, 然后额外的练习题部分是 <code>UITabbarController</code> 的状态保存和恢复,可是在这里却一直遇到问题. 以下内容基于该项目, 代码放在:</p>]]>
     
     </summary>
     
