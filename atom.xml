@@ -4,7 +4,7 @@
   <subtitle><![CDATA[Stay hungry, stay foolish]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://samwei12.github.io/"/>
-  <updated>2016-01-20T15:46:25.000Z</updated>
+  <updated>2016-02-04T08:49:11.000Z</updated>
   <id>http://samwei12.github.io/</id>
   
   <author>
@@ -13,6 +13,51 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[NSView subview blocking drag/drop event]]></title>
+    <link href="http://samwei12.github.io/2016/01/26/subview-blocking-drag-event/"/>
+    <id>http://samwei12.github.io/2016/01/26/subview-blocking-drag-event/</id>
+    <published>2016-01-26T05:41:57.000Z</published>
+    <updated>2016-02-04T08:49:11.000Z</updated>
+    <content type="html"><![CDATA[<p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p>
+<ol>
+<li>从 NSView 继承得到一个子类</li>
+<li>覆盖处理拖拽事件相关方法</li>
+<li>注册拖拽事件</li>
+</ol>
+<a id="more"></a>
+<p>开始的时候一切都很正常,直到某次发现拖拽到屏幕边缘响应较为灵敏,而<strong>拖拽到屏幕中间则不响应事件</strong>,APP页面大致是这样的:</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png" alt=""></p>
+<h1 id="u95EE_u9898_u5206_u6790"><a href="#u95EE_u9898_u5206_u6790" class="headerlink" title="问题分析"></a>问题分析</h1><p>开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。</p>
+<p>那么如何验证呢？其实也很简单，在自定义的NSView 中重载<code>draggingEnded：</code>方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 <code>NSView</code> 中添加的<code>NSImageView</code>作为 subview 会阻止拖拽事件的传递，原因是<code>NSImageView</code>本身可以处理拖拽事件，于是截获了本该自定义<code>NSView</code>处理的消息。</p>
+<h1 id="u89E3_u51B3_u65B9_u6848"><a href="#u89E3_u51B3_u65B9_u6848" class="headerlink" title="解决方案"></a>解决方案</h1><p>在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：<a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop" target="_blank" rel="external">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></p>
+<p>提供的解决方案有以下几种：</p>
+<ol>
+<li>不使用 <code>NSImageView</code>，而是采用自定义<code>NSView</code>的方式，然后重写<code>drawRect：</code>方法进行图片渲染。这个办法十分笨拙，并且不太方便。</li>
+<li>调用<code>unregisterDraggedTypes</code>方法，这样<code>NSImageView</code>就不会监听拖拽事件了，完美解决。</li>
+</ol>
+<p>参考文档:</p>
+<ul>
+<li><a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop" target="_blank" rel="external">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></li>
+<li><a href="http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation" target="_blank" rel="external">http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation</a></li>
+</ul>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p>
+<ol>
+<li>从 NSView 继承得到一个子类</li>
+<li>覆盖处理拖拽事件相关方法</li>
+<li>注册拖拽事件</li>
+</ol>]]>
+    
+    </summary>
+    
+      <category term="Mouse Event" scheme="http://samwei12.github.io/tags/Mouse-Event/"/>
+    
+      <category term="Cocoa" scheme="http://samwei12.github.io/categories/Cocoa/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[Mac下如何自动备份目录到七牛云?]]></title>
@@ -62,7 +107,7 @@
     <link href="http://samwei12.github.io/2016/01/19/UITabbarController-State-Preservation/"/>
     <id>http://samwei12.github.io/2016/01/19/UITabbarController-State-Preservation/</id>
     <published>2016-01-19T13:58:07.000Z</published>
-    <updated>2016-01-27T15:56:55.000Z</updated>
+    <updated>2016-01-27T15:56:53.000Z</updated>
     <content type="html"><![CDATA[<p>最近在看<strong>ios programming - the big nerd ranch guide</strong> 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 <code>UINavigationController</code> 来进行保存和还原状态, 然后额外的练习题部分是 <code>UITabbarController</code> 的状态保存和恢复,可是在这里却一直遇到问题. 以下内容基于该项目, 代码放在:</p>
 <a id="more"></a>
 <p>首先, 我们需要告诉系统我们想要实现状态的保存和恢复, 在 AppDelegate 中实现如下两个方法:</p>
