@@ -1,15 +1,21 @@
 <!doctype html>
-<html class="theme-next use-motion theme-next-mist">
-<head>
+
+
+
   
 
-<meta charset="UTF-8"/>
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
 
+
 <meta http-equiv="Cache-Control" content="no-transform" />
 <meta http-equiv="Cache-Control" content="no-siteapp" />
+
 
 
   <meta name="google-site-verification" content="b6Hhpskk-wylnhS2H8wHIos2x5ti2huz-0peSTiI-S4" />
@@ -20,19 +26,26 @@
 
 
 
-  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
 
 
 
 
-<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.5.1"/>
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
 
 
-    <meta name="description" content="Stay hungry, stay foolish" />
 
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
 
 
   <meta name="keywords" content="Software," />
+
+
 
 
 
@@ -40,7 +53,12 @@
 
 
 
-  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.1" />
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
 
 
 <meta name="description" content="Xmarks简介Xmarks 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。
@@ -60,10 +78,18 @@
 有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Wi">
 
 
+
 <script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
   var CONFIG = {
     scheme: 'Mist',
-    sidebar: 'post'
+    sidebar: {"position":"left","display":"always"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
   };
 </script>
 
@@ -72,33 +98,36 @@
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
-  <!--[if lte IE 8]>
-  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
-    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
-      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
-           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
-           style='margin-left:auto;margin-right:auto;display: block;'/>
-    </a>
-  </div>
-<![endif]-->
   
 
 
 
-  <div class="container one-column page-post-detail">
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><h1 class="site-meta">
-  <span class="logo-line-before"><i></i></span>
-  <a href="/" class="brand" rel="start">
-      <span class="logo">
-        <i class="icon-next-logo"></i>
-      </span>
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
       <span class="site-title">samwei12's blog</span>
-  </a>
-  <span class="logo-line-after"><i></i></span>
-</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Stay hungry, stay foolish</p>
+</div>
 
 <div class="site-nav-toggle">
   <button>
@@ -112,12 +141,14 @@
   
 
   
-    <ul id="menu" class="menu menu-left">
+    <ul id="menu" class="menu">
       
         
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
-            <i class="menu-item-icon icon-next-home"></i> <br />
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
             首页
           </a>
         </li>
@@ -125,7 +156,9 @@
         
         <li class="menu-item menu-item-categories">
           <a href="/categories" rel="section">
-            <i class="menu-item-icon icon-next-categories"></i> <br />
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
             分类
           </a>
         </li>
@@ -133,7 +166,9 @@
         
         <li class="menu-item menu-item-about">
           <a href="/about" rel="section">
-            <i class="menu-item-icon icon-next-about"></i> <br />
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
             关于
           </a>
         </li>
@@ -141,7 +176,9 @@
         
         <li class="menu-item menu-item-archives">
           <a href="/archives" rel="section">
-            <i class="menu-item-icon icon-next-archives"></i> <br />
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
             归档
           </a>
         </li>
@@ -149,13 +186,35 @@
         
         <li class="menu-item menu-item-tags">
           <a href="/tags" rel="section">
-            <i class="menu-item-icon icon-next-tags"></i> <br />
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
             标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-heartbeat fa-fw"></i> <br />
+            
+            公益404
           </a>
         </li>
       
 
       
+        <li class="menu-item menu-item-search">
+          
+            <a href="#" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
       
     </ul>
   
@@ -163,11 +222,9 @@
   
     <div class="site-search">
       
-  
   <form class="site-search-form">
-    <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
-  </form>
-
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
 
 <script type="text/javascript">
   (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
@@ -189,84 +246,116 @@
 
     <main id="main" class="main">
       <div class="main-inner">
-        <div id="content" class="content"> 
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
 
   <div id="posts" class="posts-expand">
     
 
+  
+  
+
+  
+  
+  
+
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
 
-      
-      
-        <h1 class="post-title" itemprop="name headline">
-          
-          
-            
-              跨平台书签同步:Xmarks
-            
-          
-        </h1>
-      
-
-      <div class="post-meta">
-        <span class="post-time">
-          发表于
-          <time itemprop="dateCreated" datetime="2015-09-07T19:04:08+08:00" content="2015-09-07">
-            2015-09-07
-          </time>
-        </span>
+    
+      <header class="post-header">
 
         
-          <span class="post-category" >
-            &nbsp; | &nbsp; 分类于
+        
+          <h1 class="post-title" itemprop="name headline">
             
-              <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                <a href="/categories/日常/" itemprop="url" rel="index">
-                  <span itemprop="name">日常</span>
-                </a>
-              </span>
-
-              
-              
-
             
+              
+                跨平台书签同步:Xmarks
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-09-07T19:04:08+08:00" content="2015-09-07">
+              2015-09-07
+            </time>
           </span>
-        
 
-        
           
-            <span class="post-comments-count">
+            <span class="post-category" >
               &nbsp; | &nbsp;
-              <a href="/2015/09/07/跨平台书签同步-Xmarks/#comments" itemprop="discussionUrl">
-                <span class="post-comments-count ds-thread-count" data-thread-key="2015/09/07/跨平台书签同步-Xmarks/" itemprop="commentsCount"></span>
-              </a>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/日常/" itemprop="url" rel="index">
+                    <span itemprop="name">日常</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
             </span>
           
-        
-      </div>
-    </header>
 
-    <div class="post-body">
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/09/07/跨平台书签同步-Xmarks/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/09/07/跨平台书签同步-Xmarks/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
 
       
       
 
       
-        <span itemprop="articleBody"><h1 id="Xmarks_u7B80_u4ECB"><a href="#Xmarks_u7B80_u4ECB" class="headerlink" title="Xmarks简介"></a>Xmarks简介</h1><p><a href="https://www.xmarks.com" target="_blank" rel="external">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
+        <h1 id="Xmarks简介"><a href="#Xmarks简介" class="headerlink" title="Xmarks简介"></a>Xmarks简介</h1><p><a href="https://www.xmarks.com" target="_blank" rel="external">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
 <p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>
 <a id="more"></a>
-<h1 id="u591A_u6D4F_u89C8_u5668_u652F_u6301"><a href="#u591A_u6D4F_u89C8_u5668_u652F_u6301" class="headerlink" title="多浏览器支持"></a>多浏览器支持</h1><p> Xmarks 目前支持 Firefox、Chrome、IE、Safari 这几种常见浏览器，完全可以满足大部分用户需求。</p>
+<h1 id="多浏览器支持"><a href="#多浏览器支持" class="headerlink" title="多浏览器支持"></a>多浏览器支持</h1><p> Xmarks 目前支持 Firefox、Chrome、IE、Safari 这几种常见浏览器，完全可以满足大部分用户需求。</p>
 <p><img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_001.png" alt=""></p>
 <p>仅需要在官网上下载相对应的浏览器插件，登录 Xmarks 账号即可开始使用，十分便捷。</p>
-<h1 id="u652F_u6301_u6062_u590D_u5DF2_u5220_u9664_u4E66_u7B7E"><a href="#u652F_u6301_u6062_u590D_u5DF2_u5220_u9664_u4E66_u7B7E" class="headerlink" title="支持恢复已删除书签"></a>支持恢复已删除书签</h1><p> Xmarks 会对用户每次的同步操作进行备份，同时可以很方便的进行查看和导出还原等操作。这个功能在多台设备间同步出错的时候十分实用</p>
+<h1 id="支持恢复已删除书签"><a href="#支持恢复已删除书签" class="headerlink" title="支持恢复已删除书签"></a>支持恢复已删除书签</h1><p> Xmarks 会对用户每次的同步操作进行备份，同时可以很方便的进行查看和导出还原等操作。这个功能在多台设备间同步出错的时候十分实用</p>
 <p> <img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_002.png" alt=""></p>
 <p>同时还允许查找重复书签，十分人性化的功能，有时候经常一个页面添加到不同的书签文件夹里面，时间长了自己都忘记了，很适合我这种强迫症患者。</p>
-<h1 id="u7F3A_u70B9"><a href="#u7F3A_u70B9" class="headerlink" title="缺点"></a>缺点</h1><p>Xmarks 有一个最大的缺点是与浏览器自带同步机制产生冲突，例如，Chrome 自带书签同步，同时 Xmarks 默认安装后是会隔一段时间或者每当书签发生变动时候进行自动同步，这时候问题就来了，即使没有任何书签变动，由于 Chrome 自己的同步机制，Xmarks 经常会产生另一份重复的书签，这时Xmarks 又会自动同步到服务器端，一不小心发现每个浏览器下面的书签文件夹都是好几份，只能使用直接下载覆盖，发现还是无法解决，最后使用杀手锏，恢复到之前正常的一个书签备份。</p>
+<h1 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h1><p>Xmarks 有一个最大的缺点是与浏览器自带同步机制产生冲突，例如，Chrome 自带书签同步，同时 Xmarks 默认安装后是会隔一段时间或者每当书签发生变动时候进行自动同步，这时候问题就来了，即使没有任何书签变动，由于 Chrome 自己的同步机制，Xmarks 经常会产生另一份重复的书签，这时Xmarks 又会自动同步到服务器端，一不小心发现每个浏览器下面的书签文件夹都是好几份，只能使用直接下载覆盖，发现还是无法解决，最后使用杀手锏，恢复到之前正常的一个书签备份。</p>
 <p>被这个问题折磨了几次之后终于发现原来问题是出在浏览器自带的同步书签功能上面，最后我的解决办法是在 Chrome 的同步设置里面去除书签同步，反正每次重装 Chrome 时候，会自动同步 Xmarks 插件，这时进行下载覆盖本地书签即可。</p>
-<h1 id="u603B_u7ED3"><a href="#u603B_u7ED3" class="headerlink" title="总结"></a>总结</h1><p>总的来说，对于多浏览器（尤其是包括 Safari 浏览器）的用户来说，Xmarks 是一个十分好用的同步工具。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总的来说，对于多浏览器（尤其是包括 Safari 浏览器）的用户来说，Xmarks 是一个十分好用的同步工具。</p>
 <p>享受它的便捷性的同时，它带来的问题就是，无法使用浏览器自带的同步功能了，对于 Chrome 和 Firefox 来说，这个问题还不是很明显，但是对于 Mac 和 iPhone 用户来说，这相当于抛弃了 iCloud 自带的书签同步功能，手机上的书签就需要自己手动同步了。可以根据自己的需求来取舍。</p>
-</span>
+
+      
+    </div>
+
+    <div>
+      
+        
       
     </div>
 
@@ -281,15 +370,19 @@
 
       
         <div class="post-nav">
-          <div class="post-nav-prev post-nav-item">
+          <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/09/09/如何取消UIView动画/" rel="prev">如何取消 UIView 动画？</a>
+              <a href="/2015/09/01/如何使用-Hexo-搭建个人博客/" rel="next" title="如何使用 Hexo 搭建个人博客">
+                <i class="fa fa-chevron-left"></i> 如何使用 Hexo 搭建个人博客
+              </a>
             
           </div>
 
-          <div class="post-nav-next post-nav-item">
+          <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/09/01/如何使用-Hexo-搭建个人博客/" rel="next">如何使用 Hexo 搭建个人博客</a>
+              <a href="/2015/09/09/如何取消UIView动画/" rel="prev" title="如何取消 UIView 动画？">
+                如何取消 UIView 动画？ <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -307,22 +400,24 @@
     </div>
   </div>
 
- </div>
 
-        
-
-        
-          <div class="comments" id="comments">
-            
-              <div class="ds-thread" data-thread-key="2015/09/07/跨平台书签同步-Xmarks/"
-                   data-title="跨平台书签同步:Xmarks" data-url="http://samwei12.github.io/2015/09/07/跨平台书签同步-Xmarks/">
-              </div>
-            
           </div>
-        
-      </div>
+          
 
-      
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/09/07/跨平台书签同步-Xmarks/"
+           data-title="跨平台书签同步:Xmarks" data-url="http://samwei12.github.io/2015/09/07/跨平台书签同步-Xmarks/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
   
   <div class="sidebar-toggle">
     <div class="sidebar-toggle-line-wrap">
@@ -336,6 +431,8 @@
     <div class="sidebar-inner">
 
       
+
+      
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
             文章目录
@@ -346,12 +443,14 @@
         </ul>
       
 
-      <section class="site-overview">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" src="http://7xlmda.com1.z0.glb.clouddn.com/avatar.jpg" alt="samwei12" itemprop="image"/>
+          <img class="site-author-image" itemprop="image"
+               src="http://7xlmda.com1.z0.glb.clouddn.com/avatar.jpg"
+               alt="samwei12" />
           <p class="site-author-name" itemprop="name">samwei12</p>
+          <p class="site-description motion-element" itemprop="description">Stay hungry, stay foolish</p>
         </div>
-        <p class="site-description motion-element" itemprop="description">Stay hungry, stay foolish</p>
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
@@ -359,27 +458,31 @@
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
-
-          <div class="site-state-item site-state-categories">
-            <a href="/categories">
-              <span class="site-state-item-count">5</span>
-              <span class="site-state-item-name">分类</span>
+          
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
               </a>
-          </div>
+            </div>
+          
 
-          <div class="site-state-item site-state-tags">
-            <a href="/tags">
-              <span class="site-state-item-count">11</span>
-              <span class="site-state-item-name">标签</span>
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
               </a>
-          </div>
+            </div>
+          
 
         </nav>
 
         
           <div class="feed-link motion-element">
             <a href="/atom.xml" rel="alternate">
-              <i class="menu-item-icon icon-next-feed"></i>
+              <i class="fa fa-rss"></i>
               RSS
             </a>
           </div>
@@ -389,7 +492,11 @@
           
             
               <span class="links-of-author-item">
-                <a href="https://github.com/samwei12" target="_blank">GitHub</a>
+                <a href="https://github.com/samwei12" target="_blank">
+                  
+                    <i class="fa fa-github"></i> GitHub
+                  
+                </a>
               </span>
             
           
@@ -405,15 +512,21 @@
       </section>
 
       
-        <section class="post-toc-wrap sidebar-panel-active">
-          <div class="post-toc-indicator-top post-toc-indicator"></div>
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
           <div class="post-toc">
             
+              
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Xmarks_u7B80_u4ECB"><span class="nav-number">1.</span> <span class="nav-text">Xmarks简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u591A_u6D4F_u89C8_u5668_u652F_u6301"><span class="nav-number">2.</span> <span class="nav-text">多浏览器支持</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u652F_u6301_u6062_u590D_u5DF2_u5220_u9664_u4E66_u7B7E"><span class="nav-number">3.</span> <span class="nav-text">支持恢复已删除书签</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u7F3A_u70B9"><span class="nav-number">4.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u603B_u7ED3"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Xmarks简介"><span class="nav-number">1.</span> <span class="nav-text">Xmarks简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#多浏览器支持"><span class="nav-number">2.</span> <span class="nav-text">多浏览器支持</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#支持恢复已删除书签"><span class="nav-number">3.</span> <span class="nav-text">支持恢复已删除书签</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#缺点"><span class="nav-number">4.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
           </div>
-          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
         </section>
       
 
@@ -421,15 +534,18 @@
   </aside>
 
 
+        
+      </div>
     </main>
 
     <footer id="footer" class="footer">
-      <div class="footer-inner"> <div class="copyright" >
+      <div class="footer-inner">
+        <div class="copyright" >
   
-  &copy; &nbsp;  2015 - 
+  &copy;  2015 - 
   <span itemprop="copyrightYear">2016</span>
   <span class="with-love">
-    <i class="icon-next-heart"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">samwei12</span>
 </div>
@@ -446,60 +562,58 @@
 </div>
 
 
- </div>
+
+      </div>
     </footer>
 
-    <div class="back-to-top"></div>
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
   </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
 
   <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
 
-  
-  
-  
-    
-
-  
-    
-  
-
-  <script type="text/javascript">
-    var duoshuoQuery = {short_name:"samwei12-gitcafe"};
-    (function() {
-      var ds = document.createElement('script');
-      ds.type = 'text/javascript';ds.async = true;
-      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-      ds.charset = 'UTF-8';
-      (document.getElementsByTagName('head')[0]
-      || document.getElementsByTagName('body')[0]).appendChild(ds);
-    })();
-  </script>
-    
-    
-  
-  
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
-  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.1"></script>
-
-
-  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.1"></script>
-  
-
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
-
-  <script type="text/javascript" src="/js/motion_global.js?v=0.4.5.1" id="motion.global"></script>
-
-
-
-
-  <script type="text/javascript" src="/js/nav-toggle.js?v=0.4.5.1"></script>
   <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
 
-  
-  
-<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.1" id="bootstrap.scrollspy.custom"></script>
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
 
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
 
 <script type="text/javascript" id="sidebar.toc.highlight">
   $(document).ready(function () {
@@ -579,7 +693,7 @@
 
     function tocOverflowIndicator (indicator, action) {
       var $indicator = $(indicator);
-      var opacity = action === 'show' ? 0.4 : 0;
+      var opacity = action === 'show' ? 1 : 0;
       $indicator.velocity ?
         $indicator.velocity('stop').velocity({
           opacity: opacity
@@ -633,7 +747,7 @@
 
     $('.post-toc a').on('click', function (e) {
       e.preventDefault();
-      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
       var offset = $(targetSelector).offset().top;
       hasVelocity ?
         html.velocity('stop').velocity('scroll', {
@@ -646,42 +760,60 @@
     });
 
     // Expand sidebar on post detail page by default, when post has a toc.
-    var $tocContent = $('.post-toc-content');
-    if (isDesktop() && CONFIG.sidebar === 'post') {
-      if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
-        displaySidebar();
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.scheme !== 'Pisces' && (CONFIG.sidebar.display === 'post' || CONFIG.sidebar.display === 'always')) {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
       }
-    }
+    };
   });
 </script>
 
 
 
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
   <script type="text/javascript">
-    $(document).ready(function () {
-      if (CONFIG.sidebar === 'always') {
-        displaySidebar();
-      }
-      if (isMobile()) {
-        FastClick.attach(document.body);
-      }
-    });
+    var duoshuoQuery = {short_name:"samwei12-gitcafe"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
   </script>
 
   
+    
+  
+
+
+
+
 
   
   
+  
 
   
-  <script type="text/javascript" src="/js/lazyload.js"></script>
-  <script type="text/javascript">
-    $(function () {
-      $("#posts").find('img').lazyload({
-        placeholder: "/images/loading.gif",
-        effect: "fadeIn"
-      });
-    });
-  </script>
+
+
 </body>
 </html>

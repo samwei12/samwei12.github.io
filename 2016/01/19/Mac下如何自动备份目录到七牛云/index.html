@@ -1,15 +1,21 @@
 <!doctype html>
-<html class="theme-next use-motion theme-next-mist">
-<head>
+
+
+
   
 
-<meta charset="UTF-8"/>
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
 
+
 <meta http-equiv="Cache-Control" content="no-transform" />
 <meta http-equiv="Cache-Control" content="no-siteapp" />
+
 
 
   <meta name="google-site-verification" content="b6Hhpskk-wylnhS2H8wHIos2x5ti2huz-0peSTiI-S4" />
@@ -20,19 +26,26 @@
 
 
 
-  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
 
 
 
 
-<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.5.1"/>
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
 
 
-    <meta name="description" content="Stay hungry, stay foolish" />
 
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
 
 
   <meta name="keywords" content="Software," />
+
+
 
 
 
@@ -40,7 +53,12 @@
 
 
 
-  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.1" />
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
 
 
 <meta name="description" content="七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.">
@@ -56,10 +74,18 @@
 <meta name="twitter:description" content="七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.">
 
 
+
 <script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
   var CONFIG = {
     scheme: 'Mist',
-    sidebar: 'post'
+    sidebar: {"position":"left","display":"always"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
   };
 </script>
 
@@ -68,33 +94,36 @@
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
-  <!--[if lte IE 8]>
-  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
-    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
-      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
-           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
-           style='margin-left:auto;margin-right:auto;display: block;'/>
-    </a>
-  </div>
-<![endif]-->
   
 
 
 
-  <div class="container one-column page-post-detail">
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><h1 class="site-meta">
-  <span class="logo-line-before"><i></i></span>
-  <a href="/" class="brand" rel="start">
-      <span class="logo">
-        <i class="icon-next-logo"></i>
-      </span>
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
       <span class="site-title">samwei12's blog</span>
-  </a>
-  <span class="logo-line-after"><i></i></span>
-</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Stay hungry, stay foolish</p>
+</div>
 
 <div class="site-nav-toggle">
   <button>
@@ -108,12 +137,14 @@
   
 
   
-    <ul id="menu" class="menu menu-left">
+    <ul id="menu" class="menu">
       
         
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
-            <i class="menu-item-icon icon-next-home"></i> <br />
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
             首页
           </a>
         </li>
@@ -121,7 +152,9 @@
         
         <li class="menu-item menu-item-categories">
           <a href="/categories" rel="section">
-            <i class="menu-item-icon icon-next-categories"></i> <br />
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
             分类
           </a>
         </li>
@@ -129,7 +162,9 @@
         
         <li class="menu-item menu-item-about">
           <a href="/about" rel="section">
-            <i class="menu-item-icon icon-next-about"></i> <br />
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
             关于
           </a>
         </li>
@@ -137,7 +172,9 @@
         
         <li class="menu-item menu-item-archives">
           <a href="/archives" rel="section">
-            <i class="menu-item-icon icon-next-archives"></i> <br />
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
             归档
           </a>
         </li>
@@ -145,13 +182,35 @@
         
         <li class="menu-item menu-item-tags">
           <a href="/tags" rel="section">
-            <i class="menu-item-icon icon-next-tags"></i> <br />
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
             标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-heartbeat fa-fw"></i> <br />
+            
+            公益404
           </a>
         </li>
       
 
       
+        <li class="menu-item menu-item-search">
+          
+            <a href="#" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
       
     </ul>
   
@@ -159,11 +218,9 @@
   
     <div class="site-search">
       
-  
   <form class="site-search-form">
-    <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
-  </form>
-
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
 
 <script type="text/javascript">
   (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
@@ -185,85 +242,111 @@
 
     <main id="main" class="main">
       <div class="main-inner">
-        <div id="content" class="content"> 
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
 
   <div id="posts" class="posts-expand">
     
 
+  
+  
+
+  
+  
+  
+
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
 
-      
-      
-        <h1 class="post-title" itemprop="name headline">
-          
-          
-            
-              Mac下如何自动备份目录到七牛云?
-            
-          
-        </h1>
-      
-
-      <div class="post-meta">
-        <span class="post-time">
-          发表于
-          <time itemprop="dateCreated" datetime="2016-01-19T22:54:58+08:00" content="2016-01-19">
-            2016-01-19
-          </time>
-        </span>
+    
+      <header class="post-header">
 
         
-          <span class="post-category" >
-            &nbsp; | &nbsp; 分类于
+        
+          <h1 class="post-title" itemprop="name headline">
             
-              <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                <a href="/categories/Mac/" itemprop="url" rel="index">
-                  <span itemprop="name">Mac</span>
-                </a>
-              </span>
-
-              
-              
-
             
+              
+                Mac下如何自动备份目录到七牛云?
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-01-19T22:54:58+08:00" content="2016-01-19">
+              2016-01-19
+            </time>
           </span>
-        
 
-        
           
-            <span class="post-comments-count">
+            <span class="post-category" >
               &nbsp; | &nbsp;
-              <a href="/2016/01/19/Mac下如何自动备份目录到七牛云/#comments" itemprop="discussionUrl">
-                <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/19/Mac下如何自动备份目录到七牛云/" itemprop="commentsCount"></span>
-              </a>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Mac/" itemprop="url" rel="index">
+                    <span itemprop="name">Mac</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
             </span>
           
-        
-      </div>
-    </header>
 
-    <div class="post-body">
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/01/19/Mac下如何自动备份目录到七牛云/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/19/Mac下如何自动备份目录到七牛云/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
 
       
       
 
       
-        <span itemprop="articleBody"><p>七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.</p>
+        <p>七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.</p>
 <a id="more"></a>
-<h1 id="QRSBox_u7B80_u4ECB"><a href="#QRSBox_u7B80_u4ECB" class="headerlink" title="QRSBox简介"></a>QRSBox简介</h1><p>这里为什么要使用QRSBox呢,主要有两方面原因:</p>
+<h1 id="QRSBox简介"><a href="#QRSBox简介" class="headerlink" title="QRSBox简介"></a>QRSBox简介</h1><p>这里为什么要使用QRSBox呢,主要有两方面原因:</p>
 <ol>
 <li>QRSBox 支持增量同步, 这样上传过后的文件就可以立刻删掉了,对于笔记本来说,硬盘空间毕竟还是很宝贵的.</li>
 <li>QRSBox 不会同步文件的删除操作,因为我通常是使用七牛来作为图床使用,基本都是上传博客图片在里面,所以不太需要删除操作的同步.</li>
 </ol>
-<h1 id="u4E0B_u8F7D_u5B89_u88C5"><a href="#u4E0B_u8F7D_u5B89_u88C5" class="headerlink" title="下载安装"></a>下载安装</h1><p>下载链接:<a href="http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz" target="_blank" rel="external">http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz</a>, 这里我只裂了 Mac 版本,其他版本都可以在官网进行下载.</p>
-<h1 id="u4F7F_u7528_u65B9_u6CD5"><a href="#u4F7F_u7528_u65B9_u6CD5" class="headerlink" title="使用方法"></a>使用方法</h1><p>下载解压后,得到一堆Unix可执行程序, 将其中的<code>qrsboxcli</code>拷贝到<code>$PATH</code>里任意路径即可,在这里,我拷贝到了<code>/usr/local/bin</code>路径下,之后重启终端,即可全局使用<code>qrsboxcli</code>命令.</p>
+<h1 id="下载安装"><a href="#下载安装" class="headerlink" title="下载安装"></a>下载安装</h1><p>下载链接:<a href="http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz" target="_blank" rel="external">http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz</a>, 这里我只裂了 Mac 版本,其他版本都可以在官网进行下载.</p>
+<h1 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h1><p>下载解压后,得到一堆Unix可执行程序, 将其中的<code>qrsboxcli</code>拷贝到<code>$PATH</code>里任意路径即可,在这里,我拷贝到了<code>/usr/local/bin</code>路径下,之后重启终端,即可全局使用<code>qrsboxcli</code>命令.</p>
 <p>接下来,进入<a href="https://portal.qiniu.com/setting/key" target="_blank" rel="external">开发者自主平台</a>, 查看自己的 AccessKey 和 SecretKey, 命令行输入如下:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--注意这里没有尖括号,使用自己的AccessKey, SecretKey替换下方尖括号里的内容--&gt;</span><br><span class="line">qrsboxcli init &lt;AccessKey&gt; &lt;SecretKey&gt; &lt;同步文件夹&gt; &lt;空间名称&gt;</span><br></pre></td></tr></table></figure>
 <p>完整的命令列表如下:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">qrsboxcli</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  qrsboxcli init &lt;AccessKey&gt; &lt;SecretKey&gt; &lt;SyncDir&gt; &lt;Bucket&gt;  - Init qrsbox conf</span><br><span class="line">  qrsboxcli sync &amp;                                           - Watch &lt;SyncDir&gt; and sync files</span><br><span class="line">  qrsboxcli status [&lt;Path&gt;]                                  - View path status</span><br><span class="line">  qrsboxcli <span class="built_in">log</span>                                              - View sync <span class="built_in">log</span></span><br><span class="line">  qrsboxcli stop                                             - Kill qrsboxcli sync process</span><br><span class="line"></span><br><span class="line">BuildVersion:</span><br><span class="line">  qrsboxcli v3.<span class="number">0.20150529</span></span><br></pre></td></tr></table></figure>
 <p>至此,就可以开心的使用七牛图床啦.</p>
-<h1 id="u66F4_u6539_u622A_u56FE_u8DEF_u5F84"><a href="#u66F4_u6539_u622A_u56FE_u8DEF_u5F84" class="headerlink" title="更改截图路径"></a>更改截图路径</h1><p>Mac 上自带的截图就十分好用, 我们可以通过变更系统快捷键来让它更加实用. 打开系统设置-&gt;键盘-&gt;快捷键, 之后选中屏幕快照,更改快捷键即可.</p>
+<h1 id="更改截图路径"><a href="#更改截图路径" class="headerlink" title="更改截图路径"></a>更改截图路径</h1><p>Mac 上自带的截图就十分好用, 我们可以通过变更系统快捷键来让它更加实用. 打开系统设置-&gt;键盘-&gt;快捷键, 之后选中屏幕快照,更改快捷键即可.</p>
 <p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-20_21-47-47.png" alt=""></p>
 <p>有些同学可能觉得这样仍然不够方便,毕竟,系统默认是保存截图到桌面的,还需要我们把它拷贝到自动上传目录下才行,那么我们还可以变更系统默认截屏路径. 打开终端,并输入下面的命令:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">`defaults write com.apple.screencapture location /path/`</span><br></pre></td></tr></table></figure>
@@ -274,7 +357,13 @@
 <li><a href="http://developer.qiniu.com/docs/v6/tools/qrsbox.html" target="_blank" rel="external">http://developer.qiniu.com/docs/v6/tools/qrsbox.html</a></li>
 <li><a href="http://www.cnblogs.com/ygm900/p/4237593.html" target="_blank" rel="external">如何修改Mac截屏保存路径</a></li>
 </ul>
-</span>
+
+      
+    </div>
+
+    <div>
+      
+        
       
     </div>
 
@@ -289,15 +378,19 @@
 
       
         <div class="post-nav">
-          <div class="post-nav-prev post-nav-item">
+          <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/01/26/subview-blocking-drag-event/" rel="prev">NSView subview blocking drag/drop event</a>
+              <a href="/2016/01/19/UITabbarController-State-Preservation/" rel="next" title="如何实现 UITabbarController 的 State Preservation?">
+                <i class="fa fa-chevron-left"></i> 如何实现 UITabbarController 的 State Preservation?
+              </a>
             
           </div>
 
-          <div class="post-nav-next post-nav-item">
+          <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/01/19/UITabbarController-State-Preservation/" rel="next">如何实现 UITabbarController 的 State Preservation?</a>
+              <a href="/2016/01/26/subview-blocking-drag-event/" rel="prev" title="NSView subview blocking drag/drop event">
+                NSView subview blocking drag/drop event <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -315,22 +408,24 @@
     </div>
   </div>
 
- </div>
 
-        
-
-        
-          <div class="comments" id="comments">
-            
-              <div class="ds-thread" data-thread-key="2016/01/19/Mac下如何自动备份目录到七牛云/"
-                   data-title="Mac下如何自动备份目录到七牛云?" data-url="http://samwei12.github.io/2016/01/19/Mac下如何自动备份目录到七牛云/">
-              </div>
-            
           </div>
-        
-      </div>
+          
 
-      
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/01/19/Mac下如何自动备份目录到七牛云/"
+           data-title="Mac下如何自动备份目录到七牛云?" data-url="http://samwei12.github.io/2016/01/19/Mac下如何自动备份目录到七牛云/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
   
   <div class="sidebar-toggle">
     <div class="sidebar-toggle-line-wrap">
@@ -344,6 +439,8 @@
     <div class="sidebar-inner">
 
       
+
+      
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
             文章目录
@@ -354,12 +451,14 @@
         </ul>
       
 
-      <section class="site-overview">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" src="http://7xlmda.com1.z0.glb.clouddn.com/avatar.jpg" alt="samwei12" itemprop="image"/>
+          <img class="site-author-image" itemprop="image"
+               src="http://7xlmda.com1.z0.glb.clouddn.com/avatar.jpg"
+               alt="samwei12" />
           <p class="site-author-name" itemprop="name">samwei12</p>
+          <p class="site-description motion-element" itemprop="description">Stay hungry, stay foolish</p>
         </div>
-        <p class="site-description motion-element" itemprop="description">Stay hungry, stay foolish</p>
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
@@ -367,27 +466,31 @@
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
-
-          <div class="site-state-item site-state-categories">
-            <a href="/categories">
-              <span class="site-state-item-count">5</span>
-              <span class="site-state-item-name">分类</span>
+          
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
               </a>
-          </div>
+            </div>
+          
 
-          <div class="site-state-item site-state-tags">
-            <a href="/tags">
-              <span class="site-state-item-count">11</span>
-              <span class="site-state-item-name">标签</span>
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
               </a>
-          </div>
+            </div>
+          
 
         </nav>
 
         
           <div class="feed-link motion-element">
             <a href="/atom.xml" rel="alternate">
-              <i class="menu-item-icon icon-next-feed"></i>
+              <i class="fa fa-rss"></i>
               RSS
             </a>
           </div>
@@ -397,7 +500,11 @@
           
             
               <span class="links-of-author-item">
-                <a href="https://github.com/samwei12" target="_blank">GitHub</a>
+                <a href="https://github.com/samwei12" target="_blank">
+                  
+                    <i class="fa fa-github"></i> GitHub
+                  
+                </a>
               </span>
             
           
@@ -413,15 +520,21 @@
       </section>
 
       
-        <section class="post-toc-wrap sidebar-panel-active">
-          <div class="post-toc-indicator-top post-toc-indicator"></div>
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
           <div class="post-toc">
             
+              
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#QRSBox_u7B80_u4ECB"><span class="nav-number">1.</span> <span class="nav-text">QRSBox简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u4E0B_u8F7D_u5B89_u88C5"><span class="nav-number">2.</span> <span class="nav-text">下载安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u4F7F_u7528_u65B9_u6CD5"><span class="nav-number">3.</span> <span class="nav-text">使用方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u66F4_u6539_u622A_u56FE_u8DEF_u5F84"><span class="nav-number">4.</span> <span class="nav-text">更改截图路径</span></a></li></ol></div>
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#QRSBox简介"><span class="nav-number">1.</span> <span class="nav-text">QRSBox简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#下载安装"><span class="nav-number">2.</span> <span class="nav-text">下载安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用方法"><span class="nav-number">3.</span> <span class="nav-text">使用方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更改截图路径"><span class="nav-number">4.</span> <span class="nav-text">更改截图路径</span></a></li></ol></div>
             
           </div>
-          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
         </section>
       
 
@@ -429,15 +542,18 @@
   </aside>
 
 
+        
+      </div>
     </main>
 
     <footer id="footer" class="footer">
-      <div class="footer-inner"> <div class="copyright" >
+      <div class="footer-inner">
+        <div class="copyright" >
   
-  &copy; &nbsp;  2015 - 
+  &copy;  2015 - 
   <span itemprop="copyrightYear">2016</span>
   <span class="with-love">
-    <i class="icon-next-heart"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">samwei12</span>
 </div>
@@ -454,60 +570,58 @@
 </div>
 
 
- </div>
+
+      </div>
     </footer>
 
-    <div class="back-to-top"></div>
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
   </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
 
   <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
 
-  
-  
-  
-    
-
-  
-    
-  
-
-  <script type="text/javascript">
-    var duoshuoQuery = {short_name:"samwei12-gitcafe"};
-    (function() {
-      var ds = document.createElement('script');
-      ds.type = 'text/javascript';ds.async = true;
-      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-      ds.charset = 'UTF-8';
-      (document.getElementsByTagName('head')[0]
-      || document.getElementsByTagName('body')[0]).appendChild(ds);
-    })();
-  </script>
-    
-    
-  
-  
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
-  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.1"></script>
-
-
-  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.1"></script>
-  
-
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
-
-  <script type="text/javascript" src="/js/motion_global.js?v=0.4.5.1" id="motion.global"></script>
-
-
-
-
-  <script type="text/javascript" src="/js/nav-toggle.js?v=0.4.5.1"></script>
   <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
 
-  
-  
-<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.1" id="bootstrap.scrollspy.custom"></script>
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
 
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
 
 <script type="text/javascript" id="sidebar.toc.highlight">
   $(document).ready(function () {
@@ -587,7 +701,7 @@
 
     function tocOverflowIndicator (indicator, action) {
       var $indicator = $(indicator);
-      var opacity = action === 'show' ? 0.4 : 0;
+      var opacity = action === 'show' ? 1 : 0;
       $indicator.velocity ?
         $indicator.velocity('stop').velocity({
           opacity: opacity
@@ -641,7 +755,7 @@
 
     $('.post-toc a').on('click', function (e) {
       e.preventDefault();
-      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
       var offset = $(targetSelector).offset().top;
       hasVelocity ?
         html.velocity('stop').velocity('scroll', {
@@ -654,42 +768,60 @@
     });
 
     // Expand sidebar on post detail page by default, when post has a toc.
-    var $tocContent = $('.post-toc-content');
-    if (isDesktop() && CONFIG.sidebar === 'post') {
-      if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
-        displaySidebar();
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.scheme !== 'Pisces' && (CONFIG.sidebar.display === 'post' || CONFIG.sidebar.display === 'always')) {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
       }
-    }
+    };
   });
 </script>
 
 
 
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
   <script type="text/javascript">
-    $(document).ready(function () {
-      if (CONFIG.sidebar === 'always') {
-        displaySidebar();
-      }
-      if (isMobile()) {
-        FastClick.attach(document.body);
-      }
-    });
+    var duoshuoQuery = {short_name:"samwei12-gitcafe"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
   </script>
 
   
+    
+  
+
+
+
+
 
   
   
+  
 
   
-  <script type="text/javascript" src="/js/lazyload.js"></script>
-  <script type="text/javascript">
-    $(function () {
-      $("#posts").find('img').lazyload({
-        placeholder: "/images/loading.gif",
-        effect: "fadeIn"
-      });
-    });
-  </script>
+
+
 </body>
 </html>

@@ -1,15 +1,21 @@
 <!doctype html>
-<html class="theme-next use-motion theme-next-mist">
-<head>
+
+
+
   
 
-<meta charset="UTF-8"/>
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
 
+
 <meta http-equiv="Cache-Control" content="no-transform" />
 <meta http-equiv="Cache-Control" content="no-siteapp" />
+
 
 
   <meta name="google-site-verification" content="b6Hhpskk-wylnhS2H8wHIos2x5ti2huz-0peSTiI-S4" />
@@ -20,19 +26,26 @@
 
 
 
-  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
 
 
 
 
-<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.5.1"/>
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
 
 
-    <meta name="description" content="Stay hungry, stay foolish" />
 
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
 
 
   <meta name="keywords" content="UITabbarController," />
+
+
 
 
 
@@ -40,7 +53,12 @@
 
 
 
-  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.1" />
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
 
 
 <meta name="description" content="最近在看ios programming - the big nerd ranch guide 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 UINavigationController 来进行保存和还原状态, 然后额外的练习题部分是 UITabbarController 的状态保存和恢复,可是在这里却一直遇到问题， 导致程序返回时">
@@ -59,10 +77,18 @@
 <meta name="twitter:description" content="最近在看ios programming - the big nerd ranch guide 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 UINavigationController 来进行保存和还原状态, 然后额外的练习题部分是 UITabbarController 的状态保存和恢复,可是在这里却一直遇到问题， 导致程序返回时">
 
 
+
 <script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
   var CONFIG = {
     scheme: 'Mist',
-    sidebar: 'post'
+    sidebar: {"position":"left","display":"always"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
   };
 </script>
 
@@ -71,33 +97,36 @@
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
-  <!--[if lte IE 8]>
-  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
-    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
-      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
-           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
-           style='margin-left:auto;margin-right:auto;display: block;'/>
-    </a>
-  </div>
-<![endif]-->
   
 
 
 
-  <div class="container one-column page-post-detail">
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><h1 class="site-meta">
-  <span class="logo-line-before"><i></i></span>
-  <a href="/" class="brand" rel="start">
-      <span class="logo">
-        <i class="icon-next-logo"></i>
-      </span>
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
       <span class="site-title">samwei12's blog</span>
-  </a>
-  <span class="logo-line-after"><i></i></span>
-</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Stay hungry, stay foolish</p>
+</div>
 
 <div class="site-nav-toggle">
   <button>
@@ -111,12 +140,14 @@
   
 
   
-    <ul id="menu" class="menu menu-left">
+    <ul id="menu" class="menu">
       
         
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
-            <i class="menu-item-icon icon-next-home"></i> <br />
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
             首页
           </a>
         </li>
@@ -124,7 +155,9 @@
         
         <li class="menu-item menu-item-categories">
           <a href="/categories" rel="section">
-            <i class="menu-item-icon icon-next-categories"></i> <br />
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
             分类
           </a>
         </li>
@@ -132,7 +165,9 @@
         
         <li class="menu-item menu-item-about">
           <a href="/about" rel="section">
-            <i class="menu-item-icon icon-next-about"></i> <br />
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
             关于
           </a>
         </li>
@@ -140,7 +175,9 @@
         
         <li class="menu-item menu-item-archives">
           <a href="/archives" rel="section">
-            <i class="menu-item-icon icon-next-archives"></i> <br />
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
             归档
           </a>
         </li>
@@ -148,13 +185,35 @@
         
         <li class="menu-item menu-item-tags">
           <a href="/tags" rel="section">
-            <i class="menu-item-icon icon-next-tags"></i> <br />
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
             标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-heartbeat fa-fw"></i> <br />
+            
+            公益404
           </a>
         </li>
       
 
       
+        <li class="menu-item menu-item-search">
+          
+            <a href="#" class="st-search-show-outputs">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
       
     </ul>
   
@@ -162,11 +221,9 @@
   
     <div class="site-search">
       
-  
   <form class="site-search-form">
-    <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
-  </form>
-
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
 
 <script type="text/javascript">
   (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
@@ -188,71 +245,97 @@
 
     <main id="main" class="main">
       <div class="main-inner">
-        <div id="content" class="content"> 
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
 
   <div id="posts" class="posts-expand">
     
 
+  
+  
+
+  
+  
+  
+
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
 
-      
-      
-        <h1 class="post-title" itemprop="name headline">
-          
-          
-            
-              如何实现 UITabbarController 的 State Preservation?
-            
-          
-        </h1>
-      
-
-      <div class="post-meta">
-        <span class="post-time">
-          发表于
-          <time itemprop="dateCreated" datetime="2016-01-19T21:58:07+08:00" content="2016-01-19">
-            2016-01-19
-          </time>
-        </span>
+    
+      <header class="post-header">
 
         
-          <span class="post-category" >
-            &nbsp; | &nbsp; 分类于
+        
+          <h1 class="post-title" itemprop="name headline">
             
-              <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                <a href="/categories/iOS/" itemprop="url" rel="index">
-                  <span itemprop="name">iOS</span>
-                </a>
-              </span>
-
-              
-              
-
             
+              
+                如何实现 UITabbarController 的 State Preservation?
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-01-19T21:58:07+08:00" content="2016-01-19">
+              2016-01-19
+            </time>
           </span>
-        
 
-        
           
-            <span class="post-comments-count">
+            <span class="post-category" >
               &nbsp; | &nbsp;
-              <a href="/2016/01/19/UITabbarController-State-Preservation/#comments" itemprop="discussionUrl">
-                <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/19/UITabbarController-State-Preservation/" itemprop="commentsCount"></span>
-              </a>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
             </span>
           
-        
-      </div>
-    </header>
 
-    <div class="post-body">
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/01/19/UITabbarController-State-Preservation/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/19/UITabbarController-State-Preservation/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
 
       
       
 
       
-        <span itemprop="articleBody"><p>最近在看<strong>ios programming - the big nerd ranch guide</strong> 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 <code>UINavigationController</code> 来进行保存和还原状态, 然后额外的练习题部分是 <code>UITabbarController</code> 的状态保存和恢复,可是在这里却一直遇到问题， 导致程序返回时<code>UITabbarController</code>始终无法还原状态，本文记录下如何使用State Restoration和<code>UITabbarController</code>所需的额外处理。</p>
+        <p>最近在看<strong>ios programming - the big nerd ranch guide</strong> 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 <code>UINavigationController</code> 来进行保存和还原状态, 然后额外的练习题部分是 <code>UITabbarController</code> 的状态保存和恢复,可是在这里却一直遇到问题， 导致程序返回时<code>UITabbarController</code>始终无法还原状态，本文记录下如何使用State Restoration和<code>UITabbarController</code>所需的额外处理。</p>
 <a id="more"></a>
 <p>首先, 我们需要告诉系统我们想要实现状态的保存和恢复, 在 AppDelegate 中实现如下两个方法:</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">BOOL</span>)application:(<span class="built_in">UIApplication</span> *)application shouldSaveApplicationState:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)application:(<span class="built_in">UIApplication</span> *)application shouldRestoreApplicationState:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -263,16 +346,16 @@
 <p>最后, 我们只提供了两个子页面如何进行还原, 还需要处理下<code>UITabbarController</code>, 如果我们不提供 Controller 的<code>restorationClass</code>属性, 我们可以在<code>application:viewControllerWithRestorationIdentifierPath:coder:</code>中再次处理部分页面的恢复事件,代码如下:</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UIViewController</span> *vc = [<span class="built_in">UITabBarController</span> new];</span><br><span class="line">vc<span class="variable">.restorationIdentifier</span> = [identifierComponents lastObject];</span><br><span class="line"><span class="comment">//因为仅当该 Controller 为 UITabbarController 时, identifierComponents数组才会只有一个值</span></span><br><span class="line"><span class="keyword">if</span> (identifierComponents<span class="variable">.count</span> == <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">self</span><span class="variable">.window</span><span class="variable">.rootViewController</span> = vc;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> vc;</span><br></pre></td></tr></table></figure>
 <p>至此,我们理论上算是已经完成了所有的保存和恢复事件,起码书里面针对<code>UINavigationController</code>的示例代码部分仅包含这些步骤就已经实现了这个功能,那么,<code>UITabbarController</code>是不是一样呢?</p>
-<h1 id="u95EE_u9898"><a href="#u95EE_u9898" class="headerlink" title="问题"></a>问题</h1><p>运行程序,为了检验Restoration 的效果,我们进入第二个页面,并且设置一个日期,之后进入后台或者停止调试触发保存事件,当我们再次启动程序时, 可以看到这个页面一闪而过:</p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>运行程序,为了检验Restoration 的效果,我们进入第二个页面,并且设置一个日期,之后进入后台或者停止调试触发保存事件,当我们再次启动程序时, 可以看到这个页面一闪而过:</p>
 <p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-19_22-49-48.png" alt=""></p>
 <p>之后就变为了这样:</p>
 <p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-19_22-49-13.png" alt=""></p>
 <p>事实证明,我们的 <code>UITabbarController</code> 并没有很好地还原为之前的状态,甚至页面变成全空的了,为什么会变成这样呢?</p>
-<h1 id="u63A2_u7A76"><a href="#u63A2_u7A76" class="headerlink" title="探究"></a>探究</h1><p>首先,通过启动程序时的 loading 图可以确定,我们的程序确实已经保存下了之前退出时候的页面状态,后面的白屏证实还原状态这里出了问题,那么即使<code>UITabbarController</code>无法很好地还原,为什么再次启动后会连子页面都不见了呢?</p>
-<h2 id="View_Debug"><a href="#View_Debug" class="headerlink" title="View Debug"></a>View Debug</h2><p>这里, 我们首先想到使用 ios8以后引入的View Debugging来查看 View 层级, 如下图:</p>
+<h1 id="探究"><a href="#探究" class="headerlink" title="探究"></a>探究</h1><p>首先,通过启动程序时的 loading 图可以确定,我们的程序确实已经保存下了之前退出时候的页面状态,后面的白屏证实还原状态这里出了问题,那么即使<code>UITabbarController</code>无法很好地还原,为什么再次启动后会连子页面都不见了呢?</p>
+<h2 id="View-Debug"><a href="#View-Debug" class="headerlink" title="View Debug"></a>View Debug</h2><p>这里, 我们首先想到使用 ios8以后引入的View Debugging来查看 View 层级, 如下图:</p>
 <p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-20_22-26-09.png" alt=""></p>
 <p>这里我们可以看到, View 层级中,并没有任何子页面,仅仅包含一个 UITabbar 而已,也就是说,我们的两个子页面根本没有添加到 UITabbarController 中, 这又是怎么一回事呢?</p>
-<h2 id="u67E5_u9605_u6587_u6863"><a href="#u67E5_u9605_u6587_u6863" class="headerlink" title="查阅文档"></a>查阅文档</h2><p>我们看下苹果官方文档对这里是如何描述的:</p>
+<h2 id="查阅文档"><a href="#查阅文档" class="headerlink" title="查阅文档"></a>查阅文档</h2><p>我们看下苹果官方文档对这里是如何描述的:</p>
 <blockquote>
 <p>In iOS 6 and later, if you assign a value to this view controller’s restorationIdentifier property, it preserves a reference to the view controller in the selected tab. At restore time, it uses the reference to select the tab with the same view controller.</p>
 </blockquote>
@@ -281,7 +364,7 @@
 <p>Although UIKit helps restore the individual view controllers, it does not automatically restore the relationships between those view controllers. Instead, each view controller is responsible for encoding enough state information to return itself to its previous state. For example, a navigation controller encodes information about the order of the view controllers on its navigation stack. It then uses this information later to return those view controllers to their previous positions on the stack. Other view controllers that have embedded child view controllers are similarly responsible for encoding any information they need to restore their children later.<br>Note: Not all view controllers need to encode their child view controllers. For example, tab bar controllers do not encode information about their child view controllers. Instead, it is assumed that your app follows the usual pattern of creating the appropriate child view controllers prior to creating the tab bar controller itself.</p>
 </blockquote>
 <p>这两段话大致是说, UIKit 虽然帮我们处理了恢复单独页面的事情,但是并不会帮我们恢复页面之间的逻辑关系, 那些包含多个子页面的 Controller 需要自己记录子页面间的逻辑关系并且在恢复时处理它们. 这里还专门说了 UINavigationController 会记录下页面的层级关系并且在再次创建时恢复它,而第二段话说 UITabbarController 却不会记录子页面的顺序, 需要我们自己进行处理. 同时,我们可以在恢复页面时候自行变更 UITabbarController 子页面的顺序.</p>
-<h1 id="u89E3_u51B3_u95EE_u9898"><a href="#u89E3_u51B3_u95EE_u9898" class="headerlink" title="解决问题"></a>解决问题</h1><p>有了以上知识点,我们就知道了如何还原一个 UITabbarController 页面了,除了赋值<code>restorationIdentifier</code>以外,我们还需要在还原时候自行添加子页面.</p>
+<h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>有了以上知识点,我们就知道了如何还原一个 UITabbarController 页面了,除了赋值<code>restorationIdentifier</code>以外,我们还需要在还原时候自行添加子页面.</p>
 <p>AppDelegate.m</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">BOOL</span>)application:(<span class="built_in">UIApplication</span> *)application willFinishLaunchingWithOptions:(<span class="built_in">NSDictionary</span> *)launchOptions &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span><span class="variable">.window</span> = [[<span class="built_in">UIWindow</span> alloc] initWithFrame:[<span class="built_in">UIScreen</span> mainScreen]<span class="variable">.bounds</span>];</span><br><span class="line">    <span class="keyword">self</span><span class="variable">.window</span><span class="variable">.backgroundColor</span> = [<span class="built_in">UIColor</span> whiteColor];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1.</span></span><br><span class="line">    HypnosisViewController *hvc = [HypnosisViewController new];</span><br><span class="line">    ReminderViewController *rvc = [ReminderViewController new];</span><br><span class="line">    <span class="built_in">UITabBarController</span> *tabVC = [[<span class="built_in">UITabBarController</span> alloc] init];</span><br><span class="line">    tabVC<span class="variable">.viewControllers</span> = @[hvc, rvc];</span><br><span class="line"></span><br><span class="line">    tabVC<span class="variable">.restorationIdentifier</span> = <span class="built_in">NSStringFromClass</span>([tabVC class]);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span><span class="variable">.window</span><span class="variable">.rootViewController</span> = tabVC;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这样,每次程序启动时,即创建一个新的 UITabbarController, 同时赋予它两个子页面,</p>
@@ -291,7 +374,7 @@
 <p>ReminderViewController.m</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="built_in">UIViewController</span> *)viewControllerWithRestorationIdentifierPath:(<span class="built_in">NSArray</span> *)identifierComponents coder:(<span class="built_in">NSCoder</span> *)coder</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// First object in the array stores the root view controller, which is the tabBarController</span></span><br><span class="line">    <span class="built_in">UITabBarController</span> *rootViewController = (<span class="built_in">UITabBarController</span> *)[<span class="built_in">UIApplication</span> sharedApplication]<span class="variable">.delegate</span><span class="variable">.window</span><span class="variable">.rootViewController</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> rootViewController<span class="variable">.viewControllers</span>[<span class="number">1</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>用于告诉系统,这两个子页面不需要再次创建,直接返回当前 UITabbarController 子页面即可.<br>再次运行程序,发现已经能够正常返回到第二个页面了,大功告成!</p>
-<h1 id="u6269_u5C55"><a href="#u6269_u5C55" class="headerlink" title="扩展"></a>扩展</h1><p>之前文档中有写到, UITabbarController 仅保存了当前选中的页面的指针,而没有保存页面的顺序, 那么,也就是说,我们可以在还原时候重新自定义tab 的顺序, 对代码进行以下改动:</p>
+<h1 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h1><p>之前文档中有写到, UITabbarController 仅保存了当前选中的页面的指针,而没有保存页面的顺序, 那么,也就是说,我们可以在还原时候重新自定义tab 的顺序, 对代码进行以下改动:</p>
 <ol>
 <li>AppDelegate.md</li>
 </ol>
@@ -315,7 +398,13 @@
 <li><a href="https://developer.apple.com/library/ios/documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/StrategiesforImplementingYourApp/StrategiesforImplementingYourApp.html" target="_blank" rel="external">App Programming Guide for iOS</a></li>
 <li><a href="http://aplus.rs/2013/state-restoration-in-ios-6-without-storyboards/" target="_blank" rel="external">http://aplus.rs/2013/state-restoration-in-ios-6-without-storyboards/</a></li>
 </ul>
-</span>
+
+      
+    </div>
+
+    <div>
+      
+        
       
     </div>
 
@@ -330,15 +419,19 @@
 
       
         <div class="post-nav">
-          <div class="post-nav-prev post-nav-item">
+          <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/01/19/Mac下如何自动备份目录到七牛云/" rel="prev">Mac下如何自动备份目录到七牛云?</a>
+              <a href="/2015/09/21/AVCaptureSession部分用法/" rel="next" title="AVCaptureSession部分用法">
+                <i class="fa fa-chevron-left"></i> AVCaptureSession部分用法
+              </a>
             
           </div>
 
-          <div class="post-nav-next post-nav-item">
+          <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/09/21/AVCaptureSession部分用法/" rel="next">AVCaptureSession部分用法</a>
+              <a href="/2016/01/19/Mac下如何自动备份目录到七牛云/" rel="prev" title="Mac下如何自动备份目录到七牛云?">
+                Mac下如何自动备份目录到七牛云? <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -356,22 +449,24 @@
     </div>
   </div>
 
- </div>
 
-        
-
-        
-          <div class="comments" id="comments">
-            
-              <div class="ds-thread" data-thread-key="2016/01/19/UITabbarController-State-Preservation/"
-                   data-title="如何实现 UITabbarController 的 State Preservation?" data-url="http://samwei12.github.io/2016/01/19/UITabbarController-State-Preservation/">
-              </div>
-            
           </div>
-        
-      </div>
+          
 
-      
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/01/19/UITabbarController-State-Preservation/"
+           data-title="如何实现 UITabbarController 的 State Preservation?" data-url="http://samwei12.github.io/2016/01/19/UITabbarController-State-Preservation/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
   
   <div class="sidebar-toggle">
     <div class="sidebar-toggle-line-wrap">
@@ -385,6 +480,8 @@
     <div class="sidebar-inner">
 
       
+
+      
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
             文章目录
@@ -395,12 +492,14 @@
         </ul>
       
 
-      <section class="site-overview">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" src="http://7xlmda.com1.z0.glb.clouddn.com/avatar.jpg" alt="samwei12" itemprop="image"/>
+          <img class="site-author-image" itemprop="image"
+               src="http://7xlmda.com1.z0.glb.clouddn.com/avatar.jpg"
+               alt="samwei12" />
           <p class="site-author-name" itemprop="name">samwei12</p>
+          <p class="site-description motion-element" itemprop="description">Stay hungry, stay foolish</p>
         </div>
-        <p class="site-description motion-element" itemprop="description">Stay hungry, stay foolish</p>
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
@@ -408,27 +507,31 @@
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
-
-          <div class="site-state-item site-state-categories">
-            <a href="/categories">
-              <span class="site-state-item-count">5</span>
-              <span class="site-state-item-name">分类</span>
+          
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
               </a>
-          </div>
+            </div>
+          
 
-          <div class="site-state-item site-state-tags">
-            <a href="/tags">
-              <span class="site-state-item-count">11</span>
-              <span class="site-state-item-name">标签</span>
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
               </a>
-          </div>
+            </div>
+          
 
         </nav>
 
         
           <div class="feed-link motion-element">
             <a href="/atom.xml" rel="alternate">
-              <i class="menu-item-icon icon-next-feed"></i>
+              <i class="fa fa-rss"></i>
               RSS
             </a>
           </div>
@@ -438,7 +541,11 @@
           
             
               <span class="links-of-author-item">
-                <a href="https://github.com/samwei12" target="_blank">GitHub</a>
+                <a href="https://github.com/samwei12" target="_blank">
+                  
+                    <i class="fa fa-github"></i> GitHub
+                  
+                </a>
               </span>
             
           
@@ -454,15 +561,21 @@
       </section>
 
       
-        <section class="post-toc-wrap sidebar-panel-active">
-          <div class="post-toc-indicator-top post-toc-indicator"></div>
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
           <div class="post-toc">
             
+              
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#u95EE_u9898"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u63A2_u7A76"><span class="nav-number">2.</span> <span class="nav-text">探究</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#View_Debug"><span class="nav-number">2.1.</span> <span class="nav-text">View Debug</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u67E5_u9605_u6587_u6863"><span class="nav-number">2.2.</span> <span class="nav-text">查阅文档</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u89E3_u51B3_u95EE_u9898"><span class="nav-number">3.</span> <span class="nav-text">解决问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u6269_u5C55"><span class="nav-number">4.</span> <span class="nav-text">扩展</span></a></li></ol></div>
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#问题"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#探究"><span class="nav-number">2.</span> <span class="nav-text">探究</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#View-Debug"><span class="nav-number">2.1.</span> <span class="nav-text">View Debug</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查阅文档"><span class="nav-number">2.2.</span> <span class="nav-text">查阅文档</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解决问题"><span class="nav-number">3.</span> <span class="nav-text">解决问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#扩展"><span class="nav-number">4.</span> <span class="nav-text">扩展</span></a></li></ol></div>
             
           </div>
-          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
         </section>
       
 
@@ -470,15 +583,18 @@
   </aside>
 
 
+        
+      </div>
     </main>
 
     <footer id="footer" class="footer">
-      <div class="footer-inner"> <div class="copyright" >
+      <div class="footer-inner">
+        <div class="copyright" >
   
-  &copy; &nbsp;  2015 - 
+  &copy;  2015 - 
   <span itemprop="copyrightYear">2016</span>
   <span class="with-love">
-    <i class="icon-next-heart"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">samwei12</span>
 </div>
@@ -495,60 +611,58 @@
 </div>
 
 
- </div>
+
+      </div>
     </footer>
 
-    <div class="back-to-top"></div>
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
   </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
 
   <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
 
-  
-  
-  
-    
-
-  
-    
-  
-
-  <script type="text/javascript">
-    var duoshuoQuery = {short_name:"samwei12-gitcafe"};
-    (function() {
-      var ds = document.createElement('script');
-      ds.type = 'text/javascript';ds.async = true;
-      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-      ds.charset = 'UTF-8';
-      (document.getElementsByTagName('head')[0]
-      || document.getElementsByTagName('body')[0]).appendChild(ds);
-    })();
-  </script>
-    
-    
-  
-  
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
-  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.1"></script>
-
-
-  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.1"></script>
-  
-
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
-
-  <script type="text/javascript" src="/js/motion_global.js?v=0.4.5.1" id="motion.global"></script>
-
-
-
-
-  <script type="text/javascript" src="/js/nav-toggle.js?v=0.4.5.1"></script>
   <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
 
-  
-  
-<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.1" id="bootstrap.scrollspy.custom"></script>
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
 
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
 
 <script type="text/javascript" id="sidebar.toc.highlight">
   $(document).ready(function () {
@@ -628,7 +742,7 @@
 
     function tocOverflowIndicator (indicator, action) {
       var $indicator = $(indicator);
-      var opacity = action === 'show' ? 0.4 : 0;
+      var opacity = action === 'show' ? 1 : 0;
       $indicator.velocity ?
         $indicator.velocity('stop').velocity({
           opacity: opacity
@@ -682,7 +796,7 @@
 
     $('.post-toc a').on('click', function (e) {
       e.preventDefault();
-      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
       var offset = $(targetSelector).offset().top;
       hasVelocity ?
         html.velocity('stop').velocity('scroll', {
@@ -695,42 +809,60 @@
     });
 
     // Expand sidebar on post detail page by default, when post has a toc.
-    var $tocContent = $('.post-toc-content');
-    if (isDesktop() && CONFIG.sidebar === 'post') {
-      if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
-        displaySidebar();
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.scheme !== 'Pisces' && (CONFIG.sidebar.display === 'post' || CONFIG.sidebar.display === 'always')) {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
       }
-    }
+    };
   });
 </script>
 
 
 
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
   <script type="text/javascript">
-    $(document).ready(function () {
-      if (CONFIG.sidebar === 'always') {
-        displaySidebar();
-      }
-      if (isMobile()) {
-        FastClick.attach(document.body);
-      }
-    });
+    var duoshuoQuery = {short_name:"samwei12-gitcafe"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
   </script>
 
   
+    
+  
+
+
+
+
 
   
   
+  
 
   
-  <script type="text/javascript" src="/js/lazyload.js"></script>
-  <script type="text/javascript">
-    $(function () {
-      $("#posts").find('img').lazyload({
-        placeholder: "/images/loading.gif",
-        effect: "fadeIn"
-      });
-    });
-  </script>
+
+
 </body>
 </html>
