@@ -3,17 +3,18 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle:
-description:
-keywords:
-author: John Doe
-language:
+title: Samwei12's blog
+subtitle: Stay hungry, stay foolish
+description: Stay hungry, stay foolish
+author: Samwei12
+language: zh-Hans
+email: samwei12@icloud.com
 timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
+url: http://samwei12.github.io
+# url: http://samwei12.gitcafe.io
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -41,8 +42,8 @@ future: true
 highlight:
   enable: true
   line_number: true
-  auto_detect: false
-  tab_replace:
+  auto_detect: true
+  tab_replace: true
   
 # Home page setting
 # path: Root path for your blogs index page. (default = '')
@@ -57,6 +58,21 @@ index_generator:
 default_category: uncategorized
 category_map:
 tag_map:
+
+# Archives
+## 2: Enable pagination
+## 1: Disable pagination
+## 0: Fully Disable
+archive: 2 #设置为1 是全部展示
+category: 2
+tag: 2
+
+
+# Server
+port: 4000 #本地服务器端口是4000
+server_ip: 127.0.0.1 #本地服务器地址
+logger: false
+logger_format: dev
 
 # Date / Time format
 ## Hexo uses Moment.js to parse and display date
@@ -73,9 +89,107 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: next
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type:
+  type: git
+  # repo: https://gitcafe.com/samwei12/samwei12.git
+  # branch: gitcafe-pages
+  # repo: https://github.com/samwei12/samwei12.github.io.git
+  repo: git@github.com:samwei12/samwei12.github.io.git
+  branch: master
+
+# Markdown语法
+## https://github.com/chjj/marked
+markdown:
+  gfm: true
+  pedantic: false
+  sanitize: false
+  tables: true
+  breaks: true
+  smartLists: true
+  smartypants: true
+
+# 插件列表
+plugins:
+# rss
+- hexo-generator-feed
+# site map
+- hexo-generator-sitemap
+- hexo-generator-baidu-sitemap
+
+# RSS
+feed:
+    type: atom
+    path: atom.xml
+    # 用于限制 RSS 中初始多少 feed
+    limit: 20
+
+sitemap:
+    path: sitemap.xml
+# baidu
+baidusitemap:
+    path: sitemap.xml
+
+# =============================================================================
+# NexT Theme configuration
+# =============================================================================
+
+avatar: http://7xlmda.com1.z0.glb.clouddn.com/avatar.jpg
+
+# Make duoshuo show UA
+# user_id must NOT be null when admin_enable is true!
+# you can visit http://dev.duoshuo.com get duoshuo user id.
+duoshuo_info: samwei12
+  # ua_enable: true
+  # admin_enable: false
+  # user_id: 0
+  # admin_nickname: ROOT
+duoshuo_shortname: samwei12-gitcafe
+# 多说热评文章 true 或者 false
+duoshuo_hotartical: true
+
+# Disqus
+disqus_shortname: samwei12
+
+# Social links
+social:
+  GitHub: https://github.com/samwei12
+  # Twitter: https://twitter.com/iissnan
+  # Weibo: http://weibo.com/iissnan
+  # DouBan: http://douban.com/people/iissnan
+  # ZhiHu: http://www.zhihu.com/people/iissnan
+
+
+# Creative Commons 4.0 International License.
+# http://creativecommons.org/
+# Available: by | by-nc | by-nc-nd | by-nc-sa | by-nd | by-sa | zero
+# creative_commons: by-nc-sa
+
+# Google Webmaster tools verification setting
+# See: https://www.google.com/webmasters/
+# Google Analytics
+# Google分析ID
+# google_site_verification: LrNtKvwAoCR_JBOGl7roHuVarxA1FepxBIaIyQCsmdY
+# google_site_verification: b6Hhpskk-wylnhS2H8wHIos2x5ti2huz-0peSTiI-S4
+
+
+#Swiftype Search key
+# swiftype_key: qMsLq2ZRTknGAshdAF7m
+
+# 百度分析ID
+# baidu-site-verification: rj2fA65WVY
+# baidu-site-verification: dwfkWz1eln
+# baidu_analytics: 9a154c0e096bb1c9705a8a313f98f0e6
+
+# Specify the date when the site was setup
+since: 2015
+
+# RSS
+rss:
+
+# =============================================================================
+# End NexT Theme configuration
+# =============================================================================
