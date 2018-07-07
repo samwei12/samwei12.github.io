@@ -1,9 +1,9 @@
 title: NSView subview blocking drag/drop event
 date: 2016-01-26 13:41:57
 tags:
-- Mouse Event
-categories:
 - Cocoa
+categories:
+- Mac
 ---
 
 近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:

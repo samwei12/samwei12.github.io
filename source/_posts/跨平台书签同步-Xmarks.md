@@ -3,7 +3,7 @@ date: 2015-09-07 19:04:08
 tags:
 -  Software
 categories:
-- 日常
+- Daily
 ---
 
 # Xmarks简介

@@ -1,7 +1,7 @@
 title: 如何使用 Hexo 搭建个人博客
 date: 2015-09-01 17:49:16
 tags:
-categories: 日常
+categories: Daily
 ---
 
 
@@ -248,3 +248,4 @@ hexo d
 * [Hexo静态博客使用指南](http://segmentfault.com/a/1190000002538363)
 * [Hexo在github上构建免费的Web应用](http://blog.fens.me/hexo-blog-github/)
 * [如何搭建一个独立博客——简明Github Pages与Hexo教程](http://www.jianshu.com/p/05289a4bc8b2)
+* [进阶设置](https://vxhly.github.io/2017/10/hexo-next-advanced-settings/)
