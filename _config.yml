@@ -42,8 +42,8 @@ future: true
 highlight:
   enable: true
   line_number: true
-  auto_detect: true
-  tab_replace: true
+  auto_detect: false
+  tab_replace: 
   
 # Home page setting
 # path: Root path for your blogs index page. (default = '')
@@ -113,46 +113,46 @@ markdown:
   smartypants: true
 
 # 插件列表
-plugins:
+# plugins:
 # rss
-- hexo-generator-feed
+# - hexo-generator-feed
 # site map
-- hexo-generator-sitemap
-- hexo-generator-baidu-sitemap
+# - hexo-generator-sitemap
+# - hexo-generator-baidu-sitemap
 
 # RSS
-feed:
-    type: atom
-    path: atom.xml
+# feed:
+    # type: atom
+    # path: atom.xml
     # 用于限制 RSS 中初始多少 feed
-    limit: 20
+    # limit: 20
 
-sitemap:
-    path: sitemap.xml
+# sitemap:
+    # path: sitemap.xml
 # baidu
-baidusitemap:
-    path: sitemap.xml
+# baidusitemap:
+    # path: sitemap.xml
 
 # =============================================================================
 # NexT Theme configuration
 # =============================================================================
 
-avatar: http://7xlmda.com1.z0.glb.clouddn.com/avatar.jpg
+avatar: https://img.alicdn.com/tfs/TB1BCMNCMmTBuNjy1XbXXaMrVXa-460-460.jpg
 
 # Make duoshuo show UA
 # user_id must NOT be null when admin_enable is true!
 # you can visit http://dev.duoshuo.com get duoshuo user id.
-duoshuo_info: samwei12
+# duoshuo_info: samwei12
   # ua_enable: true
   # admin_enable: false
   # user_id: 0
   # admin_nickname: ROOT
-duoshuo_shortname: samwei12-gitcafe
+# duoshuo_shortname: samwei12-gitcafe
 # 多说热评文章 true 或者 false
-duoshuo_hotartical: true
+# duoshuo_hotartical: true
 
 # Disqus
-disqus_shortname: samwei12
+# disqus_shortname: samwei12
 
 # Social links
 social:
@@ -162,6 +162,7 @@ social:
   # DouBan: http://douban.com/people/iissnan
   # ZhiHu: http://www.zhihu.com/people/iissnan
 
+han: true
 
 # Creative Commons 4.0 International License.
 # http://creativecommons.org/
