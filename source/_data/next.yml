@@ -7,7 +7,7 @@ title: Samwei12's blog
 subtitle: Stay hungry, stay foolish
 description: Stay hungry, stay foolish
 author: Samwei12
-language: zh-Hans
+language: zh-CN
 email: samwei12@icloud.com
 timezone:
 
@@ -238,7 +238,7 @@ menu:
   archives: /archives/ || archive
   #schedule: /schedule/ || calendar
   # sitemap: /sitemap.xml || sitemap
-  #commonweal: /404/ || heartbeat
+  # commonweal: /404/ || heartbeat
 
 # Enable/Disable menu icons / item badges.
 menu_settings:
