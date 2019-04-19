@@ -139,7 +139,7 @@ markdown:
 # NexT Theme configuration
 # =============================================================================
 
-avatar: https://img.alicdn.com/tfs/TB1BCMNCMmTBuNjy1XbXXaMrVXa-460-460.jpg
+# avatar: https://img.alicdn.com/tfs/TB1BCMNCMmTBuNjy1XbXXaMrVXa-460-460.jpg
 
 # Make duoshuo show UA
 # user_id must NOT be null when admin_enable is true!
