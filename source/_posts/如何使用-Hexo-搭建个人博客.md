@@ -4,14 +4,13 @@ tags:
 categories: Daily
 ---
 
+# 如何使用 Hexo 搭建个人博客
 
 ## 什么是 Hexo ？
 
 [Hexo](https://hexo.io) 是一个简单快速的静态博客框架，可以通过编辑 [Markdown](http://daringfireball.net/projects/markdown/) 文档生成好看的静态博客。
 
-<!--more-->
-
-##  搭建 Hexo
+## 搭建 Hexo
 
 ### 要求
 
@@ -19,6 +18,8 @@ categories: Daily
 
 * [Node.js](http://nodejs.org/)
 * [Git](http://git-scm.com/)
+
+<!--more-->
 
 #### Node.js
 
@@ -140,9 +141,6 @@ hexo new page "about"
 
 用于创建 about 页面
 
-#### 主题
-
- Alex
 
 ### Hexo 常用插件
 
@@ -185,38 +183,57 @@ npm install hexo-deployer-git --save
 npm install hexo-generator-baidu-sitemap@0.1.1 --save
 ```
 
-#### Disqus评论系统
+#### Gitalk
 
-* 登录`http://disqus.com/`网站，申请一个新网站的shortname，配置到`_config.yml`中，格式为：`disqus_shortname: samwei12`
-* 之后再 Disqus 中申请接入评论系统
+* 用于管理评论
 
-![](http://blog.fens.me/wp-content/uploads/2014/05/disqus.png)
-
-```
-<div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES * * */
-    var disqus_shortname = 'samwei12';
-    
-    /* * * DON'T EDIT BELOW THIS LINE * * */
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+```yaml
+# Gitalk
+# Demo: https://gitalk.github.io
+gitalk:
+  enable: true
+  github_id: samwei12  # Github repo owner
+  repo: Gitalk # Repository name to store issues 注意这里必须要填名称，而不是链接
+  client_id:  # Github Application Client ID
+  client_secret:  # Github Application Client Secret
+  admin_user: samwei12 # GitHub repo owner and collaborators, only these guys can initialize github issues 这里填名称即可，可以是数组
+  distraction_free_mode: true # Facebook-like distraction free mode
+  # Gitalk's display language depends on user's browser or system environment
+  # If you want everyone visiting your site to see a uniform language, you can set a force language value
+  # Available values: en, es-ES, fr, ru, zh-CN, zh-TW
+  language:
 ```
 
-* 然后选择 universal code,将生成的 js保存下来，新建`themes/主题名称/layout/_partial/comment.ejs`，将代码拷贝到里面
+### GoogleAnalytics
 
-## 发布到 GitCafe
+* 用于分析数据
+* https://analytics.google.com/analytics/web/#/report-home/a138655615w199342623p193811219
 
-### 拥有自己的 GitPage
+### local_search
+
+* 本地搜索
+
+```yaml
+# Local search
+# Dependencies: https://github.com/theme-next/hexo-generator-searchdb
+local_search:
+  enable: true
+  # If auto, trigger search by changing input.
+  # If manual, trigger search by pressing enter key or search button.
+  trigger: auto
+  # Show top n results per article, show all results by setting to -1
+  top_n_per_article: 1
+  # Unescape html strings to the readable one.
+  unescape: false
+```
+
+## 发布到 Github
+
+### 拥有自己的 GithubPage
 
 1. 创建一个与自己用户名相同的项目
 2. 随便上传个文件，上传 master 分支
-3. 新建 gitcafe-pages 分支，并切换到该分支，推送到远程
+3. 新建 hexo 分支，并切换到该分支，推送到远程
 
 ### 发布
 
@@ -226,8 +243,8 @@ npm install hexo-generator-baidu-sitemap@0.1.1 --save
 ```
 deploy:
   type: git
-  repo: https://gitcafe.com/samwei12/samwei12.git
-  branch: gitcafe-pages
+  repo: https://github.com/samwei12/samwei12.git
+  branch: master
 ```
 
 
@@ -242,10 +259,27 @@ hexo d
 
 即可
 
+## 绑定个人域名
+
+### 购买域名
+
+* 可以从[阿里云](https://www.aliyun.com)上购买域名, 目前我购买了 `samwei12.com` 这个域名，几个注意事项：
+  * 需要实名认证
+  * 需要备案
+
+### 域名备案
+
+* 可以参考：https://developer.qiniu.com/af/kb/3987/how-to-make-website-and-inquires-the-police-put-on-record-information
+
+### 绑定域名
+
+* 域名解析：
+* GitHub中绑定，在项目的设置界面绑定即可
+* 参考：https://help.github.com/en/articles/quick-start-setting-up-a-custom-domain
 
 ## 参考文档：
 
 * [Hexo静态博客使用指南](http://segmentfault.com/a/1190000002538363)
 * [Hexo在github上构建免费的Web应用](http://blog.fens.me/hexo-blog-github/)
-* [如何搭建一个独立博客——简明Github Pages与Hexo教程](http://www.jianshu.com/p/05289a4bc8b2)
-* [进阶设置](https://vxhly.github.io/2017/10/hexo-next-advanced-settings/)
+* https://zhuanlan.zhihu.com/p/44213627?utm_source=ZHShareTargetIDMore&utm_medium=social&utm_oi=28525297926144
+* https://help.github.com/en/articles/troubleshooting-custom-domains#https-errors
