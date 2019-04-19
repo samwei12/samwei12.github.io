@@ -574,9 +574,9 @@ bookmark:
 # Reading progress bar
 # Dependencies: https://github.com/theme-next/theme-next-reading-progress
 reading_progress:
-  enable: false
+  enable: true
   color: "#37c6c0"
-  height: 2px
+  height: 3px
 
 # Google Calendar
 # Share your recent schedule to others via calendar page.
