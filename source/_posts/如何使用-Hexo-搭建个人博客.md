@@ -183,6 +183,15 @@ npm install hexo-deployer-git --save
 npm install hexo-generator-baidu-sitemap@0.1.1 --save
 ```
 
+#### sitemap
+
+```
+npm install hexo-generator-sitemap --save
+```
+
+* 重新clean发布
+* 之后访问： https://search.google.com/search-console/settings?resource_id=http%3A%2F%2Fsamwei12.com%2F&hl=zh-CN 填写生成sitemap地址即可
+
 #### Gitalk
 
 * 用于管理评论
