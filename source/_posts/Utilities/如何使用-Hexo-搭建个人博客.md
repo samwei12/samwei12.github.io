@@ -218,6 +218,11 @@ gitalk:
 * 用于分析数据
 * https://analytics.google.com/analytics/web/#/report-home/a138655615w199342623p193811219
 
+### 阅读时间统计
+
+* 参考:https://github.com/theme-next/hexo-symbols-count-time
+* 这里有个注意点,必须要在主配置文件即`_config.yml`中提前开启,才能在 next 主题中进行配置,否则失效
+
 ### local_search
 
 * 本地搜索
