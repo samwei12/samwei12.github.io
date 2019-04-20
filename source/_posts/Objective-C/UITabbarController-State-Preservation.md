@@ -1,3 +1,4 @@
+---
 title: 如何实现 UITabbarController 的 State Preservation?
 categories:
   - iOS
@@ -92,7 +93,7 @@ return vc;
 
 至此,我们理论上算是已经完成了所有的保存和恢复事件,起码书里面针对`UINavigationController`的示例代码部分仅包含这些步骤就已经实现了这个功能,那么,`UITabbarController`是不是一样呢?
 
-# 问题
+## 问题
 
 运行程序,为了检验Restoration 的效果,我们进入第二个页面,并且设置一个日期,之后进入后台或者停止调试触发保存事件,当我们再次启动程序时, 可以看到这个页面一闪而过:
 
@@ -104,11 +105,11 @@ return vc;
 
 事实证明,我们的 `UITabbarController` 并没有很好地还原为之前的状态,甚至页面变成全空的了,为什么会变成这样呢?
 
-# 探究
+## 探究
 
 首先,通过启动程序时的 loading 图可以确定,我们的程序确实已经保存下了之前退出时候的页面状态,后面的白屏证实还原状态这里出了问题,那么即使`UITabbarController`无法很好地还原,为什么再次启动后会连子页面都不见了呢?
 
-## View Debug
+### View Debug
 
 这里, 我们首先想到使用 ios8以后引入的View Debugging来查看 View 层级, 如下图:
 
@@ -116,7 +117,7 @@ return vc;
 
 这里我们可以看到, View 层级中,并没有任何子页面,仅仅包含一个 UITabbar 而已,也就是说,我们的两个子页面根本没有添加到 UITabbarController 中, 这又是怎么一回事呢?
 
-## 查阅文档
+### 查阅文档
 
 我们看下苹果官方文档对这里是如何描述的:
 
@@ -129,7 +130,7 @@ return vc;
 
 这两段话大致是说, UIKit 虽然帮我们处理了恢复单独页面的事情,但是并不会帮我们恢复页面之间的逻辑关系, 那些包含多个子页面的 Controller 需要自己记录子页面间的逻辑关系并且在恢复时处理它们. 这里还专门说了 UINavigationController 会记录下页面的层级关系并且在再次创建时恢复它,而第二段话说 UITabbarController 却不会记录子页面的顺序, 需要我们自己进行处理. 同时,我们可以在恢复页面时候自行变更 UITabbarController 子页面的顺序.
 
-# 解决问题
+## 解决问题
 
 有了以上知识点,我们就知道了如何还原一个 UITabbarController 页面了,除了赋值`restorationIdentifier`以外,我们还需要在还原时候自行添加子页面.
 
@@ -185,7 +186,7 @@ ReminderViewController.m
 用于告诉系统,这两个子页面不需要再次创建,直接返回当前 UITabbarController 子页面即可.
 再次运行程序,发现已经能够正常返回到第二个页面了,大功告成!
 
-# 扩展
+## 扩展
 
 之前文档中有写到, UITabbarController 仅保存了当前选中的页面的指针,而没有保存页面的顺序, 那么,也就是说,我们可以在还原时候重新自定义tab 的顺序, 对代码进行以下改动:
 
