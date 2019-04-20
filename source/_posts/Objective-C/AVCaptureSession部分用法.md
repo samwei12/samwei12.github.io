@@ -1,3 +1,4 @@
+---
 title: AVCaptureSession部分用法
 tags:
   - AVCaptureSession
@@ -7,7 +8,7 @@ date: 2015-09-21 13:58:46
 ---
 
 
-# AVCaptureSession阻塞主线程问题
+## AVCaptureSession阻塞主线程问题
 
 前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在`viewWillDisappear:`中开销最大，这其中只调用了一个相机关闭的代码：
 
@@ -52,7 +53,7 @@ dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(
 
 这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。
 
-# 相机前后台切换问题
+## 相机前后台切换问题
 
 另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：
 
@@ -75,7 +76,7 @@ dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(
 我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。
 
 
-# 收获
+## 收获
 
 * AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作
 * 前后台切换时，无需手动管理 CaptureSession

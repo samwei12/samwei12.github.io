@@ -1,7 +1,9 @@
+---
 title: NSView subview blocking drag/drop event
 date: 2016-01-26 13:41:57
 tags:
 - Cocoa
+- NSView
 categories:
 - Mac
 ---
@@ -18,13 +20,13 @@ categories:
 
 ![](http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png)
 
-# 问题分析
+## 问题分析
 
 开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。
 
 那么如何验证呢？其实也很简单，在自定义的NSView 中重载`draggingEnded：`方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 `NSView` 中添加的`NSImageView`作为 subview 会阻止拖拽事件的传递，原因是` NSImageView`本身可以处理拖拽事件，于是截获了本该自定义`NSView`处理的消息。
 
-# 解决方案
+## 解决方案
 
 在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：[http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop](http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop)
 
@@ -35,7 +37,7 @@ categories:
 
 
 
-参考文档:
+## 参考文档
 
 * [http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop](http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop)
 * [http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation](http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation)

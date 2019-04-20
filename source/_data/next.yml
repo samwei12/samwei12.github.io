@@ -158,12 +158,12 @@ baidu_push: false
 # External url should start with http:// or https://
 menu:
   home: / || home
-  # about: /about/ || user
+  about: /about/ || user
   tags: /tags/ || tags
-  #categories: /categories/ || th
+  categories: /categories/ || th
   archives: /archives/ || archive
   #schedule: /schedule/ || calendar
-  sitemap: /sitemap.xml || sitemap
+  # sitemap: /sitemap.xml || sitemap
   #commonweal: /404/ || heartbeat
 
 # Enable / Disable menu icons / item badges.
@@ -527,7 +527,7 @@ math:
 
 # Han Support
 # Dependencies: https://github.com/theme-next/theme-next-han
-han: true
+han: false
 
 # Pangu Support
 # Dependencies: https://github.com/theme-next/theme-next-pangu
@@ -1131,7 +1131,7 @@ vendors:
   # Example:
   # han: //cdn.jsdelivr.net/npm/han-css@3/dist/han.min.css
   # han: //cdnjs.cloudflare.com/ajax/libs/Han/3.3.0/han.min.css
-  han: //cdn.jsdelivr.net/npm/han-css@3/dist/han.min.css
+  han:
 
   # Internal version: 4.0.7
   # See: https://github.com/vinta/pangu.js

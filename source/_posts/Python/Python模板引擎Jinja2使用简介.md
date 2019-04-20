@@ -1,12 +1,11 @@
 ---
-layout: title
 title: Python模板引擎Jinja2使用简介
 date: 2018-07-07 15:52:36
 categories:
   - Python
 tags: 
+  - Jinja2
 ---
-
 
 ## 背景
 
