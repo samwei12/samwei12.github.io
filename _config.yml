@@ -122,6 +122,13 @@ markdown:
 # - hexo-generator-sitemap
 # - hexo-generator-baidu-sitemap
 
+# 统计字数及阅读时间
+symbols_count_time:
+  symbols: true
+  time: true
+  total_symbols: true
+  total_time: true
+
 # RSS
 # feed:
     # type: atom
