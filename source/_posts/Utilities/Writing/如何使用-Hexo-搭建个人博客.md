@@ -295,5 +295,6 @@ hexo d
 
 * [Hexo静态博客使用指南](http://segmentfault.com/a/1190000002538363)
 * [Hexo在github上构建免费的Web应用](http://blog.fens.me/hexo-blog-github/)
+* https://xian6ge.cn/posts/5b8c41e7/
 * https://zhuanlan.zhihu.com/p/44213627?utm_source=ZHShareTargetIDMore&utm_medium=social&utm_oi=28525297926144
 * https://help.github.com/en/articles/troubleshooting-custom-domains#https-errors
