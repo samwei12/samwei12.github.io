@@ -152,6 +152,10 @@ hexo new page "about"
 
 `npm install hexo-generator-feed`
 
+#### 阅读进度
+
+- https://github.com/theme-next/theme-next-reading-progress
+
 #### Sitemap 
 
 给搜索引擎使用
@@ -213,17 +217,17 @@ gitalk:
   language:
 ```
 
-### GoogleAnalytics
+#### GoogleAnalytics
 
 * 用于分析数据
 * https://analytics.google.com/analytics/web/#/report-home/a138655615w199342623p193811219
 
-### 阅读时间统计
+#### 阅读时间统计
 
 * 参考:https://github.com/theme-next/hexo-symbols-count-time
 * 这里有个注意点,必须要在主配置文件即`_config.yml`中提前开启,才能在 next 主题中进行配置,否则失效
 
-### local_search
+#### local_search
 
 * 本地搜索
 
@@ -290,6 +294,23 @@ hexo d
 * 域名解析：
 * GitHub中绑定，在项目的设置界面绑定即可
 * 参考：https://help.github.com/en/articles/quick-start-setting-up-a-custom-domain
+
+## 迁移到新电脑
+
+- 最近又是好久没有写博客了，换了新电脑之后需要重新配置，这次记录下还原步骤，下次再遇到可以提高效率。
+
+### 还原博客文件
+
+- 我采用的办法是将博客相关内容专门放到 hexo 分支上，然后 git 仓库的默认分支设置为 hexo，切换电脑之后直接拉取最新代码。
+
+### 安装依赖
+
+1. 首先先把主题和插件安装下来
+    1. 我使用的主题是 `https://github.com/theme-next/hexo-theme-next.git`， 这里推荐把主题的配置文件放到 `_data`文件夹下，好处是即使换了电脑，配置重新拉取代码仍然同步
+    2. 阅读进度插件： `https://github.com/theme-next/theme-next-reading-progress`
+    3. 字体插件：`https://github.com/theme-next/theme-next-han`
+2. 根目录下执行 `npm install`
+3. `hexo g && hexo s` 本地测试是否部署成功
 
 ## 参考文档：
 
