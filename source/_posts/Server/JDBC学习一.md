@@ -1,5 +1,5 @@
 ---
-title: JDBC学习一
+title: JDBC入门
 date: 2020-03-07  17:54:52
 categories:
   - Server
