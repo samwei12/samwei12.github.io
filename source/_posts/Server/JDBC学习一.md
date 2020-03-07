@@ -224,7 +224,7 @@ connection.close();
     * 提交事务：`commit()`
     * 回滚事务：`rollback()`
 
-#### Statement
+### Statement
 
 执行sql的对象，CRUD 都可以执行：
 
@@ -252,7 +252,7 @@ while (resultSet.next()) {
 
 通过 `ResultSet` 的 `next` 方法遍历结果，之后得到的就是一行的数据，分别取出每一列的数据处理即可。
 
-#### ResultSet
+### ResultSet
 
 结果集对象，封装查询结果
 
@@ -261,7 +261,7 @@ while (resultSet.next()) {
     * Xxx：代表数据类型，如： `int getInt() , String getString()`
 - 具体的使用方法 `executeQuery` 这里已经展示过了
 
-#### PreparedStatement
+### PreparedStatement
 
 执行sql的对象，继承自 `Statement`。看到这里你可能会比较奇怪，我们不是已经有了 `Statement` 类了嘛，为什么还需要再搞一个子类出来呢？我们先通过一个示例介绍一下什么是 **SQL 注入**。
 
