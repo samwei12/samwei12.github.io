@@ -1,5 +1,5 @@
 ---
-title: 如何构建一个 PKM 系统
+title: 如何构建一个PKM系统
 date: 2020-05-02  11:00:44
 categories:
   - Thinking
