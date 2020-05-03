@@ -5,8 +5,9 @@ categories:
   - Ruby
 tags: 
   - Cocoapods
-  - Ruby
 ---
+
+> [原文链接](http://samwei12.com/2020/03/04/Ruby/Cocoapods%E6%8F%92%E4%BB%B6%E6%9C%BA%E5%88%B6%E6%B5%85%E6%9E%90/)
 
 ## 背景
 

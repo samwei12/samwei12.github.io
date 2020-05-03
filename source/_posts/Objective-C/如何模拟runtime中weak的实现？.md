@@ -1,13 +1,15 @@
 ---
 title: 如何实现ARC中weak功能？
 date: 2016-03-09 11:27:09
+categories: 
+  - iOS
 tags: 
   - Runtime 
   - Objective-C 
   - ARC
-categories: 
-  - iOS
 ---
+
+> [原文链接](http://samwei12.com/2016/03/09/Objective-C/%E5%A6%82%E4%BD%95%E6%A8%A1%E6%8B%9Fruntime%E4%B8%ADweak%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%9F/)
 
 我们都知道ARC中`weak`与`assign`或者说`unsafe_unretained`最大的不同就是设置`weak`属性后，系统会在对象被释放后自动将指向对象的指针置为`nil`，而`assign`则会产生一个悬空指针，那么系统是如何实现这一机制呢？我们能否自己模拟系统对`weak`的实现呢？
 

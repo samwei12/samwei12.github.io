@@ -3,10 +3,12 @@ layout:
 title: 如何在 MWeb 中配置 Hexo 等静态网站
 date: 2018-07-07 16:52:48
 categories:
-  - Daily
+  - Utilities
 tags: 
-  - Software
+  - MWeb
 ---
+
+> [原文链接](http://samwei12.com/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/)
 
 > 参考链接： 
 > [https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html](https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html)

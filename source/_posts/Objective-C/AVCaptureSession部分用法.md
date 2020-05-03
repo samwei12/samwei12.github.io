@@ -7,6 +7,7 @@ categories:
 date: 2015-09-21 13:58:46
 ---
 
+> [原文链接](http://samwei12.com/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/)
 
 ## AVCaptureSession阻塞主线程问题
 
@@ -76,7 +77,7 @@ dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(
 我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。
 
 
-## 收获
+## 总结
 
 * AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作
 * 前后台切换时，无需手动管理 CaptureSession

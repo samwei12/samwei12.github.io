@@ -7,6 +7,8 @@ tags:
   - Jinja2
 ---
 
+> [原文链接](http://samwei12.com/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/)
+
 ## 背景
 
 最近在项目开发中，需要针对 Jenkins 项目进行配置，Jenkins 的 job 配置采用的是 xml，在维护配置模板的过程中就遇到了问题，因为逐步发现配置灵活性超出了字符串的范畴，本文旨在简单介绍 Python 下模板引擎模块 Jinja2 的使用。
