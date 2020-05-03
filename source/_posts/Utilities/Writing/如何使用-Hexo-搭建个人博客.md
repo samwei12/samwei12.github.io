@@ -316,7 +316,11 @@ hexo d
 2. 根目录下执行 `npm install`
 3. `hexo g && hexo s` 本地测试是否部署成功
 
-## 参考文档：
+## 注意事项
+
+- 需要注意本地文件名不能有特殊符号，例如空格等，title 里面有没关系，但是文件里面有会导致 Gitalk 插件失效，详见 https://github.com/gitalk/gitalk/issues/162
+
+## 参考文档
 
 * [Hexo静态博客使用指南](http://segmentfault.com/a/1190000002538363)
 * [Hexo在github上构建免费的Web应用](http://blog.fens.me/hexo-blog-github/)
