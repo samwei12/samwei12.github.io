@@ -114,13 +114,6 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/2016/01/19/Objective-C/UITabbarController-State-Preservation/</loc>
-    
-    <lastmod>2021-05-08</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://blog.samwei12.cn/2016/01/26/Objective-C/subview-blocking-drag-event/</loc>
     
     <lastmod>2021-05-08</lastmod>
@@ -129,6 +122,13 @@
   
   <url>
     <loc>http://blog.samwei12.cn/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/</loc>
+    
+    <lastmod>2021-05-08</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/2016/01/19/Objective-C/UITabbarController-State-Preservation/</loc>
     
     <lastmod>2021-05-08</lastmod>
     
@@ -158,13 +158,6 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/tags/UITabbarController/</loc>
-    <lastmod>2021-05-08</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://blog.samwei12.cn/tags/Cocoa/</loc>
     <lastmod>2021-05-08</lastmod>
     <changefreq>daily</changefreq>
@@ -187,6 +180,13 @@
   
   <url>
     <loc>http://blog.samwei12.cn/tags/UIView/</loc>
+    <lastmod>2021-05-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/tags/UITabbarController/</loc>
     <lastmod>2021-05-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>

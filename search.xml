@@ -47,6 +47,80 @@
       </tags>
   </entry>
   <entry>
+    <title>NSView subview blocking drag/drop event</title>
+    <url>/2016/01/26/Objective-C/subview-blocking-drag-event/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2016/01/26/Objective-C/subview-blocking-drag-event/">原文链接</a></p>
+</blockquote>
+<p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p>
+<ol>
+<li>从 NSView 继承得到一个子类</li>
+<li>覆盖处理拖拽事件相关方法</li>
+<li>注册拖拽事件</li>
+</ol>
+<span id="more"></span>
+
+<p>开始的时候一切都很正常,直到某次发现拖拽到屏幕边缘响应较为灵敏,而<strong>拖拽到屏幕中间则不响应事件</strong>,APP页面大致是这样的:</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png"></p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。</p>
+<p>那么如何验证呢？其实也很简单，在自定义的NSView 中重载<code>draggingEnded：</code>方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 <code>NSView</code> 中添加的<code>NSImageView</code>作为 subview 会阻止拖拽事件的传递，原因是<code> NSImageView</code>本身可以处理拖拽事件，于是截获了本该自定义<code>NSView</code>处理的消息。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：<a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></p>
+<p>提供的解决方案有以下几种：</p>
+<ol>
+<li>不使用 <code>NSImageView</code>，而是采用自定义<code> NSView</code>的方式，然后重写<code>drawRect：</code>方法进行图片渲染。这个办法十分笨拙，并且不太方便。</li>
+<li>调用<code>unregisterDraggedTypes </code>方法，这样<code> NSImageView</code>就不会监听拖拽事件了，完美解决。</li>
+</ol>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></li>
+<li><a href="http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation">http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Mac</category>
+      </categories>
+      <tags>
+        <tag>Cocoa</tag>
+        <tag>NSView</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何取消 UIView 动画？</title>
+    <url>/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/">原文链接</a></p>
+</blockquote>
+<p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
+<p>动画部分代码很简单，如下：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">						 <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">							 [<span class="keyword">self</span> hideFocus];</span><br><span class="line">						 &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
+
+<p>对焦框在0.3秒内进行两倍缩小到正常尺寸的一个动画，之后隐藏。</p>
+<span id="more"></span>
+
+<h2 id="旧代码分析"><a href="#旧代码分析" class="headerlink" title="旧代码分析"></a>旧代码分析</h2><p>以前的代码在这部分的处理大致是这样的，</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:_touches];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UITouch</span> *touch = [_touches anyObject];</span><br><span class="line">    <span class="built_in">CGPoint</span> touchPoint = [touch locationInView:<span class="keyword">self</span>.view];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    [<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(touchFocus:) withObject: touches afterDelay:<span class="number">0.3</span>f];</span><br><span class="line">    </span><br><span class="line">- (<span class="keyword">void</span>)touchFocus:(<span class="built_in">NSSet</span> *)touches &#123;</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:touches];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 以下为具体对焦框显示部分</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看出，代码逻辑大致为，截获屏幕点击事件，之后加入一个0.3秒的延时方法，如果用户0.3秒内再次点击对焦，则取消上一次的对焦事件；否则，执行对焦框动画。</p>
+<p>这个逻辑看似解决了用户快速点击对焦的问题，实际上如果用户真正快速点击屏幕时，会出现一个很奇怪的现象，就是对焦框始终存在，并且不会变换位置，等到停止点击屏幕后，对焦框才会响应最新的触控位置进行动画，另一个问题就是对焦始终存在迟滞感，因为点击屏幕后需要等待0.3秒才能看到动画。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>那么有什么更好的办法呢？系统难道没有提供终止动画的接口嘛？当然不是，其实只需要在用户再次点击屏幕时候调用<code>[_focusView.layer removeAllAnimations];</code>即可，其中具体的 view 为正在做动画的 view。</p>
+<p>这样做还有另外一个好处，再也不需要烦人的滞后感了，屏幕对焦始终跟手，同时直接终止动画，里面的 completion 都会照常调用，不存在副作用，很好地解决了这个问题。</p>
+<h2 id="新引入问题"><a href="#新引入问题" class="headerlink" title="新引入问题"></a>新引入问题</h2><p>最近遇到了一个新引入的问题，发现对焦框无法隐藏，经过调查，问题出在这里：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (finished) &#123;</span><br><span class="line">    [<span class="keyword">self</span> hideFocus];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果是直接使用<code> removeAllAnimations</code>接口停止动画的话，此处的<code> finished</code>参数有可能返回 NO，导致这段代码产生问题，所以这里如果中止动画，则需要重新进行判定。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>学会了 <code>removeAllAnimations</code>接口用法</li>
+</ul>
+<p>尽管这个是很基础的系统 API 调用，但是我之前一直都不知道，在此记录下来，希望能给予其他人些许帮助。</p>
+]]></content>
+      <categories>
+        <category>iOS</category>
+      </categories>
+      <tags>
+        <tag>Animation</tag>
+        <tag>UIView</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何实现 UITabbarController 的 State Preservation?</title>
     <url>/2016/01/19/Objective-C/UITabbarController-State-Preservation/</url>
     <content><![CDATA[<blockquote>
@@ -129,80 +203,6 @@
       </categories>
       <tags>
         <tag>UITabbarController</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>NSView subview blocking drag/drop event</title>
-    <url>/2016/01/26/Objective-C/subview-blocking-drag-event/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2016/01/26/Objective-C/subview-blocking-drag-event/">原文链接</a></p>
-</blockquote>
-<p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p>
-<ol>
-<li>从 NSView 继承得到一个子类</li>
-<li>覆盖处理拖拽事件相关方法</li>
-<li>注册拖拽事件</li>
-</ol>
-<span id="more"></span>
-
-<p>开始的时候一切都很正常,直到某次发现拖拽到屏幕边缘响应较为灵敏,而<strong>拖拽到屏幕中间则不响应事件</strong>,APP页面大致是这样的:</p>
-<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png"></p>
-<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。</p>
-<p>那么如何验证呢？其实也很简单，在自定义的NSView 中重载<code>draggingEnded：</code>方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 <code>NSView</code> 中添加的<code>NSImageView</code>作为 subview 会阻止拖拽事件的传递，原因是<code> NSImageView</code>本身可以处理拖拽事件，于是截获了本该自定义<code>NSView</code>处理的消息。</p>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：<a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></p>
-<p>提供的解决方案有以下几种：</p>
-<ol>
-<li>不使用 <code>NSImageView</code>，而是采用自定义<code> NSView</code>的方式，然后重写<code>drawRect：</code>方法进行图片渲染。这个办法十分笨拙，并且不太方便。</li>
-<li>调用<code>unregisterDraggedTypes </code>方法，这样<code> NSImageView</code>就不会监听拖拽事件了，完美解决。</li>
-</ol>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
-<li><a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></li>
-<li><a href="http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation">http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Mac</category>
-      </categories>
-      <tags>
-        <tag>Cocoa</tag>
-        <tag>NSView</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何取消 UIView 动画？</title>
-    <url>/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/">原文链接</a></p>
-</blockquote>
-<p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
-<p>动画部分代码很简单，如下：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">						 <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">							 [<span class="keyword">self</span> hideFocus];</span><br><span class="line">						 &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
-
-<p>对焦框在0.3秒内进行两倍缩小到正常尺寸的一个动画，之后隐藏。</p>
-<span id="more"></span>
-
-<h2 id="旧代码分析"><a href="#旧代码分析" class="headerlink" title="旧代码分析"></a>旧代码分析</h2><p>以前的代码在这部分的处理大致是这样的，</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:_touches];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UITouch</span> *touch = [_touches anyObject];</span><br><span class="line">    <span class="built_in">CGPoint</span> touchPoint = [touch locationInView:<span class="keyword">self</span>.view];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    [<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(touchFocus:) withObject: touches afterDelay:<span class="number">0.3</span>f];</span><br><span class="line">    </span><br><span class="line">- (<span class="keyword">void</span>)touchFocus:(<span class="built_in">NSSet</span> *)touches &#123;</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:touches];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 以下为具体对焦框显示部分</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看出，代码逻辑大致为，截获屏幕点击事件，之后加入一个0.3秒的延时方法，如果用户0.3秒内再次点击对焦，则取消上一次的对焦事件；否则，执行对焦框动画。</p>
-<p>这个逻辑看似解决了用户快速点击对焦的问题，实际上如果用户真正快速点击屏幕时，会出现一个很奇怪的现象，就是对焦框始终存在，并且不会变换位置，等到停止点击屏幕后，对焦框才会响应最新的触控位置进行动画，另一个问题就是对焦始终存在迟滞感，因为点击屏幕后需要等待0.3秒才能看到动画。</p>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>那么有什么更好的办法呢？系统难道没有提供终止动画的接口嘛？当然不是，其实只需要在用户再次点击屏幕时候调用<code>[_focusView.layer removeAllAnimations];</code>即可，其中具体的 view 为正在做动画的 view。</p>
-<p>这样做还有另外一个好处，再也不需要烦人的滞后感了，屏幕对焦始终跟手，同时直接终止动画，里面的 completion 都会照常调用，不存在副作用，很好地解决了这个问题。</p>
-<h2 id="新引入问题"><a href="#新引入问题" class="headerlink" title="新引入问题"></a>新引入问题</h2><p>最近遇到了一个新引入的问题，发现对焦框无法隐藏，经过调查，问题出在这里：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (finished) &#123;</span><br><span class="line">    [<span class="keyword">self</span> hideFocus];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果是直接使用<code> removeAllAnimations</code>接口停止动画的话，此处的<code> finished</code>参数有可能返回 NO，导致这段代码产生问题，所以这里如果中止动画，则需要重新进行判定。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li>学会了 <code>removeAllAnimations</code>接口用法</li>
-</ul>
-<p>尽管这个是很基础的系统 API 调用，但是我之前一直都不知道，在此记录下来，希望能给予其他人些许帮助。</p>
-]]></content>
-      <categories>
-        <category>iOS</category>
-      </categories>
-      <tags>
-        <tag>Animation</tag>
-        <tag>UIView</tag>
       </tags>
   </entry>
   <entry>
