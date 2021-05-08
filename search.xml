@@ -1,0 +1,1253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>AVCaptureSession部分用法</title>
+    <url>/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/">原文链接</a></p>
+</blockquote>
+<h2 id="AVCaptureSession阻塞主线程问题"><a href="#AVCaptureSession阻塞主线程问题" class="headerlink" title="AVCaptureSession阻塞主线程问题"></a>AVCaptureSession阻塞主线程问题</h2><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>仔细看了文档之后，发现问题出在<code> stopRunning</code>这里，</p>
+<span id="more"></span>
+<p>苹果文档描述如下：</p>
+<blockquote>
+<p>Clients invoke -stopRunning to stop the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    stopped.</p>
+</blockquote>
+<p>重点是这个函数在 session 完全停止下来之前会始终阻塞线程， 同样的，在<code> startRunning</code>中：</p>
+<blockquote>
+<p>Clients invoke -startRunning to start the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    started up or failed.  A failure to start running is reported through the AVCaptureSessionRuntimeErrorNotification<br>    mechanism.</p>
+</blockquote>
+<p>因此这里必须放在后台线程中处理，否则，就会导致界面不响应，iOS8之后应该在这里做了优化，即使放在主线程做也没有很卡顿的现象，但 iOS7中，尤其是测试设备为4s，界面卡死问题很严重。</p>
+<p>开启和关闭相机部分代码改为：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 开启相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		[[<span class="keyword">self</span>.avCameraManager session] startRunning];</span><br><span class="line">	&#125;);</span><br><span class="line">	</span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="keyword">void</span>) &#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 关闭相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		<span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。</p>
+<h2 id="相机前后台切换问题"><a href="#相机前后台切换问题" class="headerlink" title="相机前后台切换问题"></a>相机前后台切换问题</h2><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(startRunningSession) withObject:<span class="literal">nil</span> afterDelay:<span class="number">0.5</span>];</span><br></pre></td></tr></table></figure>
+
+<p>当时我很奇怪，这里为什么要加延时呢？进入到前台时不是应该直接开启相机吗？于是我直接把这里改成了：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">self</span> startRunningSession];</span><br></pre></td></tr></table></figure>
+
+<p>没过多久，问题出现了，多次切换前后台之后发现，相机始终黑屏，这时，进入后台再回来，问题解决了，仔细加了 log 之后发现，出现黑屏的时候，确实也正确调用了启动 session，但是并没有收到系统相机启动成功的消息，反而收到了两次相机关闭的通知。</p>
+<p>那么之前代码中加了0.5秒延时的原因也就清楚了，是为了等待系统关闭相机之后，再调用开启相机，以免相机启动失败，但这种方式真的合理吗？其实并没有解决本质问题，如果0.5秒钟的时间并没有完全关闭系统相机呢？这里仍然会出现黑屏问题。</p>
+<p>于是继续查看系统文档，发现系统的 sampleCode AVCam-iOS中并没有专门用于前后台处理的逻辑，原来这里并不需要我们自己手动管理相机，系统会自动根据程序状态来判断是否需要关闭或者开启相机，如果按 home 进入<code>UIApplicationStateBackground</code> 状态，那么系统自动关闭相机并在进入<code>UIApplicationStateActive</code>状态时开启相机；如果是进入<code>UIApplicationStateInactive</code>状态，例如，双击 home 调出任务管理器，这时，相机并没有被关闭，仍然能够看到 preview 画面。</p>
+<p>我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作</li>
+<li>前后台切换时，无需手动管理 CaptureSession</li>
+</ul>
+]]></content>
+      <categories>
+        <category>iOS</category>
+      </categories>
+      <tags>
+        <tag>AVCaptureSession</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何实现 UITabbarController 的 State Preservation?</title>
+    <url>/2016/01/19/Objective-C/UITabbarController-State-Preservation/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2016/01/19/Objective-C/UITabbarController-State-Preservation/">原文链接</a></p>
+</blockquote>
+<p>最近在看<strong>ios programming - the big nerd ranch guide</strong> 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 <code>UINavigationController</code> 来进行保存和还原状态, 然后额外的练习题部分是 <code>UITabbarController</code> 的状态保存和恢复,可是在这里却一直遇到问题， 导致程序返回时<code>UITabbarController</code>始终无法还原状态，本文记录下如何使用State Restoration和<code>UITabbarController</code>所需的额外处理。</p>
+<span id="more"></span>
+
+<p>首先, 我们需要告诉系统我们想要实现状态的保存和恢复, 在 AppDelegate 中实现如下两个方法:</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="built_in">BOOL</span>)application:(<span class="built_in">UIApplication</span> *)application shouldSaveApplicationState:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">BOOL</span>)application:(<span class="built_in">UIApplication</span> *)application shouldRestoreApplicationState:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其次, 我们需要给每个页面赋予一个独有的<code>restorationIdentifier</code>, 两个子页面还需要设置<code>restorationClass</code>, 用于还原状态时重新生成view controller. 代码如下:</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">HypnosisViewController *hvc = [HypnosisViewController new];</span><br><span class="line">ReminderViewController *rvc = [ReminderViewController new];</span><br><span class="line"><span class="built_in">UITabBarController</span> *tabVC = [[<span class="built_in">UITabBarController</span> alloc] init];</span><br><span class="line">tabVC.viewControllers = @[hvc, rvc];</span><br><span class="line"></span><br><span class="line">tabVC.restorationIdentifier = <span class="built_in">NSStringFromClass</span>([tabVC <span class="keyword">class</span>]);</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithNibName:(<span class="built_in">NSString</span> *)nibNameOrNil bundle:(<span class="built_in">NSBundle</span> *)nibBundleOrNil &#123;</span><br><span class="line">    <span class="keyword">self</span> = [<span class="keyword">super</span> initWithNibName:nibNameOrNil bundle:nibBundleOrNil];</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.tabBarItem.title = <span class="string">@&quot;Hypno&quot;</span>;</span><br><span class="line">        <span class="keyword">self</span>.tabBarItem.image = [<span class="built_in">UIImage</span> imageNamed:<span class="string">@&quot;Hypno&quot;</span>];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">self</span>.restorationIdentifier = <span class="built_in">NSStringFromClass</span>([<span class="keyword">self</span> <span class="keyword">class</span>]);</span><br><span class="line">        <span class="keyword">self</span>.restorationClass = [<span class="keyword">self</span> <span class="keyword">class</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithNibName:(<span class="built_in">NSString</span> *)nibNameOrNil bundle:(<span class="built_in">NSBundle</span> *)nibBundleOrNil &#123;</span><br><span class="line">    <span class="keyword">self</span> = [<span class="keyword">super</span> initWithNibName:nibNameOrNil bundle:nibBundleOrNil];</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%s line:%d&quot;</span>,__FUNCTION__, __LINE__);</span><br><span class="line">        <span class="keyword">self</span>.tabBarItem.title = <span class="string">@&quot;Reminder&quot;</span>;</span><br><span class="line">        <span class="keyword">self</span>.tabBarItem.image = [<span class="built_in">UIImage</span> imageNamed:<span class="string">@&quot;Time&quot;</span>];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">self</span>.restorationIdentifier = <span class="built_in">NSStringFromClass</span>([<span class="keyword">self</span> <span class="keyword">class</span>]);</span><br><span class="line">        <span class="keyword">self</span>.restorationClass = [<span class="keyword">self</span> <span class="keyword">class</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着,我们需要在子页面中实现<code>UIViewControllerRestoration</code>协议,同时还要重写<code> UIViewController</code>自带的用于 Restoration 的两个方法, 下面以<code>HypnosisViewController</code>为例,这里在收到系统需要保存状态消息时,写入当前<code> textField</code>的值,并且在还原状态时读取,确保用户下次进入程序时仍能还原回之前的场景:</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">+ (<span class="built_in">UIViewController</span> *)viewControllerWithRestorationIdentifierPath:(<span class="built_in">NSArray</span> *)identifierComponents coder:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    <span class="built_in">UIViewController</span> *vc = [<span class="keyword">self</span> new];</span><br><span class="line">    <span class="keyword">return</span> vc;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)encodeRestorableStateWithCoder:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    [coder encodeObject:<span class="keyword">self</span>.textField.text forKey:<span class="string">@&quot;textField&quot;</span>];</span><br><span class="line">    [<span class="keyword">super</span> encodeRestorableStateWithCoder:coder];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)decodeRestorableStateWithCoder:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    <span class="keyword">self</span>.textField.text = [coder decodeObjectForKey:<span class="string">@&quot;textField&quot;</span>];</span><br><span class="line">    [<span class="keyword">super</span> decodeRestorableStateWithCoder:coder];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后, 我们只提供了两个子页面如何进行还原, 还需要处理下<code> UITabbarController</code>, 如果我们不提供 Controller 的<code>restorationClass</code>属性, 我们可以在<code>application:viewControllerWithRestorationIdentifierPath:coder:</code>中再次处理部分页面的恢复事件,代码如下:</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">UIViewController</span> *vc = [<span class="built_in">UITabBarController</span> new];</span><br><span class="line">vc.restorationIdentifier = [identifierComponents lastObject];</span><br><span class="line"><span class="comment">//因为仅当该 Controller 为 UITabbarController 时, identifierComponents数组才会只有一个值</span></span><br><span class="line"><span class="keyword">if</span> (identifierComponents.count == <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">self</span>.window.rootViewController = vc;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> vc;</span><br></pre></td></tr></table></figure>
+
+<p>至此,我们理论上算是已经完成了所有的保存和恢复事件,起码书里面针对<code>UINavigationController</code>的示例代码部分仅包含这些步骤就已经实现了这个功能,那么,<code>UITabbarController</code>是不是一样呢?</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>运行程序,为了检验Restoration 的效果,我们进入第二个页面,并且设置一个日期,之后进入后台或者停止调试触发保存事件,当我们再次启动程序时, 可以看到这个页面一闪而过:</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-19_22-49-48.png"></p>
+<p>之后就变为了这样:</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-19_22-49-13.png"></p>
+<p>事实证明,我们的 <code>UITabbarController</code> 并没有很好地还原为之前的状态,甚至页面变成全空的了,为什么会变成这样呢?</p>
+<h2 id="探究"><a href="#探究" class="headerlink" title="探究"></a>探究</h2><p>首先,通过启动程序时的 loading 图可以确定,我们的程序确实已经保存下了之前退出时候的页面状态,后面的白屏证实还原状态这里出了问题,那么即使<code>UITabbarController</code>无法很好地还原,为什么再次启动后会连子页面都不见了呢?</p>
+<h3 id="View-Debug"><a href="#View-Debug" class="headerlink" title="View Debug"></a>View Debug</h3><p>这里, 我们首先想到使用 ios8以后引入的View Debugging来查看 View 层级, 如下图:</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-20_22-26-09.png"></p>
+<p>这里我们可以看到, View 层级中,并没有任何子页面,仅仅包含一个 UITabbar 而已,也就是说,我们的两个子页面根本没有添加到 UITabbarController 中, 这又是怎么一回事呢?</p>
+<h3 id="查阅文档"><a href="#查阅文档" class="headerlink" title="查阅文档"></a>查阅文档</h3><p>我们看下苹果官方文档对这里是如何描述的:</p>
+<blockquote>
+<p>In iOS 6 and later, if you assign a value to this view controller’s restorationIdentifier property, it preserves a reference to the view controller in the selected tab. At restore time, it uses the reference to select the tab with the same view controller.</p>
+</blockquote>
+<p>看起来好像没有任何问题,只是简单地说了指定 UITabbarController 的<code>restorationIdentifier</code>后,它会记录下当前选中的子页面,然后在下次启动的时候恢复过来. 接着看下去,<a href="https://developer.apple.com/library/ios/documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/StrategiesforImplementingYourApp/StrategiesforImplementingYourApp.html">App Programming Guide for iOS</a>是这么说的:</p>
+<blockquote>
+<p>Although UIKit helps restore the individual view controllers, it does not automatically restore the relationships between those view controllers. Instead, each view controller is responsible for encoding enough state information to return itself to its previous state. For example, a navigation controller encodes information about the order of the view controllers on its navigation stack. It then uses this information later to return those view controllers to their previous positions on the stack. Other view controllers that have embedded child view controllers are similarly responsible for encoding any information they need to restore their children later.<br>Note: Not all view controllers need to encode their child view controllers. For example, tab bar controllers do not encode information about their child view controllers. Instead, it is assumed that your app follows the usual pattern of creating the appropriate child view controllers prior to creating the tab bar controller itself.</p>
+</blockquote>
+<p>这两段话大致是说, UIKit 虽然帮我们处理了恢复单独页面的事情,但是并不会帮我们恢复页面之间的逻辑关系, 那些包含多个子页面的 Controller 需要自己记录子页面间的逻辑关系并且在恢复时处理它们. 这里还专门说了 UINavigationController 会记录下页面的层级关系并且在再次创建时恢复它,而第二段话说 UITabbarController 却不会记录子页面的顺序, 需要我们自己进行处理. 同时,我们可以在恢复页面时候自行变更 UITabbarController 子页面的顺序.</p>
+<h2 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h2><p>有了以上知识点,我们就知道了如何还原一个 UITabbarController 页面了,除了赋值<code>restorationIdentifier</code>以外,我们还需要在还原时候自行添加子页面.</p>
+<p>AppDelegate.m</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="built_in">BOOL</span>)application:(<span class="built_in">UIApplication</span> *)application willFinishLaunchingWithOptions:(<span class="built_in">NSDictionary</span> *)launchOptions &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span>.window = [[<span class="built_in">UIWindow</span> alloc] initWithFrame:[<span class="built_in">UIScreen</span> mainScreen].bounds];</span><br><span class="line">    <span class="keyword">self</span>.window.backgroundColor = [<span class="built_in">UIColor</span> whiteColor];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1.</span></span><br><span class="line">    HypnosisViewController *hvc = [HypnosisViewController new];</span><br><span class="line">    ReminderViewController *rvc = [ReminderViewController new];</span><br><span class="line">    <span class="built_in">UITabBarController</span> *tabVC = [[<span class="built_in">UITabBarController</span> alloc] init];</span><br><span class="line">    tabVC.viewControllers = @[hvc, rvc];</span><br><span class="line"></span><br><span class="line">    tabVC.restorationIdentifier = <span class="built_in">NSStringFromClass</span>([tabVC <span class="keyword">class</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span>.window.rootViewController = tabVC;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样,每次程序启动时,即创建一个新的 UITabbarController, 同时赋予它两个子页面,</p>
+<p>新增了两处代码,用于指定新建的 UITabbarController 的子页面, 之后对两个子页面的<code>+ (UIViewController *)viewControllerWithRestorationIdentifierPath:(NSArray *)identifierComponents coder:(NSCoder *)coder</code>方法改动如下:</p>
+<p>HypnosisViewController.m</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">+ (<span class="built_in">UIViewController</span> *)viewControllerWithRestorationIdentifierPath:(<span class="built_in">NSArray</span> *)identifierComponents coder:(<span class="built_in">NSCoder</span> *)coder</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// First object in the array stores the root view controller, which is the tabBarController</span></span><br><span class="line">    <span class="built_in">UITabBarController</span> *rootViewController = (<span class="built_in">UITabBarController</span> *)[<span class="built_in">UIApplication</span> sharedApplication].delegate.window.rootViewController;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> rootViewController.viewControllers[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ReminderViewController.m</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">+ (<span class="built_in">UIViewController</span> *)viewControllerWithRestorationIdentifierPath:(<span class="built_in">NSArray</span> *)identifierComponents coder:(<span class="built_in">NSCoder</span> *)coder</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// First object in the array stores the root view controller, which is the tabBarController</span></span><br><span class="line">    <span class="built_in">UITabBarController</span> *rootViewController = (<span class="built_in">UITabBarController</span> *)[<span class="built_in">UIApplication</span> sharedApplication].delegate.window.rootViewController;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> rootViewController.viewControllers[<span class="number">1</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用于告诉系统,这两个子页面不需要再次创建,直接返回当前 UITabbarController 子页面即可.<br>再次运行程序,发现已经能够正常返回到第二个页面了,大功告成!</p>
+<h2 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h2><p>之前文档中有写到, UITabbarController 仅保存了当前选中的页面的指针,而没有保存页面的顺序, 那么,也就是说,我们可以在还原时候重新自定义tab 的顺序, 对代码进行以下改动:</p>
+<ol>
+<li>AppDelegate.md</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="built_in">BOOL</span>)application:(<span class="built_in">UIApplication</span> *)application willFinishLaunchingWithOptions:(<span class="built_in">NSDictionary</span> *)launchOptions &#123;</span><br><span class="line">...</span><br><span class="line">    tabVC.viewControllers = @[rvc, hvc];</span><br><span class="line">...</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>HypnosisViewController.m</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">+ (<span class="built_in">UIViewController</span> *)viewControllerWithRestorationIdentifierPath:(<span class="built_in">NSArray</span> *)identifierComponents coder:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">...</span><br><span class="line">    <span class="keyword">return</span> rootViewController.viewControllers[<span class="number">1</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>ReminderViewController.m</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">+ (<span class="built_in">UIViewController</span> *)viewControllerWithRestorationIdentifierPath:(<span class="built_in">NSArray</span> *)identifierComponents coder:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">...</span><br><span class="line">    <span class="keyword">return</span> rootViewController.viewControllers[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再次运行, 得到:</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-20_23-42-29.png"></p>
+<p>我们成功的在还原页面状态时候变更了页面顺序,而且UITabbarController 仍然选中为之前保存的状态, 大功告成!</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UITabBarController_Class/">UITabBarController Class Reference
+</a></li>
+<li><a href="http://forums.bignerdranch.com/viewtopic.php?f=505&t=8402">Help needed for silver challenge</a></li>
+<li><a href="https://developer.apple.com/library/ios/documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/StrategiesforImplementingYourApp/StrategiesforImplementingYourApp.html">App Programming Guide for iOS</a></li>
+<li><a href="http://aplus.rs/2013/state-restoration-in-ios-6-without-storyboards/">http://aplus.rs/2013/state-restoration-in-ios-6-without-storyboards/</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>iOS</category>
+      </categories>
+      <tags>
+        <tag>UITabbarController</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>NSView subview blocking drag/drop event</title>
+    <url>/2016/01/26/Objective-C/subview-blocking-drag-event/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2016/01/26/Objective-C/subview-blocking-drag-event/">原文链接</a></p>
+</blockquote>
+<p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p>
+<ol>
+<li>从 NSView 继承得到一个子类</li>
+<li>覆盖处理拖拽事件相关方法</li>
+<li>注册拖拽事件</li>
+</ol>
+<span id="more"></span>
+
+<p>开始的时候一切都很正常,直到某次发现拖拽到屏幕边缘响应较为灵敏,而<strong>拖拽到屏幕中间则不响应事件</strong>,APP页面大致是这样的:</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png"></p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。</p>
+<p>那么如何验证呢？其实也很简单，在自定义的NSView 中重载<code>draggingEnded：</code>方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 <code>NSView</code> 中添加的<code>NSImageView</code>作为 subview 会阻止拖拽事件的传递，原因是<code> NSImageView</code>本身可以处理拖拽事件，于是截获了本该自定义<code>NSView</code>处理的消息。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：<a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></p>
+<p>提供的解决方案有以下几种：</p>
+<ol>
+<li>不使用 <code>NSImageView</code>，而是采用自定义<code> NSView</code>的方式，然后重写<code>drawRect：</code>方法进行图片渲染。这个办法十分笨拙，并且不太方便。</li>
+<li>调用<code>unregisterDraggedTypes </code>方法，这样<code> NSImageView</code>就不会监听拖拽事件了，完美解决。</li>
+</ol>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></li>
+<li><a href="http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation">http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Mac</category>
+      </categories>
+      <tags>
+        <tag>Cocoa</tag>
+        <tag>NSView</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何取消 UIView 动画？</title>
+    <url>/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/">原文链接</a></p>
+</blockquote>
+<p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
+<p>动画部分代码很简单，如下：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">						 <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">							 [<span class="keyword">self</span> hideFocus];</span><br><span class="line">						 &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
+
+<p>对焦框在0.3秒内进行两倍缩小到正常尺寸的一个动画，之后隐藏。</p>
+<span id="more"></span>
+
+<h2 id="旧代码分析"><a href="#旧代码分析" class="headerlink" title="旧代码分析"></a>旧代码分析</h2><p>以前的代码在这部分的处理大致是这样的，</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:_touches];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UITouch</span> *touch = [_touches anyObject];</span><br><span class="line">    <span class="built_in">CGPoint</span> touchPoint = [touch locationInView:<span class="keyword">self</span>.view];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    [<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(touchFocus:) withObject: touches afterDelay:<span class="number">0.3</span>f];</span><br><span class="line">    </span><br><span class="line">- (<span class="keyword">void</span>)touchFocus:(<span class="built_in">NSSet</span> *)touches &#123;</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:touches];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 以下为具体对焦框显示部分</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看出，代码逻辑大致为，截获屏幕点击事件，之后加入一个0.3秒的延时方法，如果用户0.3秒内再次点击对焦，则取消上一次的对焦事件；否则，执行对焦框动画。</p>
+<p>这个逻辑看似解决了用户快速点击对焦的问题，实际上如果用户真正快速点击屏幕时，会出现一个很奇怪的现象，就是对焦框始终存在，并且不会变换位置，等到停止点击屏幕后，对焦框才会响应最新的触控位置进行动画，另一个问题就是对焦始终存在迟滞感，因为点击屏幕后需要等待0.3秒才能看到动画。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>那么有什么更好的办法呢？系统难道没有提供终止动画的接口嘛？当然不是，其实只需要在用户再次点击屏幕时候调用<code>[_focusView.layer removeAllAnimations];</code>即可，其中具体的 view 为正在做动画的 view。</p>
+<p>这样做还有另外一个好处，再也不需要烦人的滞后感了，屏幕对焦始终跟手，同时直接终止动画，里面的 completion 都会照常调用，不存在副作用，很好地解决了这个问题。</p>
+<h2 id="新引入问题"><a href="#新引入问题" class="headerlink" title="新引入问题"></a>新引入问题</h2><p>最近遇到了一个新引入的问题，发现对焦框无法隐藏，经过调查，问题出在这里：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (finished) &#123;</span><br><span class="line">    [<span class="keyword">self</span> hideFocus];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果是直接使用<code> removeAllAnimations</code>接口停止动画的话，此处的<code> finished</code>参数有可能返回 NO，导致这段代码产生问题，所以这里如果中止动画，则需要重新进行判定。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>学会了 <code>removeAllAnimations</code>接口用法</li>
+</ul>
+<p>尽管这个是很基础的系统 API 调用，但是我之前一直都不知道，在此记录下来，希望能给予其他人些许帮助。</p>
+]]></content>
+      <categories>
+        <category>iOS</category>
+      </categories>
+      <tags>
+        <tag>Animation</tag>
+        <tag>UIView</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何实现ARC中weak功能？</title>
+    <url>/2016/03/09/Objective-C/%E5%A6%82%E4%BD%95%E6%A8%A1%E6%8B%9Fruntime%E4%B8%ADweak%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%9F/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2016/03/09/Objective-C/%E5%A6%82%E4%BD%95%E6%A8%A1%E6%8B%9Fruntime%E4%B8%ADweak%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%9F/">原文链接</a></p>
+</blockquote>
+<p>我们都知道ARC中<code>weak</code>与<code>assign</code>或者说<code>unsafe_unretained</code>最大的不同就是设置<code>weak</code>属性后，系统会在对象被释放后自动将指向对象的指针置为<code>nil</code>，而<code>assign</code>则会产生一个悬空指针，那么系统是如何实现这一机制呢？我们能否自己模拟系统对<code>weak</code>的实现呢？</p>
+<span id="more"></span>
+
+<p>通过查看runtime源码中<code>objc-accessors.h</code>和<code>objc-weak.h</code>部分，我们大概可以了解系统针对<code>weak</code>的实现方式与<code>strong</code>或者<code>copy</code>的实现方式是不同的。<br>对于注册为<code>weak</code>的对象，系统会以<code>weak</code>指向的对象内存地址作为key，将之放入到一个hash表之中，当此对象的引用计数为0时会调用dealloc，之后遍历hash表中此key所对应的对象，将之置为nil，关于这部分详细内容可以自行查看源代码，在此不进行扩展。我们这里重点介绍下如何自行模拟系统这一机制。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>首先我们回想一下<code>weak</code>机制的几个步骤，其中真正与<code>assign</code>不相同的部分在于当对象调用<code>dealloc</code>之后对对象指针置空操作。那么我们很容易联想到Objective-C中关联对象的使用，关联对象也是在对象调用<code>dealloc</code>之后被移除，这样我们是否可以通过对对象添加一个关联对象来模拟<code>weak</code>的实现呢？</p>
+<h2 id="探究"><a href="#探究" class="headerlink" title="探究"></a>探究</h2><p>下面我们通过代码来说明下如何自行实现一个类似<code>weak</code>机制的对象管理机制，本文中所用到的代码存放在<a href="https://github.com/samwei12/WeakDemo">https://github.com/samwei12/WeakDemo</a> ：</p>
+<h3 id="unsafe-unretained和weak具体使用中的差异"><a href="#unsafe-unretained和weak具体使用中的差异" class="headerlink" title="unsafe_unretained和weak具体使用中的差异"></a><code>unsafe_unretained</code>和<code>weak</code>具体使用中的差异</h3><ol>
+<li><p>首先，创建一个<code>ClassA</code>类，</p>
+</li>
+<li><p>创建一个<code>ClassB</code>类，并在里面添加一个测试方法<code>print</code>，用于等下向<code>ClassB</code>实例对象发送消息，确认对象是否仍在使用</p>
+ <figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)print &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;Object is %@&quot;</span>, <span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>给<code>ClassA</code>添加一个<code>ClassB</code>对象属性，并设置为<code>unsafe_unretained</code></p>
+ <figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">unsafe_unretained</span>) ClassB *objectB;</span><br></pre></td></tr></table></figure></li>
+<li><p>在main函数中添加如下代码：</p>
+ <figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">@autoreleasepool</span> &#123;</span><br><span class="line">    ClassA *instanceA = [ClassA new];</span><br><span class="line"></span><br><span class="line">    ClassB *instanceB = [ClassB new];</span><br><span class="line">    instanceA.objectB = instanceB;</span><br><span class="line"></span><br><span class="line">    [instanceA.objectB print];</span><br><span class="line">        <span class="comment">// release instanceB</span></span><br><span class="line">    instanceB = <span class="literal">nil</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    [instanceA.objectB print];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// prevent process be killed immediately</span></span><br><span class="line">sleep(<span class="number">3</span>);</span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure></li>
+<li><p>运行一下代码，不出意外的话，程序会挂掉，因为<code>instanceA.objectB</code>所指向的内存已经在<code>instanceB = nil;</code>时候被释放掉，<code>instanceA.objectB</code>仅指向一个悬空指针：</p>
+ <figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="number">2016</span><span class="number">-03</span><span class="number">-09</span> <span class="number">15</span>:<span class="number">25</span>:<span class="number">10.427</span> WeakDemo[<span class="number">98402</span>:<span class="number">1613532</span>] Object is <span class="number">0x7fa080d0f100</span></span><br><span class="line"><span class="number">2016</span><span class="number">-03</span><span class="number">-09</span> <span class="number">15</span>:<span class="number">25</span>:<span class="number">10.432</span> WeakDemo[<span class="number">98402</span>:<span class="number">1613532</span>] Object is <span class="number">0x7fa080d0f100</span></span><br><span class="line"></span><br><span class="line">Process finished with exit code <span class="number">139</span></span><br></pre></td></tr></table></figure>
+<p> 当然，也有可能不会挂，这取决于执行<code>print</code>函数时，<code>instanceB</code>所在的内存是否完全释放掉。</p>
+</li>
+<li><p>如果将<code>ClassA</code>中的属性改为<code>@property (nonatomic, weak) ClassB *objectB;</code>则不会出现crash，这就是<code>weak</code>的作用了，<code>objectB</code>对象如果被释放掉，则该指针变为<code>nil</code>，而向<code>nil</code>发送消息是不会出现问题的。</p>
+</li>
+</ol>
+<h3 id="如何给unsafe-unretained添加weak功能"><a href="#如何给unsafe-unretained添加weak功能" class="headerlink" title="如何给unsafe_unretained添加weak功能"></a>如何给<code>unsafe_unretained</code>添加<code>weak</code>功能</h3><p>下面我们就使用<code>unsafe_unretained</code>来一步一步模拟<code>weak</code>修饰符：</p>
+<ol>
+<li><p>创建一个<code>DeallocBlock</code>类，代码如下：</p>
+ <figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">void</span> (^voidBlock)();</span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">DeallocBlock</span> : <span class="title">NSObject</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span>(<span class="keyword">nonatomic</span>, <span class="keyword">copy</span>) voidBlock block;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithBlock:(voidBlock)block1;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">DeallocBlock</span></span></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithBlock:(voidBlock)block1 &#123;</span><br><span class="line">    <span class="keyword">self</span> = [<span class="keyword">super</span> init];</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        _block = [block1 <span class="keyword">copy</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)dealloc &#123;</span><br><span class="line">    <span class="keyword">if</span> (_block) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;DeallocBlock dealloc!&quot;</span>);</span><br><span class="line">        _block();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p> 覆盖它的<code>dealloc</code>函数，这样就实现了该对象被释放时执行外部传入的<code>block</code>功能。</p>
+</li>
+<li><p>添加一个<code>NSObject</code>的category，如下：</p>
+ <figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">&lt;Foundation/Foundation.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&quot;DeallocBlock.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;objc/runtime.h&gt;</span></span></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">NSObject</span> (<span class="title">deallocBlock</span>)</span></span><br><span class="line">- (<span class="keyword">void</span>)runBlockOnDealloc:(voidBlock)block;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">NSObject</span> (<span class="title">deallocBlock</span>)</span></span><br><span class="line">- (<span class="keyword">void</span>)runBlockOnDealloc:(voidBlock)block &#123;</span><br><span class="line">    <span class="keyword">if</span> (block) &#123;</span><br><span class="line">        DeallocBlock *deallocBlock = [[DeallocBlock alloc] initWithBlock:block];</span><br><span class="line">        objc_setAssociatedObject(<span class="keyword">self</span>, _cmd, deallocBlock, OBJC_ASSOCIATION_RETAIN_NONATOMIC);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p> 这里主要实现的功能是，给所有的<code>NSObject</code>对象添加一个传入<code>block</code>的方法，这个方法的作用就是在其中根据传入的<code>block</code>生成一个<code>DeallocBlock</code>实例，并使用关联对象将这个实例关联到自身。之后当这个对象被释放时候，会自动移除所有的关联对象，也就会触发<code>DeallocBlock</code>实例的<code>dealloc</code>方法，执行我们传入的<code>block</code>。</p>
+</li>
+<li><p>接下来，我们重载<code>ClassA</code>的<code>setObjectB</code>方法：</p>
+ <figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)setObjectB:(ClassB *)objectB &#123;</span><br><span class="line">    _objectB = objectB;</span><br><span class="line">    <span class="comment">// 仅对objectB != nil case做处理</span></span><br><span class="line">    <span class="keyword">if</span> (_objectB) &#123;</span><br><span class="line">        [_objectB runBlockOnDealloc:^&#123;</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;_objectB dealloc&quot;</span>);</span><br><span class="line">            _objectB = <span class="literal">nil</span>;</span><br><span class="line">        &#125;];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 这段代码主要作用就是给<code>_objectB</code>添加一个<code>deallocBlock</code>,这样，如果<code>_objectB</code>所指向的内存已经被释放掉，则会调用我们传递进去的<code>block</code>来将此悬空指针置为空</p>
+</li>
+<li><p>再次运行程序：</p>
+ <figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="number">2016</span><span class="number">-03</span><span class="number">-09</span> <span class="number">15</span>:<span class="number">53</span>:<span class="number">36.881</span> WeakDemo[<span class="number">99270</span>:<span class="number">1639867</span>] Object is <span class="number">0x7fad79c0f310</span></span><br><span class="line"><span class="number">2016</span><span class="number">-03</span><span class="number">-09</span> <span class="number">15</span>:<span class="number">53</span>:<span class="number">36.882</span> WeakDemo[<span class="number">99270</span>:<span class="number">1639867</span>] DeallocBlock dealloc!</span><br><span class="line"><span class="number">2016</span><span class="number">-03</span><span class="number">-09</span> <span class="number">15</span>:<span class="number">53</span>:<span class="number">36.882</span> WeakDemo[<span class="number">99270</span>:<span class="number">1639867</span>] _objectB dealloc</span><br><span class="line"></span><br><span class="line">Process finished with exit code <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p> 由此可知，在<code>main</code>函数中执行<code>instanceB = nil;</code>之后，开始执行<code>deallocBlock</code>，之后由于<code>instanceA.objectB</code>已经为<code>nil</code>，<code>print</code>方法不执行操作。</p>
+</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，我们已经实现了自己模拟系统<code>weak</code>机制的运行，给一个本会产生悬空指针的<code>unsafe_unretained</code>修饰符加上了<code>weak</code>的功能。大家可以自行尝试<a href="https://github.com/samwei12/WeakDemo">https://github.com/samwei12/WeakDemo</a>,如果有任何问题，欢迎指正。</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="https://www.opensource.apple.com/source/objc4/">https://www.opensource.apple.com/source/objc4/</a></li>
+<li><a href="http://blog.slaunchaman.com/2011/04/11/fun-with-the-objective-c-runtime-run-code-at-deallocation-of-any-object/">Fun With the Objective-C Runtime: Run Code at Deallocation of Any Object</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>iOS</category>
+      </categories>
+      <tags>
+        <tag>Runtime</tag>
+        <tag>Objective-C</tag>
+        <tag>ARC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>常用汇编指令总结</title>
+    <url>/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/">原文链接</a></p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="浮点数相关"><a href="#浮点数相关" class="headerlink" title="浮点数相关"></a>浮点数相关</h2><h3 id="mm-unpacklo-ps"><a href="#mm-unpacklo-ps" class="headerlink" title="_mm_unpacklo_ps"></a><code>_mm_unpacklo_ps</code></h3><blockquote>
+<p>Selects and interleaves the lower two SP FP values from a and b.</p>
+</blockquote>
+<p>将两个128位浮点数的低64位分别取出，返回新的128位浮点数</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">INTERLEAVE_DWORDS</span>(src1[<span class="number">127</span>:<span class="number">0</span>], src2[<span class="number">127</span>:<span class="number">0</span>])&#123;</span><br><span class="line">	dst[<span class="number">31</span>:<span class="number">0</span>] := src1[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">63</span>:<span class="number">32</span>] := src2[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">95</span>:<span class="number">64</span>] := src1[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	dst[<span class="number">127</span>:<span class="number">96</span>] := src2[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	RETURN dst[<span class="number">127</span>:<span class="number">0</span>]</span><br><span class="line">&#125;	</span><br><span class="line"></span><br><span class="line">dst[<span class="number">127</span>:<span class="number">0</span>] := <span class="built_in">INTERLEAVE_DWORDS</span>(a[<span class="number">127</span>:<span class="number">0</span>], b[<span class="number">127</span>:<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+
+<p>输入如果为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,a1,a2,a3</span><br><span class="line">b0,b1,b2,b3</span><br></pre></td></tr></table></figure>
+
+<p>则输出结果为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,b0,a1,b1</span><br></pre></td></tr></table></figure>
+
+<h3 id="mm-mul-ps"><a href="#mm-mul-ps" class="headerlink" title="_mm_mul_ps"></a><code>_mm_mul_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">FOR j := <span class="number">0</span> to <span class="number">3</span></span><br><span class="line">	i := j*<span class="number">32</span></span><br><span class="line">	dst[i+<span class="number">31</span>:i] := a[i+<span class="number">31</span>:i] * b[i+<span class="number">31</span>:i]</span><br><span class="line">ENDFOR</span><br></pre></td></tr></table></figure>
+
+<p>分别将两个128位浮点数的每个float相乘，结果仍然是128位浮点数<br>也就是:</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] * b[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">63</span>:<span class="number">32</span>] * b[<span class="number">63</span>:<span class="number">32</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] * b[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">127</span>:<span class="number">96</span>] * b[<span class="number">127</span>:<span class="number">96</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="mm-moveldup-ps"><a href="#mm-moveldup-ps" class="headerlink" title="_mm_moveldup_ps"></a><code>_mm_moveldup_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">95</span>:<span class="number">64</span>]</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Source data: 0.100000 0.200000 0.300000 0.400000<br>Calling _mm_moveldup_ps to load the values.<br>Result: 0.100000 0.100000 0.300000 0.300000</p>
+</blockquote>
+<p>将128bit浮点数的第一个及第三个float分别复制到第二个及第四个float中</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide">https://software.intel.com/sites/landingpage/IntrinsicsGuide</a></li>
+<li><a href="https://software.intel.com/en-us/node/524266">https://software.intel.com/en-us/node/524266</a></li>
+<li><a href="https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx">https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx</a></li>
+<li><a href="https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx">https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Assembly</category>
+      </categories>
+      <tags>
+        <tag>Cheatsheet</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python模板引擎Jinja2使用简介</title>
+    <url>/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/">原文链接</a></p>
+</blockquote>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>最近在项目开发中，需要针对 Jenkins 项目进行配置，Jenkins 的 job 配置采用的是 xml，在维护配置模板的过程中就遇到了问题，因为逐步发现配置灵活性超出了字符串的范畴，本文旨在简单介绍 Python 下模板引擎模块 Jinja2 的使用。</p>
+<h2 id="什么是-Jinja2？"><a href="#什么是-Jinja2？" class="headerlink" title="什么是 Jinja2？"></a>什么是 Jinja2？</h2><blockquote>
+<p>Jinja2 是一个 Python 的功能齐全的模板引擎。它有完整的 unicode 支持，一个可选的集成沙箱执行环境，被广泛使用，以 BSD 许可证授权。</p>
+</blockquote>
+<p>以上是官方说明，简单来说，它提供了替换功能（变量替换）和一些强大的特性（控制流、继承等），可以快速生成数据文件，使得业务与数据分离开来，满足一些灵活多变的配置需求。</p>
+<span id="more"></span>
+
+<h2 id="为什么要使用-Jinja2？"><a href="#为什么要使用-Jinja2？" class="headerlink" title="为什么要使用 Jinja2？"></a>为什么要使用 Jinja2？</h2><p>拿 Jenkins 配置来说，如果要实现不同平台、不同项目的配置，有以下几种方案：</p>
+<ol>
+<li>直接进行字符串替换，使用 Python 字符串语法即可</li>
+<li>使用 XML 解析和生成模块，比较简便的是 ElementTree</li>
+<li>使用模板引擎，例如 Jinja2</li>
+</ol>
+<p>起初，我选用的是方案一，特点是简单粗暴，不需要额外的配置，例如，两个项目的 git 仓库配置可以采用如下代码实现：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 略去不相关代码</span></span><br><span class="line">template = <span class="string">b&quot;&quot;&quot;&lt;configVersion&gt;2&lt;/configVersion&gt;</span></span><br><span class="line"><span class="string">        &lt;userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">                &lt;url&gt;%(git_url)s&lt;/url&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">        &lt;/userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">        &lt;branches&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">                &lt;name&gt;%(git_branch)s&lt;/name&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">        &lt;/branches&gt;&quot;&quot;&quot;</span></span><br><span class="line">xml = template % &#123;<span class="string">&#x27;git_url&#x27;</span>:self.__git_url, <span class="string">&#x27;git_branch&#x27;</span>:self.__git_branch&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样，只需要外部传入地址及分支，即可获得不同的项目配置 xml，但缺点也很明显如果两个配置节点数目不相同或者里面的字段差别很大，那么就需要使用 <code>template2</code>、<code>template3</code>、<code>template4</code>等等，因此此方案仅适合配置需求较为简单，字段不是很复杂的场景。</p>
+<p>紧接着，开始调研快速生成不同 xml 数据的方案，找到了 <a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python%EF%BC%8C">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python，</a> 这里提到了两种方案，也就是上述的2、3。</p>
+<p>方案2的特点也很明显，可以完整控制 xml 中每个字段和属性，灵活性确实够了，能够满足我们的需求，但是有点大炮打蚊子的感觉，而且频繁的读写 xml 也比较消耗性能，业务逻辑也会随着配置的灵活性和多样性急遽膨胀，比如 Jenkins 项目配置，仓库地址、分支信息、ssh 信息、tag 字段、打包脚本等等，如果使用 xml 解析的话，针对这些节点都必须创建对应的业务逻辑，不是很推荐。</p>
+<p>那么我们的选择也比较简单了，Jinja 可以快速的替换生成我们业务需要的各种各样的数据，而且接入成本低，业务逻辑不会变化太大，下面简单介绍下本次项目中的使用。</p>
+<h2 id="Jinja2的简单使用教程"><a href="#Jinja2的简单使用教程" class="headerlink" title="Jinja2的简单使用教程"></a>Jinja2的简单使用教程</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>这个比较简单，看下文档即可，执行命令</p>
+<p><code>pip install jinja2</code></p>
+<h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>Jinja2中有一个名为<code>Environment</code>的对象，用于存储配置、全局变量，并且用于从文件系统中加载模板。即使你通过<code>Template</code>用字符串创建一个模板，Jinja2 也会自动为你创建一个环境。推荐使用这种方式进行模板配置而不是使用字符串，大多数程序使用一个环境即可。</p>
+<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><ol>
+<li>创建一个环境：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, PackageLoader, select_autoescape</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化 jinja 环境</span></span><br><span class="line">self.__env = Environment(</span><br><span class="line">	loader=PackageLoader(<span class="string">&#x27;模块名称&#x27;</span>, <span class="string">&#x27;模板文件夹&#x27;</span>),</span><br><span class="line">	autoescape=select_autoescape([<span class="string">&#x27;html&#x27;</span>, <span class="string">&#x27;xml&#x27;</span>])</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>加载一个模板：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__job_template = self.__env.get_template(<span class="string">&#x27;job_template.xml&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
+<li><p>接下来就是传递一些业务参数了，</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__config = self.__job_template.render(</span><br><span class="line">            git_url=self.__git_remote_url,</span><br><span class="line">            git_branch=self.__git_branch,</span><br><span class="line">            git_tag=self.__git_tag</span><br><span class="line">        )</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>以上都还是比较简单的 API 调用，核心使用部分在与如何在模板中通过 Jinja 支持的语法灵活的进行数据配置。</p>
+<h4 id="基本变量替换"><a href="#基本变量替换" class="headerlink" title="基本变量替换"></a>基本变量替换</h4><p>最基础的功能就是进行变量替换了，语法为<code>&#123;&#123;变量名&#125;&#125;</code>， 例如将 url 传递到 xml 中，模板中写法为(省略了不相关内容):</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">userRemoteConfigs</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>&#123;&#123;git_url&#125;&#125;<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">userRemoteConfigs</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后在代码中向上面一样调用 <code>template.render(git_url=&#39;xxx&#39;)</code>即可</p>
+<h4 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h4><p>Jinja 支持基本的<code>if</code>、<code>for</code>、宏等语法，这也是它最强大的地方，目前项目中我只用到了判断就够了。用法如下：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">&#123;% if push_tag %&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">targetRepoName</span>&gt;</span>origin<span class="tag">&lt;/<span class="name">targetRepoName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagName</span>&gt;</span>&#123;&#123;git_tag&#125;&#125;<span class="tag">&lt;/<span class="name">tagName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagMessage</span>&gt;</span><span class="tag">&lt;/<span class="name">tagMessage</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">createTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">createTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">updateTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">updateTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这段 xml 的逻辑就是如果传入了 <code>push_tag</code>变量且为<code>True</code>则在 Jenkins 配置中增加推送 git tag 节点，否则不做任何处理。</p>
+<p>除此之外，Jinja2 还支持循环，</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&lt;dl&gt;</span><br><span class="line">&#123;% <span class="keyword">for</span> key, value <span class="keyword">in</span> my_dict.iteritems() %&#125;</span><br><span class="line">    &lt;dt&gt;&#123;&#123; key|e &#125;&#125;&lt;/dt&gt;</span><br><span class="line">    &lt;dd&gt;&#123;&#123; value|e &#125;&#125;&lt;/dd&gt;</span><br><span class="line">&#123;% endfor %&#125;</span><br><span class="line">&lt;/dl&gt;</span><br></pre></td></tr></table></figure>
+
+<p>详细说明可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#for">http://docs.jinkan.org/docs/jinja2/templates.html#for</a></p>
+<h4 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h4><p>这部分由于目前项目配置还比较简单，暂时没用到，可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#id23">http://docs.jinkan.org/docs/jinja2/templates.html#id23</a></p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>对于简单的项目来说，上面提到的一些基本替换加控制流基本都能满足使用了， 稍微复杂一点的程序可以考虑使用继承和扩展。</p>
+<p>总的来说，Jinja2 既强大又简便，完美符合项目中一些HTML、XML 的业务配置需求，目前项目中本身有的三四个 xml 文件用了 Jinja2 之后缩减成一个，同时改动工作量大约只花了几个小时，真的很方便。</p>
+<blockquote>
+<p>参考资料：</p>
+<ul>
+<li><a href="http://jinja.pocoo.org/docs/2.10/">http://jinja.pocoo.org/docs/2.10/</a></li>
+<li><a href="http://docs.jinkan.org/docs/jinja2/index.html">http://docs.jinkan.org/docs/jinja2/index.html</a></li>
+<li><a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python</a></li>
+</ul>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>Jinja2</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Cocoapods插件机制浅析</title>
+    <url>/2020/03/04/Ruby/Cocoapods%E6%8F%92%E4%BB%B6%E6%9C%BA%E5%88%B6%E6%B5%85%E6%9E%90/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2020/03/04/Ruby/Cocoapods%E6%8F%92%E4%BB%B6%E6%9C%BA%E5%88%B6%E6%B5%85%E6%9E%90/">原文链接</a></p>
+</blockquote>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>虽然做iOS开发的过程中使用过 **<a href="https://cocoapods.org/">Cocoapods</a>**， 但是对里面的细节了解其实不算太多，直到这两年做织女项目时，通过对Cocoapods进行Qt支持改造才开始深入了解部分细节，这个过程中，网上没有找到太多相关资料，本文就简单介绍下我对Cocoapods提供的插件机制的一个简单了解，希望能给大家带来一些帮助。</p>
+<h3 id="Ruby-Open-Classes"><a href="#Ruby-Open-Classes" class="headerlink" title="Ruby Open Classes"></a>Ruby Open Classes</h3><p>在此之前，我们简单看下 <code>Ruby Open Classes</code> ，这部分是为未接触过Ruby的同学准备的，熟悉的同学可以直接略过。</p>
+<p>在Ruby中，类永远是开放的，你总是可以将新的方法加入到已有的类中，除了你自己的代码中，还可以用在标准库和内置类中，这个特性被称为<code>Ruby Open Classes</code>。下面我们通过一个示例简单看下。</p>
+<span id="more"></span>
+
+<p>首先，我们自定义一个类<code>Human</code>，放在<code>human.rb</code>文件中:</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Human</span></span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">greeting</span> </span></span><br><span class="line">        puts <span class="string">&quot;hello everybody&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hungry</span> </span></span><br><span class="line">        puts <span class="string">&quot;I am hungry&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>接着，我们新增一个<code>main.rb</code>：</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">require_relative <span class="string">&#x27;human&#x27;</span></span><br><span class="line"></span><br><span class="line">john = Human.new</span><br><span class="line"></span><br><span class="line">john.greeting </span><br><span class="line"><span class="comment"># hello everybody</span></span><br><span class="line"></span><br><span class="line">john.hungry</span><br><span class="line"><span class="comment"># I am hungry</span></span><br></pre></td></tr></table></figure>
+<p>之后，我们在<code>main.rb</code>中重新定义<code>hungry</code>方法，</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Human</span></span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hungry</span> </span></span><br><span class="line">        puts <span class="string">&quot;I could eat a horse&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">john.hungry</span><br><span class="line"><span class="comment"># I could eat a horse</span></span><br></pre></td></tr></table></figure>
+<p>可以看到，这里在我们新增<code>hungry</code>方法之后，所有的<code>Human</code>类的实例均调用我们的新实现了，即使是已经创建好的实例，这里故意放到两个文件中是想说明这个特性是可以跨文件甚至跨模块的，对Ruby内置方法的替换也是可以的（谨慎使用）</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">puts <span class="string">&quot;hello&quot;</span>.size</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">String</span> </span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">size</span></span></span><br><span class="line">        puts <span class="string">&quot;goodbye&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5</span></span><br><span class="line"><span class="comment"># goodbye</span></span><br><span class="line">puts <span class="string">&quot;hello&quot;</span>.size</span><br></pre></td></tr></table></figure>
+
+<p>这个特性是十分强大的，让我们可以很容易的对三方模块进行扩展，也是<code>Cocoapods</code>的插件体系所依赖的基础。</p>
+<h2 id="流程分析"><a href="#流程分析" class="headerlink" title="流程分析"></a>流程分析</h2><p><code>Cocoapods</code>的插件体系整体流程还是比较清晰的，下面我们就来逐步看下。</p>
+<h3 id="CLAide"><a href="#CLAide" class="headerlink" title="CLAide"></a>CLAide</h3><p>首先，<code>Cocoapods</code> 提供了一个便捷的命令行工具库 <a href="https://github.com/CocoaPods/CLAide">CLAide</a>，这个库包含很多功能，例如，一套命令基类，一套插件加载机制等。</p>
+<h3 id="Command基类"><a href="#Command基类" class="headerlink" title="Command基类"></a>Command基类</h3><p>Command基类在<code>lib/claide/command.rb</code>中，这里提供了大量基础功能，包括 <code>run</code> 、 <code>options</code>、 <code>help</code>等等。</p>
+<p>首先，当我们每次执行 <code>pod xxx</code> 命令时候，会执行 <code>bin</code>目录下的可执行文件<code>pod</code>。</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="keyword">require</span> <span class="string">&#x27;cocoapods&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> profile_filename = ENV[<span class="string">&#x27;PROFILE&#x27;</span>]</span><br><span class="line">    <span class="comment"># 忽略不相关内容... </span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    Pod::Command.run(ARGV)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>这里实际上是 <code>Pod</code> 模块从<code>CLAide</code>继承了子类<code>Command &lt; CLAide::Command</code>，我们执行Pod命令时候，就会调用</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">def <span class="keyword">self</span>.run(argv)</span><br><span class="line">    help! <span class="string">&#x27;You cannot run CocoaPods as root.&#x27;</span> <span class="keyword">if</span> Process.uid == <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    verify_minimum_git_version!</span><br><span class="line">    verify_xcode_license_approved!</span><br><span class="line"></span><br><span class="line">    <span class="keyword">super</span>(argv)</span><br><span class="line"><span class="keyword">ensure</span></span><br><span class="line">    UI.print_warnings</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>实际上只是扩展了一些检测git版本、xcode证书等，真正核心部分还是调用的<code>CLAide</code>的实现：</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">def <span class="keyword">self</span>.run(argv = [])</span><br><span class="line">    plugin_prefixes.each <span class="keyword">do</span> <span class="params">|plugin_prefix|</span></span><br><span class="line">        PluginManager.load_plugins(plugin_prefix)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    argv = ARGV.coerce(argv)</span><br><span class="line">    command = parse(argv)</span><br><span class="line">    ANSI.disabled = !command.ansi_output?</span><br><span class="line">    <span class="keyword">unless</span> command.handle_root_options(argv)</span><br><span class="line">        command.validate!</span><br><span class="line">        command.run</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">rescue</span> Object =&gt; exception</span><br><span class="line">    handle_exception(command, exception)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到这里真正执行命令之前会遍历所有的插件前缀，并进行插件加载，回过头来再查看 <code>cocoapods/command.rb</code> 会发现，这里指定了约定的插件前缀</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="keyword">self</span>.plugin_prefixes = <span class="string">%w(claide cocoapods)</span></span><br></pre></td></tr></table></figure>
+<p>可以看到这里的插件分为两种，我们目前只关心文件名为<code>cocoapods</code>前缀的插件。</p>
+<h3 id="PluginManager"><a href="#PluginManager" class="headerlink" title="PluginManager"></a>PluginManager</h3><p>我们深入<code>PluginManager</code>的具体实现看下，</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">def <span class="keyword">self</span>.load_plugins(plugin_prefix)</span><br><span class="line">    loaded_plugins[plugin_prefix] <span class="params">||</span>=</span><br><span class="line">    plugin_gems_for_prefix(plugin_prefix).map <span class="keyword">do</span> <span class="params">|spec, paths|</span></span><br><span class="line">        spec <span class="keyword">if</span> safe_activate_and_require(spec, paths)</span><br><span class="line">    <span class="keyword">end</span>.compact</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">def <span class="keyword">self</span>.plugin_gems_for_prefix(prefix)</span><br><span class="line">    glob = <span class="string">&quot;<span class="subst">#&#123;prefix&#125;</span>_plugin<span class="subst">#&#123;Gem.suffix_pattern&#125;</span>&quot;</span></span><br><span class="line">    Gem::Specification.latest_specs(<span class="literal">true</span>).map <span class="keyword">do</span> <span class="params">|spec|</span></span><br><span class="line">        matches = spec.matches_for_glob(glob)</span><br><span class="line">        [spec, matches] <span class="keyword">unless</span> matches.empty?</span><br><span class="line">    <span class="keyword">end</span>.compact</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">def <span class="keyword">self</span>.safe_activate_and_require(spec, paths)</span><br><span class="line">    spec.activate</span><br><span class="line">    paths.each &#123; <span class="params">|path|</span> <span class="keyword">require</span>(path) &#125;</span><br><span class="line">    <span class="literal">true</span></span><br><span class="line">    <span class="comment"># 不相关代码略去</span></span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>为了减小篇幅，这里只贴了核心相关代码，整体的流程大致是：</p>
+<ol>
+<li>调用<code>PluginManager.load_plugins</code>并传入插件前缀</li>
+<li><code>PluginManager.plugin_gems_for_prefix</code>对插件名进行处理，取出我们需要加载的文件，例如<code>cocoapods</code>前缀在这里会转换为所有包含<code>cocoapods_plugin.rb</code>的gem spec 信息及文件信息，例如<code>~/cocoapods-qt/lib/cocoapods_plugin.rb</code></li>
+<li>调用<code>PluginManager.safe_activate_and_require</code> 进行对应的 gem spec 检验并对每个文件进行加载</li>
+</ol>
+<p>至此，基本的插件加载流程大致梳理清楚了。</p>
+<h2 id="实操"><a href="#实操" class="headerlink" title="实操"></a>实操</h2><p>下面我们看下如何自己扩展一个插件，关于这部分，Cocoapods其实也基本已经帮我们做了很多事情了，主要是 <a href="https://github.com/CocoaPods/cocoapods-plugins">cocoapods-plugins</a>， 它提供了一个插件创建的完整生命周期，包括新增、发布、检索等。</p>
+<h3 id="Cocoapods-plugins"><a href="#Cocoapods-plugins" class="headerlink" title="Cocoapods-plugins"></a>Cocoapods-plugins</h3><p>执行 <code>pod plugins create cocoapods-test</code> 之后，发现自动帮我们创建了一个gem工程，其中的 lib 文件夹下果然存在了一个 <code>cocoapods_plugin.rb</code> 文件，整体的目录结构如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">├── Gemfile</span><br><span class="line">├── LICENSE.txt</span><br><span class="line">├── README.md</span><br><span class="line">├── Rakefile</span><br><span class="line">├── cocoapods-test.gemspec</span><br><span class="line">├── lib</span><br><span class="line">│   ├── cocoapods-test</span><br><span class="line">│   │   ├── <span class="built_in">command</span></span><br><span class="line">│   │   │   └── test.rb</span><br><span class="line">│   │   ├── command.rb</span><br><span class="line">│   │   └── gem_version.rb</span><br><span class="line">│   ├── cocoapods-test.rb</span><br><span class="line">│   └── **cocoapods_plugin.rb**</span><br><span class="line">└── spec</span><br><span class="line">    ├── <span class="built_in">command</span></span><br><span class="line">    │   └── test_spec.rb</span><br><span class="line">    └── spec_helper.rb</span><br></pre></td></tr></table></figure>
+
+<p>这里最核心的就是<code>cocoapods_plugin.rb</code> ，我们前面分析过，执行pod命令时候会主动加载所有<code>cocoapods_plugin.rb</code>文件，那么只要我们将需要扩展的类加到这里面，执行命令时候就会生效。</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> &lt; Command</span></span><br><span class="line">    <span class="keyword">self</span>.summary = <span class="string">&#x27;Short description of cocoapods-test.&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span>.description = <span class="string">&lt;&lt;-DESC</span></span><br><span class="line"><span class="string">        Longer description of cocoapods-test.</span></span><br><span class="line"><span class="string">    DESC</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span>.arguments = <span class="string">&#x27;NAME&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(argv)</span></span></span><br><span class="line">        <span class="variable">@name</span> = argv.shift_argument</span><br><span class="line">        <span class="keyword">super</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">validate!</span></span></span><br><span class="line">        <span class="keyword">super</span></span><br><span class="line">        help! <span class="string">&#x27;A Pod name is required.&#x27;</span> <span class="keyword">unless</span> <span class="variable">@name</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span></span></span><br><span class="line">        UI.puts <span class="string">&quot;Add your implementation for the cocoapods-test plugin in <span class="subst">#&#123;<span class="keyword">__FILE__</span>&#125;</span>&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到这里其实只是新增了一个 <code>Test</code> 命令，并加了一些描述信息。为了让我们的扩展能生效，我们可以通过几种方式，</p>
+<ol>
+<li>本地gem源码依赖</li>
+<li>安装gem产物</li>
+</ol>
+<p>为了更贴近实际生产发布流程，这里我们采用第二种方式。</p>
+<p>首先，我们编译生成gem产物，</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gem build cocoapods-test.gemspec</span><br></pre></td></tr></table></figure>
+
+<p>其次，本地安装</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gem install ~/CocoapodsQt/cocoapods-test/cocoapods-test-0.0.1.gem  --<span class="built_in">local</span></span><br></pre></td></tr></table></figure>
+
+<p>此时，我们再执行 pod 命令</p>
+<p><img src="https://img.alicdn.com/tfs/TB1I3Ova8Cw3KVjSZR0XXbcUpXa-2116-1076.jpg"></p>
+<p>可以看到我们扩展的命令已经生效，接下来就可以开始愉快的coding了。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>至此，我们对Cocoapods的整体插件流程应该有了一个比较清晰的认识了，希望能给大家带来一些帮助。</p>
+]]></content>
+      <categories>
+        <category>Ruby</category>
+      </categories>
+      <tags>
+        <tag>Cocoapods</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>JDBC学习一---JDBC入门</title>
+    <url>/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/">原文链接</a></p>
+</blockquote>
+<p>今天开始会写一系列 Java 后端学习的笔记，一方面是为了以后翻阅查看，更主要的原因是通过写作输出的方式让自己的印象更深，避免遗忘。</p>
+<p>首先是简单记录下自己学习使用 JDBC 的历程，由于目前基本都是通过一些类似 MyBatis 的框架来进行数据库操作，所以 JDBC 的使用不需要掌握太深入，仅作为了解即可。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>首先我们学习任何东西之前都需要先了解几个问题，基本上的思路是：<br>    1. xxx 是什么？<br>    2. 有什么作用？也就是为什么需要 xxx？<br>    3. 怎么使用（简单入门即可）？<br>    4. 分别就主要链路进行知识补充<br>之后，可以根据实际情况决定是否要进一步深入了解，还是只作为简单学习即可。</p>
+<p>JDBC 也不例外。</p>
+<span id="more"></span>
+
+<h3 id="什么是-JDBC？"><a href="#什么是-JDBC？" class="headerlink" title="什么是 JDBC？"></a>什么是 JDBC？</h3><blockquote>
+<p>Java数据库连接，（Java Database Connectivity，简称JDBC）是Java语言中用来规范客户端程序如何来访问数据库的应用程序接口，提供了诸如查询和更新数据库中数据的方法。JDBC也是Sun Microsystems的商标[1]。JDBC是面向关系型数据库的。</p>
+</blockquote>
+<p>上面是维基百科的解释，从这里我们获取到的几个有用信息：</p>
+<ol>
+<li>简单来说，JDBC 就是 Java 定义的一套用来规范和约束客户端程序如何访问数据库的<strong>接口</strong>，尤其是需要注意接口一词</li>
+<li>JDBC 是面向关系型数据库的，也就是说对于非关系型数据库用这一套接口是不行的。</li>
+</ol>
+<h3 id="为什么需要-JDBC？"><a href="#为什么需要-JDBC？" class="headerlink" title="为什么需要 JDBC？"></a>为什么需要 JDBC？</h3><p>回答类似这种问题其实套路也比较简单，我们思考一下，假如没有 JDBC 会怎么样？</p>
+<p>我们知道，关系型数据库是有很多分类的，例如常见的 MySQL、Oracle、SQL Server等等，那么如果没有一套标准接口的话，意味着我们如果开发 MySQL 数据库，不光需要引入 MySQL 的官方驱动，还需要引入官方的 Jar 包，根据对应的 CRUD 接口编写数据库操作代码，如果这时候你还有另一个使用 Oracle 项目，那么同样的工作需要重新进行一次，可想而知，这个适配成本是随着数据库厂商的增多逐渐上升的。</p>
+<p>那么怎么解决这类问题呢？有一句名言是这么说的，<strong>“计算机科学领域的任何问题都可以通过增加一个简介的中间层来解决。”</strong>，回到我们的问题上，Java 开发者就提供了这么一个中间层，也就是 <strong>JDBC</strong>。</p>
+<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200301214356.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200301214356.png" alt="20200301214356"></a></p>
+<p>通过这个图可以看到，由于有了这么一个中间层，我们在开发代码时，只需要使用 JDBC 相关的接口即可，不需要关心具体实现底层的是 MySQL 还是 Oracle。</p>
+<h2 id="如何使用-JDBC？"><a href="#如何使用-JDBC？" class="headerlink" title="如何使用 JDBC？"></a>如何使用 JDBC？</h2><p>接下来我们看下如何快速搭建一个 JDBC 的demo。通常在 Java 后端开发中，我们只需要掌握几个核心点就可以快速上手一个框架，它们分别是：</p>
+<ol>
+<li>jar 包或者 maven坐标</li>
+<li>关键的配置文件和属性</li>
+<li>核心的类和 API</li>
+</ol>
+<p>下面我们就从这个几方面入手快速了解一下：</p>
+<h3 id="jar-包或者-maven坐标"><a href="#jar-包或者-maven坐标" class="headerlink" title="jar 包或者 maven坐标"></a>jar 包或者 maven坐标</h3><p>使用数据库需要这么几个比较重要的包：</p>
+<ol>
+<li><code>java.sql</code>：所有与 JDBC 访问数据库相关的接口和类,可以说有了这里面提供的接口和类已经足够搭建一个 demo 实现基本功能</li>
+<li><code>javax.sql</code>：数据库扩展包，提供数据库额外的功能，如：连接池。接下来我们只是实现基本功能，可以不使用这个包。</li>
+<li>数据库的驱动：由各大数据库厂商提供，需要额外去下载，是对 JDBC 接口实现的类。</li>
+</ol>
+<p>这里面只有数据库的驱动是需要我们自己使用 jar 包或者 maven 依赖的。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>mysql<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mysql-connector-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.0.17<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里由于我本地的 MySQL 是 8.x 版本，因此使用了 8.0.17， 如果你的 MySQL 是 5.x 版本可以使用 5.1.39。</p>
+<h3 id="关键的配置文件和属性"><a href="#关键的配置文件和属性" class="headerlink" title="关键的配置文件和属性"></a>关键的配置文件和属性</h3><p>JDBC 中可以通过使用配置文件来加载数据库相关配置，例如指定数据库 URL、账户、密码等，这个等下详细介绍。</p>
+<h3 id="核心的类和-API"><a href="#核心的类和-API" class="headerlink" title="核心的类和 API"></a>核心的类和 API</h3><p>JDBC 中几个比较核心的类和作用如下：</p>
+<ul>
+<li>DriverManager 类<ul>
+<li>管理和注册数据库驱动</li>
+<li>得到数据库连接对象</li>
+</ul>
+</li>
+<li>Connection 接口<ul>
+<li>一个连接对象，可用于创建 Statement 和 PreparedStatement 对象</li>
+</ul>
+</li>
+<li>Statement 接口<ul>
+<li>一个 SQL 语句对象，用于将 SQL 语句发送给数据库服务器。</li>
+</ul>
+</li>
+<li>PreparedStatemen 接口<ul>
+<li>一个 SQL 语句对象，是 Statement 的子接口</li>
+</ul>
+</li>
+<li>ResultSet 接口<ul>
+<li>用于封装数据库查询的结果集，返回给客户端 Java 程序</li>
+</ul>
+</li>
+</ul>
+<p>简单了解即可，等下具体搭建工程会详细介绍。</p>
+<h3 id="搭建测试工程"><a href="#搭建测试工程" class="headerlink" title="搭建测试工程"></a>搭建测试工程</h3><p>这里我们先简单建一个表，然后插入几条数据用于查看。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `bank` (</span><br><span class="line">    `name` <span class="type">varchar</span>(<span class="number">10</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    `money` <span class="keyword">double</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> bank</span><br><span class="line"><span class="keyword">values</span> (money <span class="operator">=</span> <span class="number">100</span>, name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">200</span>, name <span class="operator">=</span> <span class="string">&#x27;李四&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">300</span>, name <span class="operator">=</span> <span class="string">&#x27;王五&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">400</span>, name <span class="operator">=</span> <span class="string">&#x27;赵六&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这样我们的表就建好了，数据也有了，我们就正式开始通过编写代码查找表中的数据。</p>
+<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307202152.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307202152.png" alt="20200307202152"></a></p>
+<p>其实说白了使用 JDBC 的核心步骤就是这些：</p>
+<ol>
+<li>导入驱动jar包</li>
+<li>注册驱动</li>
+<li>获取数据库连接对象</li>
+<li>定义sql</li>
+<li>获取执行sql语句的对象 Statement</li>
+<li>执行sql，接受返回结果</li>
+<li>处理结果</li>
+<li>释放资源</li>
+</ol>
+<p>那么我们看下，这里其中导入 jar 包我们已经通过引入 maven 坐标解决了，接下来看看如何注册驱动。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Class.forName(<span class="string">&quot;com.mysql.cj.jdbc.Driver&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这不就是加载类吗？哪里有注册驱动呢？别着急，我们看下源码。跳到 <code>com.mysql.cj.jdbc.Driver</code> 中，我们发现 <code>Driver</code> 中的静态代码块调用了 <code>DriverManager</code> 的<code>registerDriver</code>方法，然后创建了一个<code>Driver</code>对象作为入参传入。这也跟我们之前提到的 <code>DriverManager</code> 有管理和注册驱动的作用是吻合的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        DriverManager.registerDriver(<span class="keyword">new</span> Driver());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (SQLException var1) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;Can&#x27;t register driver!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看下 <code>DriverManager</code> 的官方文档，可以看到</p>
+<blockquote>
+<p>JDBC 4.0 Drivers must include the file META-INF/services/java.sql.Driver. This file contains the name of the JDBC drivers implementation of java.sql.Driver.</p>
+</blockquote>
+<blockquote>
+<p>Applications no longer need to explicitly load JDBC drivers using Class.forName(). Existing programs which currently load JDBC drivers using Class.forName() will continue to work without modification.</p>
+</blockquote>
+<p>这几句话是什么意思呢？简单来说就是可能 JDK 觉得大家老是这么加载驱动比较繁琐，在 JDBC4.0 之后新增了一个约定，数据库驱动实现方必须要在 jar 包的 <code>META-INF/services/java.sql.Driver</code> 路径里面写明指定的 <code>Driver</code> 类，这样 JVM 会自动将对应的驱动进行加载，而不再需要程序员在开发过程中手动调用 <code>Class.forName()</code> 了，当然已经调用了的代码可以正常运行而不会受到影响，所以这一步我们可以省略了。</p>
+<p>接下来是获取数据库连接对象 <code>Connection</code>，前面我们已经提到，这个类是用来创建 <code>Statement</code> 对象的，而 <code>Statement</code> 对象就是真正进行数据库操作的类，</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> Connection connection = DriverManager.getConnection(<span class="string">&quot;jdbc:mysql://localhost:3306/samwei12&quot;</span>, <span class="string">&quot;root&quot;</span>,<span class="string">&quot;root&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>通过调用 <code>DriverManager</code> 的<code>getConnection</code>方法，我们就得到了一个 <code>Connection</code> 对象。它的几个入参也比较显而易见，就是数据库连接时的 url、账户、密码等信息。这也是 <code>DriverManager</code> 的第二个功能，就是获取数据库连接对象 <code>Connection</code> 的实例。</p>
+<p>接下来是定义 sql 语句，这个最好理解，这里我们把张三的存款设置成 1000。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String sql = <span class="string">&quot;update bank set money=1000 where name=&#x27;张三&#x27;&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>接下来是创建 <code>Statement</code> 对象，</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br></pre></td></tr></table></figure>
+
+<p>执行 sql 语句：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> count = statement.executeUpdate(sql);</span><br></pre></td></tr></table></figure>
+
+<p>入参代表我们需要执行的 sql 语句，出参代表本条 update 语句影响的行数。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">System.out.println(count);</span><br></pre></td></tr></table></figure>
+<p>这里我们简单打印下就可以，如果查询到的是需要封装的对象，那么还需要其他处理，这里不展开。</p>
+<p>最后就是释放资源，这个一定要记住。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">statement.close();</span><br><span class="line">connection.close();</span><br></pre></td></tr></table></figure>
+
+<p>之后我们执行一下，可以看到打印结果是 1，同时数据库中对应数据也发生了变动。</p>
+<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307192219.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307192219.png" alt="20200307192219"></a></p>
+<p>示例代码地址：</p>
+<ul>
+<li><a href="https://github.com/samwei12/jdbc-demo">https://github.com/samwei12/jdbc-demo</a></li>
+</ul>
+<h2 id="详细-API-了解"><a href="#详细-API-了解" class="headerlink" title="详细 API 了解"></a>详细 API 了解</h2><h3 id="DriverManager"><a href="#DriverManager" class="headerlink" title="DriverManager"></a>DriverManager</h3><p>前面已经讲得比较清楚，它的主要作用就是注册驱动+管理数据库连接，这里只说一下 MySQL 的 URL 写法。</p>
+<ul>
+<li><code>jdbc:mysql://ip地址(域名):端口号/数据库名称</code><ul>
+<li>例子：<code>jdbc:mysql://localhost:3306/samwei12</code></li>
+<li>细节：如果连接的是本机mysql服务器，并且mysql服务默认端口是3306，则url可以简写为：<code>jdbc:mysql:///数据库名称</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="Connection"><a href="#Connection" class="headerlink" title="Connection"></a>Connection</h3><p>数据库连接对象，它的主要功能包括创建一个 <code>Statement</code> 和管理事务。</p>
+<ol>
+<li>获取执行sql 的对象<ul>
+<li><code>Statement createStatement()</code></li>
+<li><code>PreparedStatement prepareStatement(String sql)</code></li>
+</ul>
+</li>
+<li>管理事务：<ul>
+<li>开启事务：<code>setAutoCommit(boolean autoCommit)</code> ：调用该方法设置参数为false，即开启事务</li>
+<li>提交事务：<code>commit()</code></li>
+<li>回滚事务：<code>rollback()</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="Statement"><a href="#Statement" class="headerlink" title="Statement"></a>Statement</h3><p>执行sql的对象，CRUD 都可以执行：</p>
+<ol>
+<li><code>boolean execute(String sql)</code> ：可以执行任意的sql语句</li>
+<li><code>int executeUpdate(String sql)</code> ：执行DML（insert、update、delete）语句、DDL(create，alter、drop)语句<ul>
+<li>返回值：影响的行数，可以通过这个影响的行数判断DML语句是否执行成功 返回值&gt;0的则执行成功，反之，则失败。</li>
+</ul>
+</li>
+<li><code>ResultSet executeQuery(String sql)</code>：执行DQL(select) 语句</li>
+</ol>
+<p>这里我们最常用的的一般就是最后一个方法了，示例代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//4. 定义sql</span></span><br><span class="line">String sql = <span class="string">&quot;select * from bank&quot;</span>;</span><br><span class="line"><span class="comment">// 5. 获取执行sql语句的对象 Statement</span></span><br><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br><span class="line"><span class="comment">// 6. 执行sql，接受返回结果</span></span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = statement.executeQuery(sql);</span><br><span class="line"><span class="comment">// 7. 处理结果</span></span><br><span class="line"><span class="keyword">while</span> (resultSet.next()) &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">double</span> money = resultSet.getDouble(<span class="string">&quot;money&quot;</span>);</span><br><span class="line">    <span class="keyword">final</span> String name = resultSet.getString(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">    System.out.println(name+<span class="string">&quot;银行账户：&quot;</span>+money);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过 <code>ResultSet</code> 的 <code>next</code> 方法遍历结果，之后得到的就是一行的数据，分别取出每一列的数据处理即可。</p>
+<h3 id="ResultSet"><a href="#ResultSet" class="headerlink" title="ResultSet"></a>ResultSet</h3><p>结果集对象，封装查询结果</p>
+<ul>
+<li><code>boolean next()</code>: 游标向下移动一行，判断当前行是否是最后一行末尾(是否有数据)，如果是，则返回false，如果不是则返回true</li>
+<li><code>getXxx(参数)</code>:获取数据<ul>
+<li>Xxx：代表数据类型，如： <code>int getInt() , String getString()</code></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>具体的使用方法 <code>executeQuery</code> 这里已经展示过了</li>
+</ul>
+<h3 id="PreparedStatement"><a href="#PreparedStatement" class="headerlink" title="PreparedStatement"></a>PreparedStatement</h3><p>执行sql的对象，继承自 <code>Statement</code>。看到这里你可能会比较奇怪，我们不是已经有了 <code>Statement</code> 类了嘛，为什么还需要再搞一个子类出来呢？我们先通过一个示例介绍一下什么是 <strong>SQL 注入</strong>。</p>
+<p>创建一个用户登录信息表，包括用户名和密码。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span> (</span><br><span class="line"></span><br><span class="line">id <span class="type">int</span> <span class="keyword">primary</span> key auto_increment,</span><br><span class="line"></span><br><span class="line">name <span class="type">varchar</span>(<span class="number">20</span>),</span><br><span class="line"></span><br><span class="line">password <span class="type">varchar</span>(<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span> (<span class="keyword">null</span>,<span class="string">&#x27;jack&#x27;</span>,<span class="string">&#x27;123&#x27;</span>),(<span class="keyword">null</span>,<span class="string">&#x27;rose&#x27;</span>,<span class="string">&#x27;456&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>然后模拟一下用户的登录，如果用户输入的用户名和密码能够匹配到一条记录，那么我们认为登录成功，否则认为登录失败。</p>
+<p>代码比较简单，核心代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String sql = <span class="string">&quot;select * from user where name=&#x27;&quot;</span>+userName+<span class="string">&quot;&#x27; and password=&#x27;&quot;</span>+password+<span class="string">&quot;&#x27;&quot;</span>;</span><br><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = statement.executeQuery(sql);</span><br><span class="line"><span class="keyword">if</span> (resultSet.next()) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录成功，欢迎您：&quot;</span> + userName);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录失败&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>验证一下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">JACK</span><br><span class="line">请输入用户密码：</span><br><span class="line">123</span><br><span class="line">登录成功，欢迎您：JACK</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">jack1</span><br><span class="line">请输入用户密码：</span><br><span class="line">123</span><br><span class="line">登录失败</span><br></pre></td></tr></table></figure>
+
+<p>看起来好像一切正常，没毛病，那么我们尝试一下如下输入：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">我是一个不存在的用户</span><br><span class="line">请输入用户密码：</span><br><span class="line">我是密码<span class="string">&#x27; or &#x27;</span>a<span class="string">&#x27;=&#x27;</span>a</span><br></pre></td></tr></table></figure>
+
+<p>这时我们发现，神奇的事情出现了：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">登录成功，欢迎您：我是一个不存在的用户</span><br></pre></td></tr></table></figure>
+
+<p>这是为什么呢？？？其实我们 debug 一下就会发现，原因很简单，我们传给 <code>Statement</code> 对象的是一个字符串，那么上述参数真正执行的 SQL 语句是 <code>select * from user where name=&#39;我是一个不存在的用户&#39; and password=&#39;我是密码&#39; or &#39;a&#39;=&#39;a&#39;</code>。 大家发现了吗？我们的原始 SQL 只是查询用户名和密码信息，但是如果用户输入了类似上面这种奇怪的密码，在我们的 SQL 后面拼接上其他字符串，就可以绕过我们的检查，随意输入任何用户名和密码都可以获得登录授权，这无疑是很危险的。</p>
+<blockquote>
+<p>SQL注入（英语：SQL injection），也称SQL注入或SQL注码，是发生于应用程序与数据库层的安全漏洞。简而言之，是在输入的字符串之中注入SQL指令，在设计不良的程序当中忽略了字符检查，那么这些注入进去的恶意指令就会被数据库服务器误认为是正常的SQL指令而运行，因此遭到破坏或是入侵。</p>
+</blockquote>
+<p>以上是维基百科对应的词条解释，那么怎么解决这种问题呢？JDK 的作者们提供的 <code>PreparedStatement</code> 就是用来处理这种问题的。我们来看一下它的用法。</p>
+<ol>
+<li>Connection 接口中的方法<ol>
+<li><code>PreparedStatement prepareStatement(String sql)</code>: 指定预编译的 SQL 语句，SQL 语句中使用占位符 <code>?</code> 创建一个语句对象</li>
+</ol>
+</li>
+<li>PreparedStatement 接口中的方法<ol>
+<li><code>int executeUpdate()</code>: 执行 DML，增删改的操作，返回影响的行数。</li>
+<li><code>ResultSet executeQuery()</code>: 执行 DQL，查询的操作，返回结果集</li>
+</ol>
+</li>
+</ol>
+<p>使用步骤：</p>
+<ol start="3">
+<li>编写 SQL 语句，未知内容使用?占位：<code>&quot;SELECT * FROM user WHERE name=? AND password=?&quot;;</code></li>
+<li>获得 <code>PreparedStatement</code> 对象</li>
+<li>设置实际参数：<code>setXxx(占位符的位置, 真实的值)</code><ol>
+<li>对应一系列重载的方法</li>
+</ol>
+</li>
+<li>执行参数化 SQL 语句</li>
+<li>关闭资源</li>
+</ol>
+<p>具体的代码示例如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 构造一个带参数的 SQL 语句，这里不需要加单引号了，而是使用占位符 ？</span></span><br><span class="line">String sql = <span class="string">&quot;select * from user where name=? and password=?&quot;</span>;</span><br><span class="line"><span class="comment">// 2. 获取 PreparedStatement 对象</span></span><br><span class="line"><span class="keyword">final</span> PreparedStatement preparedStatement = connection.prepareStatement(sql);</span><br><span class="line"><span class="comment">// 3. 设置参数，这里需要注意的是索引是从 1 开始的，而不是 0</span></span><br><span class="line">preparedStatement.setString(<span class="number">1</span>, userName);</span><br><span class="line">preparedStatement.setString(<span class="number">2</span>, userName);</span><br><span class="line"><span class="comment">// 4. 执行参数化 SQL 语句，这里由于 sql 语句已经准备好了，不再需要传入参数，直接执行即可</span></span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = preparedStatement.executeQuery();</span><br><span class="line"><span class="keyword">if</span> (resultSet.next()) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录成功，欢迎您：&quot;</span> + userName);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录失败&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用起来还是比较简单的，需要注意的几个点已经写在了注释里面。<br>执行结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">我是一个不存在的用户</span><br><span class="line">请输入用户密码：</span><br><span class="line">我是密码<span class="string">&#x27; or &#x27;</span>a<span class="string">&#x27;=&#x27;</span>a</span><br><span class="line">登录失败</span><br></pre></td></tr></table></figure>
+
+<p>可以看到使用 <code>PreparedStatement</code> 有效的解决了 SQL 注入的问题，它还有以下好处：</p>
+<ol>
+<li><code>prepareStatement()</code> 方法会先将 SQL 语句发送给数据库预编译。<code>PreparedStatement</code> 会引用着预编译后的结果。 可以多次传入不同的参数给 <code>PreparedStatement</code> 对象并执行。减少 SQL 编译次数，提高效率。</li>
+<li>提高了程序的可读性</li>
+</ol>
+<p>所以我们尽可能全部都使用 <code>PreparedStatement</code> 的方式，而不是 <code>Statement</code> 类。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，一个简单的 JDBC demo 就搭建完毕了。由于目前已经不会有人直接使用 JDBC 进行数据库操作了，我们只是为了接下来学习 MyBatis 进行一个铺垫，简单了解即可，不需要深入。</p>
+<p>示例代码地址：</p>
+<ul>
+<li><a href="https://github.com/samwei12/jdbc-demo">https://github.com/samwei12/jdbc-demo</a></li>
+</ul>
+<h2 id="Relations"><a href="#Relations" class="headerlink" title="Relations"></a>Relations</h2><ul>
+<li><a href="https://zh.wikipedia.org/wiki/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5">https://zh.wikipedia.org/wiki/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/SQL%E6%B3%A8%E5%85%A5">https://zh.wikipedia.org/wiki/SQL%E6%B3%A8%E5%85%A5</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Server</category>
+      </categories>
+      <tags>
+        <tag>JDBC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何构建一个PKM系统</title>
+    <url>/2020/05/02/Thinking/%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAPKM%E7%B3%BB%E7%BB%9F/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2020/05/02/Thinking/%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AA%20PKM%20%E7%B3%BB%E7%BB%9F/">原文链接</a></p>
+</blockquote>
+<ul>
+<li>这篇文章是个人知识总结相关的第一篇文章，主要目的是为了阐述我们为什么需要一个 PKM 系统，并且简单对自己这几年亲身形成的PKM 系统进行总结。</li>
+</ul>
+<h2 id="PKM-是什么？"><a href="#PKM-是什么？" class="headerlink" title="PKM 是什么？"></a>PKM 是什么？</h2><ul>
+<li>PKM 是 Personal Knowledge Management 的缩写，我们先来看一下 Wikipedia 中的描述：</li>
+</ul>
+<blockquote>
+<p>Personal knowledge management (PKM) is a process of collecting information that a person uses to gather, classify, store, search, retrieve and share knowledge in their daily activities (Grundspenkis 2007) and the way in which these processes support work activities (Wright 2005). It is a response to the idea that knowledge workers need to be responsible for their own growth and learning (Smedley 2009). </p>
+</blockquote>
+<ul>
+<li>这个解释已经非常清晰了，PKM 就是一套个人知识管理系统，包括知识检索、收集、分类、分享等等，可以说我们在日常生活中每个人都在不停的使用 PKM，例如看新闻、刷抖音、刷微信公众号等等，都是一个不停获取信息的过程，那么我们为什么要梳理搭建属于自己的 PKM 呢？</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="为什么要构建自己的-PKM-系统？"><a href="#为什么要构建自己的-PKM-系统？" class="headerlink" title="为什么要构建自己的 PKM 系统？"></a>为什么要构建自己的 PKM 系统？</h2><ul>
+<li>大家都知道，我们目前处在一个知识爆炸的时代，虽然说各种信息和知识随手可以检索查看，但是对于绝大部分人来说，这其实并不是一件好事，相反，我认为弊端是大于好处的。</li>
+<li>为什么这么说呢？<ol>
+<li>大家可以思考一下自己每天使用手机的时间和次数，你可以先自己猜测一个数字，然后再使用一些手机时间追踪软件看一下真实数据，我相信大部分人猜测的时间都会比自己实际使用时间少很多。这里我推荐使用 <strong>OffScreen</strong> 这款软件，比起苹果系统自带的追踪多了很多指标，例如每天拿起多少次、走路时看手机的时间、晚上在床上玩了多久手机（这个维度很扎心，大家可以关注下）等等。我自己平均使用时长一般在 2~3 小时左右，每天拿起次数在 50 次左右。</li>
+<li>当然，手机使用时长并不能说明所有问题，但是手机上干扰因素实在是太多，这个大家可以看下系统自带的屏幕使用时间，里面有一栏是每天收到的通知次数，我自己基本上手机每天推送通知次数超过 300次，比如在写代码、学习的时候，微信推送了一条信息，打开手机回复完毕之后，顺便刷一会朋友圈，再看看公众号，链接点进去发现有个好玩的视频，不小心跳到了抖音，然后一天就过去了。是不是觉得这个场景似曾相识？大家要知道，目前有一大堆大公司聘请了高薪产品经理和数据挖掘工程师，他们做的事情就是想办法吸引你的注意力，让你不停地黏在手机上，他们通过收集你在各个页面、软件停留的数据，分析一下之后，对你喜欢看什么（比如抖音里面的大长腿）、喜欢玩什么等等一清二楚，这也就是为什么刷抖音之类的很难停下来，你会发现看到的视频很多都是喜欢看的，这种东西靠意志力很难克服。</li>
+<li>慢慢地，你就会发现自己的手机其实替代了你进行思考，比如今天要看什么、学什么，你以为是你主动控制的，其实都是手机里面各种软件操控你完成的，不信你可以回想一下自己每天使用手机的路径，是不是不自觉的解锁之后就会打开微信、微博看两眼？，<strong>习惯的力量是很可怕的，而且对于大部分来说受到的都是坏习惯的影响。</strong></li>
+</ol>
+</li>
+<li>怎么避免自己淹没在无谓知识的浪潮里面呢？这里简单介绍一下 <strong>DIKW 模型</strong> 和 <strong>学习金字塔</strong>。<ul>
+<li>DIKW：<ul>
+<li><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502102007.png" alt="20200502102007"></li>
+<li>它的核心思想其实也很简单， Data-&gt;Information-&gt;Knowledge-&gt;Wisdom 是符合金字塔模型的，尤其是从 Information 到 Knowledge 这里，平时大家刷的微信公众号、看的各种鸡汤文、背的单词，看似也都在努力学习，其实他们大部分都停留在信息这一步，并没有转换成你的知识，而知道了这些知识之后，真正到把它们转换为自己的技能，中间又有一个非常大的 gap，所以其实花了大量的时间，自我成长提升却非常少。</li>
+</ul>
+</li>
+<li>学习金字塔：<ul>
+<li><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502114143.png" alt="20200502114143"></li>
+<li>学习效率从低到高大体上分别是文字阅读、音频、视频、演示 Demo、实践、分享教学。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>这里的核心其实总结下来就是几点：<ol>
+<li><strong>不要把别人的知识当做自己的</strong>，很多人（包括我自己）喜欢收藏各种知识，比如买书、买教程、看到好文章先收藏再稍后读（其实根本不读）。</li>
+<li><strong>没有输出的知识是很难转换为技能的</strong>，很多东西明明自己是看过的，但是仅限于知道理论知识，很快就忘了，下次遇到还是需要 Google，这里需要养成分享的习惯，试想一下，如果你正在看的书或者知识点，老板过来让你下周准备一次分享，是不是立马就更认真了，为了不出丑，不被挑战，你必然会花费更多的心思学习，同时会主动思考大家会问什么问题，提前做好准备，那么经历这么一次分享之后，对应的知识点，过来听讲的人说不定很快就忘了，但是你自己一定可以牢牢记住很久。</li>
+<li><strong>定期 Review</strong>，这个也很好理解，知识的记忆是符合 <strong>艾宾浩斯记忆曲线</strong> 的，可以自行 Google 一下，定期复习确保不会遗忘。</li>
+</ol>
+</li>
+</ul>
+<h2 id="我是如何搭建自己的-PKM-系统的？"><a href="#我是如何搭建自己的-PKM-系统的？" class="headerlink" title="我是如何搭建自己的 PKM 系统的？"></a>我是如何搭建自己的 PKM 系统的？</h2><ul>
+<li>俗话说，”工欲善其事必先利其器“，说了这么多，终于到了本文的核心内容，简单分享总结一下我这几年形成的一套 PKM 体系。</li>
+<li>通过前面的介绍，大家应该也都明白，如果想要把信息和他人的知识变为自己的知识和技能，那么最起码需要完成一个闭环，就是 收集-&gt;整理-&gt;输出-&gt;复习。只有自己实践完成之后，能够归纳整理并且分享给他人的知识才能进一步巩固。</li>
+<li><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502134625.png" alt="20200502134625"></li>
+<li>下面就分别对这其中的环节进行详细展开，这里事先说明下，我平时的工作环境是 Mac 全家桶，尽管我这里推荐的都是一些跨平台软件，但是部分 case 可能有所不同。</li>
+</ul>
+<h3 id="信息输入"><a href="#信息输入" class="headerlink" title="信息输入"></a>信息输入</h3><ul>
+<li><p>在当下这么一个信息爆炸的时代，我们所缺少的不是如何收集知识，而是如何主动获取知识和辨别整理。我个人通常的信息来源有这些：<strong>Google（是的没错）、RSS 订阅、微信公众号</strong>。</p>
+</li>
+<li><p>这些信息大部分是通过手机获取的，也可以利用碎片时间阅读，例如等公交、排队等等（不建议吃饭或者上厕所时候看，会影响身体监控）。核心功能诉求如下：</p>
+<ol>
+<li><strong>跨平台</strong>，尤其是手机端，体验一定要好</li>
+<li><strong>速度要快</strong>，这里的速度快包括几个方面，网络速度、文章保存速度等，例如 Raindrop.io 这种，保存一个书签需要转圈 3s 左右，且还需要关心分类文件夹等，基本上可以直接排除，我理解大部分情况下只保存网址即可，哪怕你把网址复制下来贴到滴答清单都可以</li>
+<li>部分重要信息需要能够离线保存查看，不是强诉求</li>
+</ol>
+</li>
+<li><p>这里有几个过滤筛选信息的原则：</p>
+<ol>
+<li>尽可能收集英文资料，原因大家应该都能想到，目前大部分的知识分享都是由英语世界的牛人们发起的，国内各种博客公众号基本都是看了一遍之后自己转手翻译或者加工之后分享的，当然这样的好处就是对于新手来说，更加便于理解，坏处更是显而易见，你收集到的知识都是别人咀嚼过一次的，可能会有很多偏差。所以这里首先你要有一个能够任意查阅国外优质资源的途径（原因大家都懂），然后尽可能使用一些英文关键词进行检索。</li>
+<li>尽可能主动获取知识，否则一定要做好<strong>过滤</strong>。这一点我目前做的也很不好，正在逐步改善，什么意思呢？不要让自己被信息淹没，而是要主动去检索。这里一个比较好的方式就是通过 RSS 订阅或者关注一些优质博客，毕竟个人的精力是有限的，最忌讳看到什么都想学一下，关注几百个微信公众号，每天沉迷在刷各种热门知识的快感中，比如区块链、机器学习等等，实际上工作中根本用不到。<strong>热点是永远跟不完的，尽量学会掌握核心知识，这些知识大部分都是通用的。</strong></li>
+<li>快速区分出哪些信息需要进一步跟进。由于大部分时间这类文章或者咨询都是在等公交、排队等碎片时间接触到的，那么就需要有一个快速鉴别和定期检阅的机制，也就是决定哪些资料需要 Read Later。</li>
+<li><strong>避免 Read Later 变成 Read Never</strong>。这点我也在努力改进，目前 Pocket 里面堆积了 300+ 文章没有看。</li>
+</ol>
+</li>
+<li><p>这里推荐几款我自己在使用的软件：</p>
+<ul>
+<li><del>GFW</del>：不可说。</li>
+<li>RSS： <strong>Reeder4</strong>，老牌应用了，不多说，体验很好，可以使用美国区账号购买 Redeem Code，价格还是比较划算的，印象中十几块钱就可以。</li>
+<li>信息收集类软件：<strong>Pinbox</strong>，这类软件非常多，大体上分为两种，一种是以 Pinboard 为主的书签收集类，同类产品还有 PinBox、Raindrop.io 等；另一种以 Pocket 为首的正宗稍后读类，还有 Instapaper、收趣云等等，Evernote 也算是这类软件，当然它本身是做笔记的，只是网页剪切功能太强大了而已。从阅读体验上来说当然是 Pocket 这类软件更好，不过由于它本身带有的一些社交属性及归档功能，很容易让它变成第二个 Evernote，让你变成一只仓鼠。所以这里我选择了 Pinbox 作为我自己的收集工具，其实单从功能上来说，Pinboard 和 Raindrop.io 做的都比 Pinbox 更好，但是他们的服务器都在国外，网络实在是不够稳定，就这一点上已经被排除了，收趣各方面都不错，但是免费版不支持导出是致命伤，且现在感觉有点凉了，基本没在维护，上一次更新已经是一年多前了，于是只剩下 Pinbox 可选。关于这类软件的测评可以单独写一篇文章了，后面有时间我会更新。</li>
+<li>清单待办类：<strong>滴答清单</strong>，免费版已经足够使用，我比较看重的是它的自然语言识别和跨平台快速实时同步功能，至于其他的类似番茄钟、日历视图等高级功能属于锦上添花，如果你不打算专门为此付费，完全不影响使用。另外它还有一个比较好的亮点功能就是可以把任务以看板视图查看，比较方便。</li>
+<li>书籍类：<strong>MarginNote</strong>，针对深度阅读的诉求，例如阅读书籍等，推荐使用电子书，原因是 IT 类书籍更新迭代较快，，当然一些经典书籍，例如《代码大全》、《重构》等，是可以买一本时时翻阅的，MarginNote 阅读电子书十分方便，可以导入 PDF 批注，同时可以配合 Pad 版本手写批注等，还支持导出笔记为脑图、复习卡片导出为 Anki 等等，功能十分强大。</li>
+</ul>
+</li>
+</ul>
+<h3 id="整理归纳"><a href="#整理归纳" class="headerlink" title="整理归纳"></a>整理归纳</h3><ul>
+<li>获取到自己需要的信息之后需要做的事情就是对这些信息进行分门别类。这里有两种方式进行分类，一种按照目录结构进行分类；另一种是按照标签系统进行分类。有很多关于这方面的话题，在这里我不多赘述，我个人更倾向于使用目录结构，可以配合标签使用，单目录+搜索是必不可少的，通常来说，如果你连搜索的关键词都想不起来，那么说明这个知识点根本就还没在你的大脑里面形成初步印象，那么退回到上一步是更合适的。</li>
+<li>这一步主要的诉求有这么几个：<ol>
+<li>需要对已经存入稍后读的文章进行细品，或者需要实践，之后把核心信息提取出来，进行归纳，这里需要一个<strong>快速整理大纲</strong>的软件。</li>
+<li>如果是看到一些比较好的书单或者类似于学习计划等，需要汇总到自己的个人学习计划中，并且转换为年度、月度、周计划，定期 check，这里有一个模型叫做 <strong>PDCA</strong>，大家可以检索下，它是 Plan、DO、 Check、Action 的缩写，意思是说针对某个目标，需要先进行计划，之后实践，定期 check 学习成果，最后总结反馈，以便下一次学习计划使用。下图就是我自己在用的周报模板。<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502180750.png" alt="20200502180750"></li>
+</ol>
+</li>
+<li>在这里我主要使用的是 <strong>Dynalist</strong> 这款软件，它是大纲类笔记软件的一种，同类型的软件还有 Workflowy、幕布等等，其实思维导图也是一种大纲类软件，不过更倾向于平铺对某个知识进行介绍，不适合查看过长的列表，当然你可以加 N 个节点，但是这样无法做到一眼浏览完整体结构，也就失去了导图的意义；Dynalist 这类列表型笔记的好处就是可以一直添加列表项，缺点就是不够直观，不过它的 Pro 版本可以查看导图，一定程度上弥补了这个问题。</li>
+<li>之前我的大量笔记框架都是基于 Xmind 处理的，用了大概两年的样子，但是一直有点不爽的地方在于，Xmind 无法支持 Markdown 格式，插入图片十分不方便，且多个知识点之间联动也比较麻烦。有的知识点可能归属于多个分类，Xmind 只能做到树状结构，无法支持网状知识点关联，也没有办法对所有的导图中某个知识点进行检索。之前的解决方案是使用 Xmind 作为大纲，具体的叶子节点，通过本地 Markdown 链接的方式处理，终归比较麻烦。Dynalist 很完美的解决了这个问题，它支持大部分 Markdown 语法，包括图片、链接等，同时内置了快速链接内部节点的方式，同时可以在所有笔记中全文检索，还支持标签系统，这些都是 Xmind 或者 VSCode 解决不了的问题。</li>
+<li>关于 Dynalist 的测评文章网上有很多，后续有机会我会把导图、列表笔记、 VSCode + Markdown 笔记的优劣对比详细再写一篇文章，Dynalist唯一的缺点就是 Pro 版本太贵，如果大家有兴趣，可以使用我的邀请链接注册，你可以得到一个月的 Pro 时间（价值 10 刀），而我可以获得 5 刀的抵扣券, <a href="https://dynalist.io/invite/pxG1VA">https://dynalist.io/invite/pxG1VA</a> 。</li>
+</ul>
+<h3 id="输出分享"><a href="#输出分享" class="headerlink" title="输出分享"></a>输出分享</h3><ul>
+<li>当你梳理完知识点之后，还需要进一步实践并且输出，这样它才能变成你自己的观点或者知识。Dynalist 或者导图只适合于梳理思路，整理大纲等，并不适合长文书写，如果你需要对某个知识点进行自己的阐述、或者需要写一篇读后感等等，你一定还需要一套专门用于写作的工具，它需要这些功能：<ol>
+<li>绘图工具，很多时候，我们如果想要把知识点清晰的说明出来，就需要绘制成各种图表，例如常见的示意图、阅读源码用到的流程图、时序图等等。这里我使用的软件分别是 <strong>edrawmax</strong> 和 <strong>astah</strong>。<ol>
+<li>edrawmax 提供了大量的绘图模板，例如金字塔、瀑布流、流程图等等，大大的提升了绘图效率。同类型的软件还有 Google 的 draw.io，OmniGraffle 等，也很好用，不过模板方面不尽人意。</li>
+<li>astah 是专门用于软件开发设计使用的工具，绘制 UML、流程图、ER 图等十分专业，界面略简陋，但是功能十分强大，而且比较全面，不需要来回切换软件。</li>
+</ol>
+</li>
+<li>图床：有了自己绘制的各种图片，我们还需要一个图床用于上传图片，这里我选择使用的是阿里云 OSS，优点是性能稳定、上传速度极快，基本上是秒传，同时价格比较便宜，平均一个月 10 块钱左右，用于个人博客足够了。搭配使用 <strong>PicGo</strong> 效果就更棒了，或者可以配合 Typora 直接在粘贴图片时候自动上传。</li>
+<li>Markdown 编辑器：Markdown 编辑器是近几年一个很火爆的话题，同类型的软件大概有好几十个，我自己用过的就包括 MacDown、Marked、MWeb、Typora、Bear 等等。最终选择使用 VSCode+Markdown 插件的形式，比较简洁清晰，而且 VSCode 查找文件、使用命令行操作 Git 等十分方便，不用来回切换。</li>
+<li>个人博客：这里其实不一定需要自己建站，现在博客方案很多种，可以使用博客园、CSDN、简书，也可以建立个人微信公众号，等等。说到底，重要的是产出的内容和是否能够坚持下来，中间的工具都是辅助而已，博客搭建的再漂亮没有文章也是白扯。我个人是用的 GitHub 的 page + Hexo 搭建的博客，好处是归档比较方便，有 Git 提交记录，有分类有 tag，可以再自己买一个域名，也可以直接使用 GitHub 的域名。这部分内容可以参考我之前的文章：<a href="http://samwei12.com/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">如何使用 Hexo 搭建个人博客</a>。</li>
+</ol>
+</li>
+</ul>
+<h3 id="定期-Review"><a href="#定期-Review" class="headerlink" title="定期 Review"></a>定期 Review</h3><ul>
+<li>按照”艾宾浩斯记忆曲线“理论，我们已经学会的知识需要定期回顾整理，才能牢牢记住，这一步我通常的做法是制作记忆卡片，使用的软件是 <strong>Anki</strong>，网上教程很多，这里不再赘述。</li>
+<li>需要说明的一点是，定期 Review 的核心在于 <strong>定期</strong>，如何能够坚持下来是很关键的，这里推荐一款名为 <strong>Streaks</strong> 的软件，它的功能十分简单单一，就是用于养成习惯，亮点是可以跟苹果的健康系统打通，自动读取你的起床时间、睡眠时间进行打卡。</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li>经过上面这些介绍，现在简单总结一下我个人的一个学习工作流程：<ol>
+<li>首先是信息输入，分为碎片信息、日常待办及书籍阅读。针对碎片信息，先进行过滤筛选，看看是不是要进一步了解学习，如果需要再放到 <strong>Pinbox</strong> 中；日常待办事项，通常我使用 <strong>滴答清单</strong> 处理，可以配合番茄钟使用；深度书籍阅读，电子书我一般使用 <strong>MarginNote</strong> 进行阅读，便于提取信息和整理导图。这里不建议在手机上进行深入阅读，手机也不是很合适，干扰因素太多，尽量减少手机使用时长，还是应该每天专门抽时间在电脑前查看整理收集到的碎片信息。</li>
+<li>之后是归纳整理，这一步需要将各个信息来源所收集到的信息知识进行分门别类，这里按照功能会划分一些固定的目录，例如编程、个人思考、旅行、日常等等，目前使用 <strong>Dynalist</strong> 用来整理大纲。对于一些碎片文章，如果已经整理完毕大纲，则根据是否需要归档来决定要不要将对应的网页进行本地保存，这里推荐一款 Chrome 的插件 <strong>SingleFile</strong>，用于将网页内容全部下载到本地一个单独的 html 文件中，即使网站挂了也能继续翻阅；如果不需要保存，那么仅作为一个参考资料，贴个链接即可。这样可以最大程度上避免 Pinbox 中的信息堆积如山，以至于再也不去查看。同时，目前我也在使用 <strong>Dynalist</strong> 进行个人工作学习计划的整理，而没有采用专门的 Trello 之类的软件，避免来回切换产生的成本。</li>
+<li>然后就是最重要的输出分享，对于一些编程类知识，还需要进行实践，可以针对每个分类单独建一个 GitHub 仓库，用于记录学习，同时把一些知识点归纳成图表，发到自己的博客上，对外进行输出，这里也可以采用跟其他同事同学一起讨论的方式，效率更高。如果觉得需要分享给其他人看，并且要有交流，推荐使用<strong>博客园</strong>，可以配合 MWeb 的 Metablog 支持同时发布到多个博客平台上。</li>
+<li>最后就是把自己已经学习到的知识点，录入到 <strong>Anki</strong> 中，进行定期复习，避免遗忘。</li>
+</ol>
+</li>
+</ul>
+<h2 id="PKM-常见误区"><a href="#PKM-常见误区" class="headerlink" title="PKM 常见误区"></a>PKM 常见误区</h2><ul>
+<li>这里总结一下 PKM 容易进入的误区：</li>
+</ul>
+<ol>
+<li><strong>折腾工具</strong>：尽可能开始明确一套工具体系，然后一直用下去。这个我觉得是绝大部分人会犯的的主要错误（当然包括我）。由于我个人比较喜欢尝试各种新鲜的工具，这些年也浪费了大量的时间，先后使用过 Evernote、为知笔记、MWeb、Xmind 等等，中间各种迁移，花了很多精力不说，部分信息还出现了丢失。目前在逐步克服这个毛病，希望大家不要走我的老路。这里列一下我自己这些年折腾工具摸出来的经验，希望对大家明确合适自己的工具起到帮助：<ol>
+<li><strong>尽可能不要全部依赖免费工具</strong>：现在大家对软件的付费意愿原来越强了，我这里还是简单提一下，不要只是因为某个软件免费而使用它，<strong>Pinboard</strong> 的作者就坚持提供付费服务，产品定价随着购买用户增多而提高，目前已经是每年 22 刀，并且做的越来越好，<strong>免费的往往是最贵的</strong>，我现在越来越能理解这一点。因为免费通常是要付出代价的，比如开发者一直拿不到收获，停止更新了，这时候你就不得不寻找下一个合适的工具，同时还要进行大量的迁移工作，中间会浪费大量的时间，世界上大部分事情都是不公平的，但只有时间，对每个人都是最公平的，所以最宝贵的是你的时间，而不是购买软件的那几十或者几百块钱。写到这里我不得不再次强推一下 Mac 下的 <strong>Manico</strong> 这款软件，它的功能很单一，就是可以帮助你快速切换软件，任意时刻快速按一个快捷键就能打开编辑器、打开钉钉、打开网页，而不是打开 Spotlight 或者 Alfred 再敲软件名，或者用鼠标在 Dock 中寻找，每次大约能节省 1~2 秒，每天大约能节省 5-6 分钟的样子，它现在是我使用频率最高的软件，没有之一，而且很良心的只要 25￥，这个钱是我花过最值的一次。附上我的近 30 天使用截图。 <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502182226.png" alt="20200502182226"></li>
+<li><strong>格式越简单越好</strong>：就像很多人现在还喜欢用笔和纸记录笔记一样，互联网发展的速度相当之快，但是兼容性也随之变差，记录想法的工具，最好是足够简单，这也是近些年 Markdown 能够这么火爆的原因。这么多年过去了，txt 格式一样是任何软件都可以支持的，而不是各种奇怪的软件自定义格式，所以尽量避开那些自定义自己格式和规范的软件，尤其是创业公司的，软件或者公司随时可能会倒闭，到时候倒霉的还是用户。这也是我为什么没有选择使用 <strong>Bear</strong>、<strong>Ulysses</strong> 等软件的原因，他们都定义了自己的 Markdown 语法，未来切换迁移成本会比较高。当然现在也还有一些软件走了极端，类似 <strong>Taskpaper</strong> 这种，全部使用文本文件，不是不可以，而是没有必要，如何在易用性和兼容性中间做取舍，要看大家各自的选择了。我个人建议，对于一些价值不是很大的，比如购物清单、待办事项等，可以优先考虑易用性和稳定性；而对于一些需要长久保存翻看的，例如个人博客、年度总结、工作思考等，选用一些相对通用的格式，类似 Markdown、Opml、HTML 等等。</li>
+<li><strong>除非是网络实在不可用，否则尽可能选用国外产品</strong>：倒不是说崇洋媚外，但是我这些年使用软件的心得告诉我，大部分情况下，国产软件不好用。这里指的并不是说功能不够好，而是国内软件氛围普遍较差，大部分软件免费版本砍掉了一些核心功能，逼着你必须付费，然而付费之后发现核心功能还是不够稳定。另一方面，国内产品通常没有足够的克制性，这点上做的最好的是微信，这么多年来，新增功能屈指可数，但是核心功能稳定的一比，假如微信也每年新增 n 个功能，各种摇一摇、视频号强制推广，但是聊天会丢失消息、偶尔连不上网，它绝对做不到如今的规模。反例太多了，比如我前两年用的收趣，刚开始出来的时候真的是好用，同步速度很快，且跟微信打通，直接在微信里面就可以保存文章，解决了一个大难题，但是逐渐就变味了，推出会员制、免费版不允许导出、加了各种花里胡哨的功能，于是我只能放弃它，更恶心的在于如果我想从它上面退出，必须要先买一个会员，否则我的内容导出不了，只能一个个打开拷贝链接，再迁移到 Raindrop.io 或者 Pinbox。国内产品通常都存在这个问题，你在上面产生的任何数据都是归属于他们，而不是你自己，国外公司的产品基本都没这个问题，哪怕是免费版本，你的各种数据在需要的时候都可以自行导出，可能是国内外对数据隐私的看法不同吧。另一个反例就是百度云盘，真的是喂屎给用户，为了不吃屎，只能花钱，而不是说确保核心功能可用的情况下，让用户自愿付费购买额外功能。</li>
+</ol>
+</li>
+<li><strong>仓鼠党</strong>：这个问题想必也有大部分人存在（包括我自己），曾经我的 Evernote 里面保存了上千篇文章和网页，以致于我后面都不想打开它，因为它剪切保存文章功能实在是太方便了，网上随便看到一篇文章就点击保存，动动手指头，分分钟就保存几十篇，然而一篇文章就需要花费几十分钟仔细阅读，有时候还要敲代码，时间就更久了，慢慢的，你会发现文章堆积如山，再也不想看了。我现在也同样存在这个问题，目前缓解的做法之一，就是把那些不能立马用到的或者曾经觉得有用现在用不到的文章全部删掉，不要觉得心疼或者可惜，换个角度考虑，这种文章网上一搜一大把，尽量做到关注到某个主题的时候，主动检索相关信息和知识，而不是推送过来的消息全部保存，然后 <strong>Read Never</strong>，共勉。</li>
+<li>停止打 tag：标签系统并不是很符合人类的思维习惯，可能你并没有注意到，你打的那些标签大部分从来没有检索过，反正我自己平时查阅个人知识的时候就是直接在整个知识库里面全文搜索，直接使用 VSCode 或者 Dynalist 的搜索功能即可。</li>
+<li>停止笔记分类焦虑：看到一篇文章的时候，不要一直纠结它的分类，或者动不动隔段时间就要对笔记进行一次大扫除，确保所有的笔记都在合适的目录下，很多时候有些知识点是很难讲清楚放在 A 还是放在 B 下面，它可能都涉及到。这时候不得不提一下，Dynalist 的内链十分方便，而且对每一个节点都会生成一个唯一链接，如果不是经常改变节点名称的话（大部分情况下改节点名也没问题），即使挪动了目录，对应的内链都不会失效，这点比自己用 Markdown 生成本地文件链接要好太多了。之前我尝试过用 Xmind + 本地文件链接跳转方式管理各种导图，后来就是因为文件位置或者名称一改，链接全部失效，只能作罢。所以使用 Dynalist 可以让你忽略目录分类变更，不用一开始就想尽办法把笔记放在合适的位置，别在这上面浪费时间。</li>
+<li>尽可能简化你的工作流，不要增加太多步骤，步骤越长，越难坚持。</li>
+</ol>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><ul>
+<li>这篇文章基本上总结到了我这几年个人知识管理的关键点，包括一些工具的挑选原则、具体的使用心得、一些常见的误区等等，希望对大家有所帮助。</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://en.wikipedia.org/wiki/Personal_knowledge_management">Wikipedia</a></li>
+<li><a href="https://medium.com/@axtonliu/how-to-build-an-efficient-personal-knowledge-management-system-355332ae5991">How To Build an Efficient Personal Knowledge Management System</a></li>
+<li><a href="https://dynalist.io/d/2pKguSbUt4PK58fuinbTsdWj#z=wCvySzD71orXrlkYhGM2x9OR">PKM 常见误区</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/39630918">清单笔记</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Thinking</category>
+      </categories>
+      <tags>
+        <tag>PKM</tag>
+        <tag>DIKW</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用 Wekan 搭建个人看板</title>
+    <url>/2020/05/03/Utilities/Wekan/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2020/05/03/Utilities/Wekan/">原文链接</a></p>
+</blockquote>
+<h2 id="看板？"><a href="#看板？" class="headerlink" title="看板？"></a>看板？</h2><p>术语：</p>
+<ul>
+<li>看板：TODO</li>
+<li>列表：同类型的事务放在一起，按照任务进度，通常为：未完成、进行中、已完成</li>
+<li>卡片：最小单位，即任务，</li>
+<li>泳道：不同类型的任务横向对比，例如，团队中不同分组等</li>
+</ul>
+<span id="more"></span>
+
+
+<h2 id="为什么要用看板？"><a href="#为什么要用看板？" class="headerlink" title="为什么要用看板？"></a>为什么要用看板？</h2><p>TODO</p>
+<h2 id="关于-wekan"><a href="#关于-wekan" class="headerlink" title="关于 wekan"></a>关于 wekan</h2><p><a href="https://github.com/wekan/wekan">wekan</a> 是一款开源的看板系统，从功能上来讲模仿看板类软件鼻祖 <a href="https://trello.com/">Trello</a>。整体界面大致如下：</p>
+<p><img src="http://www.scienjus.com/uploads/2016/03/wekan.jpeg"></p>
+<p>采用 wekan 的原因也比较简单， 为了安全性考虑，公司内部文档禁止使用部署在外部服务器上的工具。</p>
+<h2 id="如何搭建-wekan？"><a href="#如何搭建-wekan？" class="headerlink" title="如何搭建 wekan？"></a>如何搭建 wekan？</h2><blockquote>
+<p> 官方教程：<a href="https://github.com/wekan/wekan/wiki/Install-Wekan-Docker-in-production">https://github.com/wekan/wekan/wiki/Install-Wekan-Docker-in-production</a></p>
+</blockquote>
+<ol>
+<li>安装 Docker</li>
+<li>下载 <a href="https://github.com/wekan/wekan-mongodb">https://github.com/wekan/wekan-mongodb</a></li>
+<li>进入 mongodb 文件夹</li>
+<li>修改 yaml 中的 url 信息</li>
+<li>执行 <code>docker-compose up -d</code> 或者 <code>docker-compose up</code></li>
+</ol>
+<h2 id="wekan-简易说明"><a href="#wekan-简易说明" class="headerlink" title="wekan 简易说明"></a>wekan 简易说明</h2><h3 id="初步接触"><a href="#初步接触" class="headerlink" title="初步接触"></a>初步接触</h3><p>目前是在 Mac 服务器上搭建了 wekan，暂时没有域名，大家先使用 IP 地址登录， <a href="http://30.3.131.128/">http://30.3.131.128</a>，之后就是注册账号： –统一约定使用中文花名，邮箱使用公司邮箱–，</p>
+<p><img src="http://gw.alicdn.com/mt/TB1Qu_nd8mWBuNkSndVXXcsApXa-1566-950.png"></p>
+<p>之后进入看板首页，这里可以管理个人名下所有项目，新增看板也在这里，下面以工程组为例，简单介绍下如何使用看板。</p>
+<p>首先，创建一个看板，<img src="http://gw.alicdn.com/mt/TB1UY6MmgmTBuNjy1XbXXaMrVXa-303-210.png"></p>
+<p>接下来可以看到看板的整体页面，</p>
+<p><img src="http://gw.alicdn.com/mt/TB1ThO.d3KTBuNkSne1XXaJoXXa-1917-956.png"></p>
+<ul>
+<li>左上角为工程属性，例如是否私有，是否提示通知</li>
+<li>左侧整体面板为看板主体内容</li>
+<li>右侧为属性栏，包括系统日志、项目成员、标签设置等</li>
+<li>右上角为工具栏，包括搜索、过滤、列表/泳道切换、多选、看板菜单等</li>
+</ul>
+<h3 id="需求看板"><a href="#需求看板" class="headerlink" title="需求看板"></a>需求看板</h3><p>接下来需要做的事情就是建立列表和泳道，这里我们约定，需求跟任务划分为两个看板，例如，所有工程618的需求放到一个看板中，包括待定需求、进行中的需求、已完成需求，不需要写明需求详细工期，仅列出本期都有哪些需求即可；所有的需求细分出来的任务单独放一个看板中，需要细化到每人每天的工作。需求看板示例：</p>
+<p><img src="http://gw.alicdn.com/mt/TB18GyQmDJYBeNjy1zeXXahzVXa-1919-943.png"></p>
+<p>这里我们约定划分这么几个列表：</p>
+<ul>
+<li>待梳理需求：需要进一步评估是否需要做或者如何做</li>
+<li>长期规划：一般是3个月以上，可以视项目情况而定，移除该列表也可以</li>
+<li>中期规划：一般是1-3个月</li>
+<li>本月：当前月需要完成的需求</li>
+<li>已交付：该版本已完成需求</li>
+<li>后续可以看情况自定义部分列表，例如已延期</li>
+<li>不同泳道即不同模块，整体大图的话就可以按照算法、2D、3D 这样划分，小组内部可以根据功能划分，例如 CPU、GPU 等</li>
+</ul>
+<p>右侧面板中需要添加其他成员，这样其他人才能访问</p>
+<h3 id="任务看板"><a href="#任务看板" class="headerlink" title="任务看板"></a>任务看板</h3><p>之后我们就需要根据刚才整理出来的需求进一步分配工时，列表可以参考下图：</p>
+<p><img src="http://gw.alicdn.com/mt/TB1_ZzUd4uTBuNkHFNRXXc9qpXa-1633-949.png"></p>
+<ul>
+<li>需求列表：即本月需要完成的需求描述</li>
+<li>Task-todo：待完成任务</li>
+<li>Task-doing：进行中的任务</li>
+<li>Task-done：已完成任务</li>
+<li>需求-testing：测试中的需求</li>
+<li>需求-bug：测试中发现的 bug 列表</li>
+<li>需求-done：需求完成</li>
+</ul>
+<h3 id="任务详情"><a href="#任务详情" class="headerlink" title="任务详情"></a>任务详情</h3><p><img src="http://gw.alicdn.com/mt/TB1x8O1mDJYBeNjy1zeXXahzVXa-807-885.png"></p>
+<p>主要分为描述、成员、标签、耗时、评论等。</p>
+<h3 id="标签使用"><a href="#标签使用" class="headerlink" title="标签使用"></a>标签使用</h3><p><img src="http://gw.alicdn.com/mt/TB1BCoRmbGYBuNjy0FoXXciBFXa-299-283.png"></p>
+<p>按照需求优先级划分标签</p>
+<h2 id="项目约定"><a href="#项目约定" class="headerlink" title="项目约定"></a>项目约定</h2><ol>
+<li>账号统一使用中文花名</li>
+<li>邮箱使用公司邮箱</li>
+<li>所有项目均设置为私有</li>
+<li>每个组分为两个看板，分别为需求看板及任务看板</li>
+<li>标签按照需求优先级划分</li>
+</ol>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>Wekan</tag>
+        <tag>看板</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>跨平台书签同步:Xmarks</title>
+    <url>/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/">原文链接</a></p>
+</blockquote>
+<h2 id="Xmarks简介"><a href="#Xmarks简介" class="headerlink" title="Xmarks简介"></a>Xmarks简介</h2><p><a href="https://www.xmarks.com/">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
+<p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>
+<span id="more"></span>
+
+<h2 id="多浏览器支持"><a href="#多浏览器支持" class="headerlink" title="多浏览器支持"></a>多浏览器支持</h2><p> Xmarks 目前支持 Firefox、Chrome、IE、Safari 这几种常见浏览器，完全可以满足大部分用户需求。</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_001.png"></p>
+<p>仅需要在官网上下载相对应的浏览器插件，登录 Xmarks 账号即可开始使用，十分便捷。</p>
+<h2 id="支持恢复已删除书签"><a href="#支持恢复已删除书签" class="headerlink" title="支持恢复已删除书签"></a>支持恢复已删除书签</h2><p> Xmarks 会对用户每次的同步操作进行备份，同时可以很方便的进行查看和导出还原等操作。这个功能在多台设备间同步出错的时候十分实用</p>
+<p> <img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_002.png"></p>
+<p>同时还允许查找重复书签，十分人性化的功能，有时候经常一个页面添加到不同的书签文件夹里面，时间长了自己都忘记了，很适合我这种强迫症患者。</p>
+<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><p>Xmarks 有一个最大的缺点是与浏览器自带同步机制产生冲突，例如，Chrome 自带书签同步，同时 Xmarks 默认安装后是会隔一段时间或者每当书签发生变动时候进行自动同步，这时候问题就来了，即使没有任何书签变动，由于 Chrome 自己的同步机制，Xmarks 经常会产生另一份重复的书签，这时Xmarks 又会自动同步到服务器端，一不小心发现每个浏览器下面的书签文件夹都是好几份，只能使用直接下载覆盖，发现还是无法解决，最后使用杀手锏，恢复到之前正常的一个书签备份。</p>
+<p>被这个问题折磨了几次之后终于发现原来问题是出在浏览器自带的同步书签功能上面，最后我的解决办法是在 Chrome 的同步设置里面去除书签同步，反正每次重装 Chrome 时候，会自动同步 Xmarks 插件，这时进行下载覆盖本地书签即可。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说，对于多浏览器（尤其是包括 Safari 浏览器）的用户来说，Xmarks 是一个十分好用的同步工具。</p>
+<p>享受它的便捷性的同时，它带来的问题就是，无法使用浏览器自带的同步功能了，对于 Chrome 和 Firefox 来说，这个问题还不是很明显，但是对于 Mac 和 iPhone 用户来说，这相当于抛弃了 iCloud 自带的书签同步功能，手机上的书签就需要自己手动同步了。可以根据自己的需求来取舍。</p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>Xmarks</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何创建一个 Cocoapods 插件</title>
+    <url>/2019/04/22/Ruby/Gem/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2019/04/22/Ruby/Gem/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6/">原文链接</a></p>
+</blockquote>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>我们在使用 Cocoapods 过程中,如果发现它未能满足我们的要求该怎么办呢? </li>
+<li>最简单的粗暴的办法就是 fork 一份 Cocoapods 源码,然后自己公司内部或者个人直接针对源码进行部分修改或者新增功能,但这样做完全没有兼容性和扩展性,如果后续 Cocoapods 升级版本,你是无法兼容的,还需要重新进行一次修改,费力不讨好.</li>
+<li>其实 Cocoapods 提供了一套很方便的插件机制,只需要符合插件规则,即可定制各种自定义需求,接下来我们就看下应该如何自定义一个自己的插件.</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="How"><a href="#How" class="headerlink" title="How"></a>How</h2><ol>
+<li>确保 Gem 中安装了 <code>cocoapods-plugins</code> 模块,这个按理讲是安装 Cocoapods 时自带的,可以使用命令 <code>gem install cocoapods-plugins</code>进行安装</li>
+<li>新增插件 <code>pod plugins create NAME</code></li>
+<li>针对 gemspec 进行部分修改<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 这里是对外暴露的文件</span></span><br><span class="line">s.files = Dir[<span class="string">&quot;lib/**/*.rb&quot;</span>] + <span class="string">%w&#123; bin/pod bin/sandbox-pod README.md LICENSE CHANGELOG.md &#125;</span></span><br><span class="line">s.files = Dir[<span class="string">&quot;lib/**/*.rb&quot;</span>] + <span class="string">%w&#123; README.md LICENSE.txt &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 可执行文件, 没有的话可以使用默认生成的</span></span><br><span class="line">s.executables   = <span class="string">%w&#123; pod sandbox-pod &#125;</span></span><br><span class="line"><span class="comment"># 查找路径</span></span><br><span class="line">s.require_paths = <span class="string">%w&#123; lib &#125;</span></span><br></pre></td></tr></table></figure></li>
+<li>开发过程直接在 <code>lib/cocoapods_plugin</code> 文件中加载你 hook 的文件即可</li>
+<li>最终对外发布可以通过提 PR 给 <code>cocoapods-plugins</code> ,也可以放到自己公司的内部 Gem 源中</li>
+</ol>
+<h2 id="Relations"><a href="#Relations" class="headerlink" title="Relations"></a>Relations</h2><h3 id="书籍"><a href="#书籍" class="headerlink" title="书籍"></a>书籍</h3><h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><ul>
+<li><a href="https://github.com/CocoaPods/cocoapods-plugins">https://github.com/CocoaPods/cocoapods-plugins</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Ruby</category>
+      </categories>
+      <tags>
+        <tag>Cocoapods</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mac下如何自动备份目录到七牛云?</title>
+    <url>/2016/01/19/Utilities/Mac/Mac%E4%B8%8B%E5%A6%82%E4%BD%95%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E7%9B%AE%E5%BD%95%E5%88%B0%E4%B8%83%E7%89%9B%E4%BA%91/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2016/01/19/Utilities/Mac/Mac%E4%B8%8B%E5%A6%82%E4%BD%95%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E7%9B%AE%E5%BD%95%E5%88%B0%E4%B8%83%E7%89%9B%E4%BA%91/">原文链接</a></p>
+</blockquote>
+<p>七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.</p>
+<span id="more"></span>
+
+<h2 id="QRSBox简介"><a href="#QRSBox简介" class="headerlink" title="QRSBox简介"></a>QRSBox简介</h2><p>这里为什么要使用QRSBox呢,主要有两方面原因:</p>
+<ol>
+<li>QRSBox 支持增量同步, 这样上传过后的文件就可以立刻删掉了,对于笔记本来说,硬盘空间毕竟还是很宝贵的.</li>
+<li>QRSBox 不会同步文件的删除操作,因为我通常是使用七牛来作为图床使用,基本都是上传博客图片在里面,所以不太需要删除操作的同步.</li>
+</ol>
+<h2 id="下载安装"><a href="#下载安装" class="headerlink" title="下载安装"></a>下载安装</h2><p>下载链接:<a href="http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz">http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz</a>, 这里我只裂了 Mac 版本,其他版本都可以在官网进行下载.</p>
+<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><p>下载解压后,得到一堆Unix可执行程序, 将其中的<code>qrsboxcli</code>拷贝到<code>$PATH</code>里任意路径即可,在这里,我拷贝到了<code>/usr/local/bin</code>路径下,之后重启终端,即可全局使用<code> qrsboxcli</code>命令.</p>
+<p>接下来,进入<a href="https://portal.qiniu.com/setting/key">开发者自主平台</a>, 查看自己的 AccessKey 和 SecretKey, 命令行输入如下:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&lt;!--注意这里没有尖括号,使用自己的AccessKey, SecretKey替换下方尖括号里的内容--&gt;</span><br><span class="line">qrsboxcli init &lt;AccessKey&gt; &lt;SecretKey&gt; &lt;同步文件夹&gt; &lt;空间名称&gt;</span><br></pre></td></tr></table></figure>
+
+<p>完整的命令列表如下:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">qrsboxcli</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  qrsboxcli init &lt;AccessKey&gt; &lt;SecretKey&gt; &lt;SyncDir&gt; &lt;Bucket&gt;  - Init qrsbox conf</span><br><span class="line">  qrsboxcli sync &amp;                                           - Watch &lt;SyncDir&gt; and sync files</span><br><span class="line">  qrsboxcli status [&lt;Path&gt;]                                  - View path status</span><br><span class="line">  qrsboxcli <span class="built_in">log</span>                                              - View sync <span class="built_in">log</span></span><br><span class="line">  qrsboxcli stop                                             - Kill qrsboxcli sync process</span><br><span class="line"></span><br><span class="line">BuildVersion:</span><br><span class="line">  qrsboxcli v3.0.20150529</span><br></pre></td></tr></table></figure>
+
+<p>至此,就可以开心的使用七牛图床啦.</p>
+<h2 id="更改截图路径"><a href="#更改截图路径" class="headerlink" title="更改截图路径"></a>更改截图路径</h2><p>Mac 上自带的截图就十分好用, 我们可以通过变更系统快捷键来让它更加实用. 打开系统设置-&gt;键盘-&gt;快捷键, 之后选中屏幕快照,更改快捷键即可.</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-20_21-47-47.png"></p>
+<p>有些同学可能觉得这样仍然不够方便,毕竟,系统默认是保存截图到桌面的,还需要我们把它拷贝到自动上传目录下才行,那么我们还可以变更系统默认截屏路径. 打开终端,并输入下面的命令:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">`defaults write com.apple.screencapture location /path/`</span><br></pre></td></tr></table></figure>
+
+<p>这里其中的<code> path</code>部分就是你想要变更的截图路径,需要注意的是, 输入命令时候记得前后各有一个`符号,我当时输错了好多次才注意到这点.</p>
+<p>这里我们将截图路径设置为七牛云自动上传路径, 以后就可以快速截图加上传,只要打开图床网站获取外部链接即可直接使用在博客之类的地方,是不是很方便呢?</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档:"></a>参考文档:</h2><ul>
+<li><a href="http://developer.qiniu.com/docs/v6/tools/qrsbox.html">http://developer.qiniu.com/docs/v6/tools/qrsbox.html</a></li>
+<li><a href="http://www.cnblogs.com/ygm900/p/4237593.html">如何修改Mac截屏保存路径</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>图床</tag>
+        <tag>七牛云</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何恢复 iCloud 已删除文件</title>
+    <url>/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/">原文链接</a></p>
+</blockquote>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><ul>
+<li>今天在查找之前的 C++ 笔记时,突然发现之前的资料全没了,整个 Cpp 文件夹内就只剩下了三个文件,怎么形容当时的心情呢,应该说是一下就跌倒了谷底,感觉之前的心血全白费了,有种深深的挫败感.</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="思考路径"><a href="#思考路径" class="headerlink" title="思考路径"></a>思考路径</h2><ul>
+<li>这时候,我第一反应是想到了前几天我进行过一次文件夹整理,中间有个操作就是把另一个同名 Cpp 文件夹拷贝到了原本的 Cpp 文件夹中,这里有一个深坑,是把我原本的文件夹整个替换掉了!!!具体原因我等下再讲.</li>
+<li>突然有点六神无主,这时候想到的第一个解决方案是使用 Mac 数据恢复软件,网上迅速搜了一把,找到了 Disk Drill,嗯,无奈发现这个是收费软件,而且并没有能找到我想恢复的内容,因为我是误删了整个文件夹,且已经删除大概一周左右,我其实并想不起来里面具体都有几个文件,每个文件名叫什么,可能这个软件更适合于单个文件恢复吧,而且查找速度略慢,等了大概5-8分钟,结果告诉我没找到相关资料.(后面发现这货出现在我的 Setapp 里面,然而我暂时没有想用它的欲望了.)</li>
+<li>就在这时,我想起来苹果貌似有个文件恢复, 找到 <a href="https://www.icloud.com/#iclouddrive">https://www.icloud.com/#iclouddrive</a> 点击右下角最近删除,这时突然发现,嗯,里面是空的,告诉我最近没有任何文件删除! 此时我的内心有点小绝望,猜测应该是删除文件时间过久,苹果已经放弃他了,</li>
+<li>如果结果是这样,那么也就不会有这篇文章了,再次不甘尝试,换个关键词搜索,嗯,貌似有戏</li>
+<li><img src="https://i.loli.net/2019/04/21/5cbc8868cfb12.png" alt="CleanShot 2019-04-21 at 23.10.58@2x.png"></li>
+</ul>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><ul>
+<li>再次打开 iCloud, 这次进入的是 <a href="https://www.icloud.com/#settings">https://www.icloud.com/#settings</a> 这个页面,此时,果然发现左下角有个高级-&gt;恢复文件,半信半疑的点开</li>
+<li><img src="https://i.loli.net/2019/04/21/5cbc886607019.png" alt="CleanShot 2019-04-21 at 23.11.29@2x.png"></li>
+<li>耐心等待了大约10分钟左右,这次真的有文件列表出来了!!!天知道我此刻心里有多么的激动,这种失而复得的感觉是很棒的.</li>
+</ul>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><ul>
+<li>这里补充下,为什么当时粘贴时候没注意点了一下 OK,就差点(其实已经酿成了,不过勉强救回来了)酿成悲剧呢?</li>
+<li>原因在于拷贝跟剪切是完全不一样的,当你拷贝一个文件夹,然后粘贴时遇到同名文件夹,会提示:</li>
+<li><img src="https://i.loli.net/2019/04/21/5cbc8a9ac9e8d.png" alt="CleanShot 2019-04-21 at 23.21.32@2x.png"></li>
+<li>看到吧,这里会很明显告诉你要不要进行合并还是选择替换,但是当你使用了剪切之后,会提示什么呢?</li>
+<li><img src="https://i.loli.net/2019/04/21/5cbc8a9ac5216.png" alt="CleanShot 2019-04-21 at 23.21.47@2x.png"></li>
+<li>坑就在这里了, <strong>剪切时候,并不会提示合并,而是直接替换!!!</strong>,我就是在这里没有注意,手一抖,点了一个替换,然后就悲剧了.</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>所以,iCloud Drive 中的恢复文件,貌似时间是更短一点的,具体多久还没测试,但是看起来我超过3天的文件已经无法看到了,只有当天删除的可以显示,这时候千万不要气馁,找到 iCloud Setting 里面的高级-&gt;恢复文件, 这个时间限制就久很多了,可以恢复不超过<strong>30天</strong>的文件,一般情况下都足够使用了,这里稍微吐槽下,苹果云盘的这个恢复功能远不如国内坚果云做的好,考虑到每个月只要6块钱,我忍了.</li>
+<li>另外,<strong>剪切功能使用的时候一定要小心,注意是没有合并提示的!!!</strong></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Mac</category>
+      </categories>
+      <tags>
+        <tag>iCloud</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何在 MWeb 中配置 Hexo 等静态网站</title>
+    <url>/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/">原文链接</a></p>
+</blockquote>
+<blockquote>
+<p>参考链接：<br><a href="https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html">https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html</a><br><a href="https://zhuanlan.zhihu.com/p/30513914">https://zhuanlan.zhihu.com/p/30513914</a></p>
+</blockquote>
+<p>网上搜索到相关资料，如上面的链接，发现最新版本 MWeb （3.1.2）步骤有所出入，添加外部文件夹时候并没有弹出设置页面，需要自己手动在左侧文件夹上右击，点击编辑，</p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>MWeb</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何使用 Hexo 搭建个人博客</title>
+    <url>/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">原文链接</a></p>
+</blockquote>
+<h2 id="什么是-Hexo-？"><a href="#什么是-Hexo-？" class="headerlink" title="什么是 Hexo ？"></a>什么是 Hexo ？</h2><p><a href="https://hexo.io/">Hexo</a> 是一个简单快速的静态博客框架，可以通过编辑 <a href="http://daringfireball.net/projects/markdown/">Markdown</a> 文档生成好看的静态博客。</p>
+<h2 id="搭建-Hexo"><a href="#搭建-Hexo" class="headerlink" title="搭建 Hexo"></a>搭建 Hexo</h2><h3 id="要求"><a href="#要求" class="headerlink" title="要求"></a>要求</h3><p>安装 Hexo 十分简单，只需要 Node.js 和 Git 即可。</p>
+<ul>
+<li><a href="http://nodejs.org/">Node.js</a></li>
+<li><a href="http://git-scm.com/">Git</a></li>
+</ul>
+<span id="more"></span>
+
+<h4 id="Node-js"><a href="#Node-js" class="headerlink" title="Node.js"></a>Node.js</h4><p>最好的安装方式是使用 <a href="https://github.com/creationix/nvm">nvm</a>，</p>
+<p>cURL：</p>
+<p><code>$ curl https://raw.github.com/creationix/nvm/master/install.sh | sh</code></p>
+<p>安装好 nvm 之后，重启终端，然后通过</p>
+<p><code>$ nvm install 0.12</code></p>
+<p>来安装 Node.js</p>
+<h4 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h4><p>Mac 用户：<a href="http://mxcl.github.com/homebrew/">Homebrew</a></p>
+<h3 id="安装-Hexo"><a href="#安装-Hexo" class="headerlink" title="安装 Hexo"></a>安装 Hexo</h3><p><code>$ npm install -g hexo-cli</code></p>
+<blockquote>
+<p>需要注意的是，这里的 npm 相关命令，最好都使用管理员权限操作，否则可能会报错</p>
+</blockquote>
+<h2 id="如何使用-Hexo"><a href="#如何使用-Hexo" class="headerlink" title="如何使用 Hexo"></a>如何使用 Hexo</h2><p>一旦安装完毕 Hexo，即可通过如下命令在指定文件夹中初始化 Hexo：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ hexo init &lt;folder&gt;</span><br><span class="line">$ cd &lt;folder&gt;</span><br><span class="line">$ npm install</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置-Hexo"><a href="#配置-Hexo" class="headerlink" title="配置 Hexo"></a>配置 Hexo</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># Hexo Configuration</span><br><span class="line"># Site</span><br><span class="line">title: Hexo #博客标题</span><br><span class="line">subtitle: #博客副标题</span><br><span class="line">description: #博客描述</span><br><span class="line">author: John Doe #作者名字</span><br><span class="line">email: #邮箱地址</span><br><span class="line">language: #语言 中国大陆简体中文的标准语系地区码是zh-CN 台灣是正體中文zh-TW </span><br><span class="line"></span><br><span class="line"># URL</span><br><span class="line">url: http://yoursite.com #博客地址</span><br><span class="line">root: / #博客根目录</span><br><span class="line">permalink: :year/:month/:day/:title/ #博客url地址结构  </span><br><span class="line">tag_dir: tags </span><br><span class="line">archive_dir: archives</span><br><span class="line">category_dir: categories</span><br><span class="line">code_dir: downloads/code</span><br><span class="line">permalink_defaults:</span><br><span class="line"></span><br><span class="line"># Directory</span><br><span class="line">source_dir: source</span><br><span class="line">public_dir: public</span><br><span class="line"></span><br><span class="line"># Writing</span><br><span class="line">new_post_name: :title.md # File name of new posts</span><br><span class="line">default_layout: post</span><br><span class="line">titlecase: false # Transform title into titlecase</span><br><span class="line">external_link: true # Open external links in new tab</span><br><span class="line">filename_case: 0</span><br><span class="line">render_drafts: false</span><br><span class="line">post_asset_folder: false</span><br><span class="line">relative_link: false</span><br><span class="line">highlight:</span><br><span class="line">enable: true</span><br><span class="line">line_number: true</span><br><span class="line">tab_replace:</span><br><span class="line"></span><br><span class="line"># Category &amp; Tag</span><br><span class="line">default_category: uncategorized</span><br><span class="line">category_map:</span><br><span class="line">tag_map:</span><br><span class="line"></span><br><span class="line"># Archives</span><br><span class="line">archive: 1 #设置为1 是全部展示</span><br><span class="line">category: 2</span><br><span class="line">tag: 2</span><br><span class="line"></span><br><span class="line"># Server</span><br><span class="line">port: 4000 #本地服务器端口是4000</span><br><span class="line">server_ip: localhost #本地服务器地址</span><br><span class="line">logger: false</span><br><span class="line">logger_format: dev</span><br><span class="line"></span><br><span class="line"># Date / Time format</span><br><span class="line">date_format: MMM D YYYY #日期格式</span><br><span class="line">time_format: H:mm:ss #时间格式</span><br><span class="line"></span><br><span class="line"># Pagination</span><br><span class="line">## Set per_page to 0 to disable pagination</span><br><span class="line">per_page: 10</span><br><span class="line">pagination_dir: page</span><br><span class="line"></span><br><span class="line"># Disqus</span><br><span class="line">disqus_shortname: #disqus的用户名称</span><br><span class="line"></span><br><span class="line"># Extensions</span><br><span class="line">theme: landscape #主题设置</span><br><span class="line">exclude_generator:</span><br><span class="line"></span><br><span class="line"># Deployment</span><br><span class="line">deploy:</span><br><span class="line">  type:</span><br></pre></td></tr></table></figure>
+
+<h4 id="完善页面"><a href="#完善页面" class="headerlink" title="完善页面"></a>完善页面</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hexo new page &quot;about&quot;</span><br></pre></td></tr></table></figure>
+
+<p>用于创建 about 页面</p>
+<h3 id="Hexo-常用插件"><a href="#Hexo-常用插件" class="headerlink" title="Hexo 常用插件"></a>Hexo 常用插件</h3><p><a href="https://github.com/hexojs/hexo/wiki/Plugins">Plugins</a>, Hexo官方插件列表地址</p>
+<h4 id="RSS"><a href="#RSS" class="headerlink" title="RSS"></a>RSS</h4><p>安装hexo-generator-feed插件即可</p>
+<p><code>npm install hexo-generator-feed</code></p>
+<h4 id="阅读进度"><a href="#阅读进度" class="headerlink" title="阅读进度"></a>阅读进度</h4><ul>
+<li><a href="https://github.com/theme-next/theme-next-reading-progress">https://github.com/theme-next/theme-next-reading-progress</a></li>
+</ul>
+<h4 id="Sitemap"><a href="#Sitemap" class="headerlink" title="Sitemap"></a>Sitemap</h4><p>给搜索引擎使用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">npm install hexo-generator-sitemap</span><br></pre></td></tr></table></figure>
+
+
+<p>装完之后 记得在全局配置里面开启插件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">plugins:</span><br><span class="line">- hexo-generator-feed</span><br><span class="line">- hexo-generator-sitemap</span><br></pre></td></tr></table></figure>
+
+<h4 id="Git-1"><a href="#Git-1" class="headerlink" title="Git"></a>Git</h4><p>用于发布</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
+
+<h4 id="baidu-sitemap"><a href="#baidu-sitemap" class="headerlink" title="baidu sitemap"></a>baidu sitemap</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">npm install hexo-generator-baidu-sitemap@0.1.1 --save</span><br></pre></td></tr></table></figure>
+
+<h4 id="sitemap"><a href="#sitemap" class="headerlink" title="sitemap"></a>sitemap</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">npm install hexo-generator-sitemap --save</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>重新clean发布</li>
+<li>之后访问： <a href="https://search.google.com/search-console/settings?resource_id=http://samwei12.com/&amp;hl=zh-CN">https://search.google.com/search-console/settings?resource_id=http%3A%2F%2Fsamwei12.com%2F&amp;hl=zh-CN</a> 填写生成sitemap地址即可</li>
+</ul>
+<h4 id="Gitalk"><a href="#Gitalk" class="headerlink" title="Gitalk"></a>Gitalk</h4><ul>
+<li>用于管理评论</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Gitalk</span></span><br><span class="line"><span class="comment"># Demo: https://gitalk.github.io</span></span><br><span class="line"><span class="attr">gitalk:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">github_id:</span> <span class="string">samwei12</span>  <span class="comment"># Github repo owner</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">Gitalk</span> <span class="comment"># Repository name to store issues 注意这里必须要填名称，而不是链接</span></span><br><span class="line">  <span class="attr">client_id:</span>  <span class="comment"># Github Application Client ID</span></span><br><span class="line">  <span class="attr">client_secret:</span>  <span class="comment"># Github Application Client Secret</span></span><br><span class="line">  <span class="attr">admin_user:</span> <span class="string">samwei12</span> <span class="comment"># GitHub repo owner and collaborators, only these guys can initialize github issues 这里填名称即可，可以是数组</span></span><br><span class="line">  <span class="attr">distraction_free_mode:</span> <span class="literal">true</span> <span class="comment"># Facebook-like distraction free mode</span></span><br><span class="line">  <span class="comment"># Gitalk&#x27;s display language depends on user&#x27;s browser or system environment</span></span><br><span class="line">  <span class="comment"># If you want everyone visiting your site to see a uniform language, you can set a force language value</span></span><br><span class="line">  <span class="comment"># Available values: en, es-ES, fr, ru, zh-CN, zh-TW</span></span><br><span class="line">  <span class="attr">language:</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="GoogleAnalytics"><a href="#GoogleAnalytics" class="headerlink" title="GoogleAnalytics"></a>GoogleAnalytics</h4><ul>
+<li>用于分析数据</li>
+<li><a href="https://analytics.google.com/analytics/web/#/report-home/a138655615w199342623p193811219">https://analytics.google.com/analytics/web/#/report-home/a138655615w199342623p193811219</a></li>
+</ul>
+<h4 id="阅读时间统计"><a href="#阅读时间统计" class="headerlink" title="阅读时间统计"></a>阅读时间统计</h4><ul>
+<li>参考:<a href="https://github.com/theme-next/hexo-symbols-count-time">https://github.com/theme-next/hexo-symbols-count-time</a></li>
+<li>这里有个注意点,必须要在主配置文件即<code>_config.yml</code>中提前开启,才能在 next 主题中进行配置,否则失效</li>
+</ul>
+<h4 id="local-search"><a href="#local-search" class="headerlink" title="local_search"></a>local_search</h4><ul>
+<li>本地搜索</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Local search</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/hexo-generator-searchdb</span></span><br><span class="line"><span class="attr">local_search:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment"># If auto, trigger search by changing input.</span></span><br><span class="line">  <span class="comment"># If manual, trigger search by pressing enter key or search button.</span></span><br><span class="line">  <span class="attr">trigger:</span> <span class="string">auto</span></span><br><span class="line">  <span class="comment"># Show top n results per article, show all results by setting to -1</span></span><br><span class="line">  <span class="attr">top_n_per_article:</span> <span class="number">1</span></span><br><span class="line">  <span class="comment"># Unescape html strings to the readable one.</span></span><br><span class="line">  <span class="attr">unescape:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="发布到-Github"><a href="#发布到-Github" class="headerlink" title="发布到 Github"></a>发布到 Github</h2><h3 id="拥有自己的-GithubPage"><a href="#拥有自己的-GithubPage" class="headerlink" title="拥有自己的 GithubPage"></a>拥有自己的 GithubPage</h3><ol>
+<li>创建一个与自己用户名相同的项目</li>
+<li>随便上传个文件，上传 master 分支</li>
+<li>新建 hexo 分支，并切换到该分支，推送到远程</li>
+</ol>
+<h3 id="发布"><a href="#发布" class="headerlink" title="发布"></a>发布</h3><ul>
+<li>配置里，新增</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repo: https://github.com/samwei12/samwei12.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li>然后</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 生成静态文件</span><br><span class="line">hexo g</span><br><span class="line">// 发布</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure>
+
+<p>即可</p>
+<h2 id="绑定个人域名"><a href="#绑定个人域名" class="headerlink" title="绑定个人域名"></a>绑定个人域名</h2><h3 id="购买域名"><a href="#购买域名" class="headerlink" title="购买域名"></a>购买域名</h3><ul>
+<li>可以从<a href="https://www.aliyun.com/">阿里云</a>上购买域名, 目前我购买了 <code>samwei12.com</code> 这个域名，几个注意事项：<ul>
+<li>需要实名认证</li>
+<li>需要备案</li>
+</ul>
+</li>
+</ul>
+<h3 id="域名备案"><a href="#域名备案" class="headerlink" title="域名备案"></a>域名备案</h3><ul>
+<li>可以参考：<a href="https://developer.qiniu.com/af/kb/3987/how-to-make-website-and-inquires-the-police-put-on-record-information">https://developer.qiniu.com/af/kb/3987/how-to-make-website-and-inquires-the-police-put-on-record-information</a></li>
+</ul>
+<h3 id="绑定域名"><a href="#绑定域名" class="headerlink" title="绑定域名"></a>绑定域名</h3><ul>
+<li>域名解析：</li>
+<li>GitHub中绑定，在项目的设置界面绑定即可</li>
+<li>参考：<a href="https://help.github.com/en/articles/quick-start-setting-up-a-custom-domain">https://help.github.com/en/articles/quick-start-setting-up-a-custom-domain</a></li>
+</ul>
+<h2 id="迁移到新电脑"><a href="#迁移到新电脑" class="headerlink" title="迁移到新电脑"></a>迁移到新电脑</h2><ul>
+<li>最近又是好久没有写博客了，换了新电脑之后需要重新配置，这次记录下还原步骤，下次再遇到可以提高效率。</li>
+</ul>
+<h3 id="还原博客文件"><a href="#还原博客文件" class="headerlink" title="还原博客文件"></a>还原博客文件</h3><ul>
+<li>我采用的办法是将博客相关内容专门放到 hexo 分支上，然后 git 仓库的默认分支设置为 hexo，切换电脑之后直接拉取最新代码。</li>
+</ul>
+<h3 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h3><ol>
+<li>首先先把主题和插件安装下来<ol>
+<li>我使用的主题是 <code>https://github.com/theme-next/hexo-theme-next.git</code>， 这里推荐把主题的配置文件放到 <code>_data</code>文件夹下，好处是即使换了电脑，配置重新拉取代码仍然同步</li>
+<li>阅读进度插件： <code>https://github.com/theme-next/theme-next-reading-progress</code></li>
+<li>字体插件：<code>https://github.com/theme-next/theme-next-han</code></li>
+</ol>
+</li>
+<li>根目录下执行 <code>npm install</code></li>
+<li><code>hexo g &amp;&amp; hexo s</code> 本地测试是否部署成功</li>
+</ol>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ul>
+<li>需要注意本地文件名不能有特殊符号，例如空格等，title 里面有没关系，但是文件里面有会导致 Gitalk 插件失效，详见 <a href="https://github.com/gitalk/gitalk/issues/162">https://github.com/gitalk/gitalk/issues/162</a></li>
+</ul>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="http://segmentfault.com/a/1190000002538363">Hexo静态博客使用指南</a></li>
+<li><a href="http://blog.fens.me/hexo-blog-github/">Hexo在github上构建免费的Web应用</a></li>
+<li><a href="https://xian6ge.cn/posts/5b8c41e7/">https://xian6ge.cn/posts/5b8c41e7/</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/44213627?utm_source=ZHShareTargetIDMore&amp;utm_medium=social&amp;utm_oi=28525297926144">https://zhuanlan.zhihu.com/p/44213627?utm_source=ZHShareTargetIDMore&amp;utm_medium=social&amp;utm_oi=28525297926144</a></li>
+<li><a href="https://help.github.com/en/articles/troubleshooting-custom-domains#https-errors">https://help.github.com/en/articles/troubleshooting-custom-domains#https-errors</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>Blog</tag>
+      </tags>
+  </entry>
+</search>
