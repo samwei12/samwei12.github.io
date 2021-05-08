@@ -7,7 +7,7 @@ tags:
   - iCloud
 ---
 
-> [原文链接](http://samwei12.com/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/)
+> [原文链接](http://blog.samwei12.cn/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/)
 
 ## 问题
 

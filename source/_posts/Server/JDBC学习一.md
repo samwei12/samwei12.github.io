@@ -7,7 +7,7 @@ tags:
   - JDBC
 ---
 
-> [原文链接](http://samwei12.com/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/)
+> [原文链接](http://blog.samwei12.cn/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/)
 
 今天开始会写一系列 Java 后端学习的笔记，一方面是为了以后翻阅查看，更主要的原因是通过写作输出的方式让自己的印象更深，避免遗忘。
 

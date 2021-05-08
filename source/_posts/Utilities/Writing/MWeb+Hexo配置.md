@@ -8,7 +8,7 @@ tags:
   - MWeb
 ---
 
-> [原文链接](http://samwei12.com/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/)
+> [原文链接](http://blog.samwei12.cn/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/)
 
 > 参考链接： 
 > [https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html](https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html)

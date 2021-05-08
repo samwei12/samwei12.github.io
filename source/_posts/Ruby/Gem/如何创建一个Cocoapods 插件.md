@@ -7,7 +7,7 @@ tags:
   - Cocoapods
 ---
 
-> [原文链接](http://samwei12.com/2019/04/22/Ruby/Gem/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6/)
+> [原文链接](http://blog.samwei12.cn/2019/04/22/Ruby/Gem/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6/)
 
 ## 前言
 

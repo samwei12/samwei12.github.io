@@ -8,7 +8,7 @@ tags:
   - 七牛云
 ---
 
-> [原文链接](http://samwei12.com/2016/01/19/Utilities/Mac/Mac%E4%B8%8B%E5%A6%82%E4%BD%95%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E7%9B%AE%E5%BD%95%E5%88%B0%E4%B8%83%E7%89%9B%E4%BA%91/)
+> [原文链接](http://blog.samwei12.cn/2016/01/19/Utilities/Mac/Mac%E4%B8%8B%E5%A6%82%E4%BD%95%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E7%9B%AE%E5%BD%95%E5%88%B0%E4%B8%83%E7%89%9B%E4%BA%91/)
 
 七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.
 

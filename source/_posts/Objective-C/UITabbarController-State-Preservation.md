@@ -7,7 +7,7 @@ tags:
   - UITabbarController
 ---
 
-> [原文链接](http://samwei12.com/2016/01/19/Objective-C/UITabbarController-State-Preservation/)
+> [原文链接](http://blog.samwei12.cn/2016/01/19/Objective-C/UITabbarController-State-Preservation/)
 
 最近在看**ios programming - the big nerd ranch guide** 这本书,其中第24章介绍了如何使用系统接口来实现 State Restoration. 示例部分介绍的是如何针对 `UINavigationController` 来进行保存和还原状态, 然后额外的练习题部分是 `UITabbarController` 的状态保存和恢复,可是在这里却一直遇到问题， 导致程序返回时`UITabbarController`始终无法还原状态，本文记录下如何使用State Restoration和`UITabbarController`所需的额外处理。
 

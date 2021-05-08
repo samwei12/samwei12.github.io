@@ -7,7 +7,7 @@ tags:
   - Jinja2
 ---
 
-> [原文链接](http://samwei12.com/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/)
+> [原文链接](http://blog.samwei12.cn/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/)
 
 ## 背景
 

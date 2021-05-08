@@ -8,7 +8,7 @@ categories:
 - Utilities
 ---
 
-> [原文链接](http://samwei12.com/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/)
+> [原文链接](http://blog.samwei12.cn/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/)
 
 ## 什么是 Hexo ？
 

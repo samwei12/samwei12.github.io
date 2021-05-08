@@ -7,7 +7,7 @@ categories:
 date: 2015-09-21 13:58:46
 ---
 
-> [原文链接](http://samwei12.com/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/)
+> [原文链接](http://blog.samwei12.cn/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/)
 
 ## AVCaptureSession阻塞主线程问题
 
