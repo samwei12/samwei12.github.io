@@ -428,6 +428,9 @@ gitalk:
   distraction_free_mode: true # Facebook-like distraction free mode
   # Gitalk's display language depends on user's browser or system environment
   # If you want everyone visiting your site to see a uniform language, you can set a force language value
+  # 避免403错误，参考： https://cuiqingcai.com/30010.html
+  # https://github.com/gitalk/gitalk/issues/433
+  proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token'
   # Available values: en, es-ES, fr, ru, zh-CN, zh-TW
   language:
 
