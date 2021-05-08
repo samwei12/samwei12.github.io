@@ -1,6 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>AVCaptureSession部分用法</title>
+    <url>/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/">原文链接</a></p>
+</blockquote>
+<h2 id="AVCaptureSession阻塞主线程问题"><a href="#AVCaptureSession阻塞主线程问题" class="headerlink" title="AVCaptureSession阻塞主线程问题"></a>AVCaptureSession阻塞主线程问题</h2><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>仔细看了文档之后，发现问题出在<code> stopRunning</code>这里，</p>
+<span id="more"></span>
+<p>苹果文档描述如下：</p>
+<blockquote>
+<p>Clients invoke -stopRunning to stop the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    stopped.</p>
+</blockquote>
+<p>重点是这个函数在 session 完全停止下来之前会始终阻塞线程， 同样的，在<code> startRunning</code>中：</p>
+<blockquote>
+<p>Clients invoke -startRunning to start the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    started up or failed.  A failure to start running is reported through the AVCaptureSessionRuntimeErrorNotification<br>    mechanism.</p>
+</blockquote>
+<p>因此这里必须放在后台线程中处理，否则，就会导致界面不响应，iOS8之后应该在这里做了优化，即使放在主线程做也没有很卡顿的现象，但 iOS7中，尤其是测试设备为4s，界面卡死问题很严重。</p>
+<p>开启和关闭相机部分代码改为：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 开启相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		[[<span class="keyword">self</span>.avCameraManager session] startRunning];</span><br><span class="line">	&#125;);</span><br><span class="line">	</span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="keyword">void</span>) &#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 关闭相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		<span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。</p>
+<h2 id="相机前后台切换问题"><a href="#相机前后台切换问题" class="headerlink" title="相机前后台切换问题"></a>相机前后台切换问题</h2><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(startRunningSession) withObject:<span class="literal">nil</span> afterDelay:<span class="number">0.5</span>];</span><br></pre></td></tr></table></figure>
+
+<p>当时我很奇怪，这里为什么要加延时呢？进入到前台时不是应该直接开启相机吗？于是我直接把这里改成了：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">self</span> startRunningSession];</span><br></pre></td></tr></table></figure>
+
+<p>没过多久，问题出现了，多次切换前后台之后发现，相机始终黑屏，这时，进入后台再回来，问题解决了，仔细加了 log 之后发现，出现黑屏的时候，确实也正确调用了启动 session，但是并没有收到系统相机启动成功的消息，反而收到了两次相机关闭的通知。</p>
+<p>那么之前代码中加了0.5秒延时的原因也就清楚了，是为了等待系统关闭相机之后，再调用开启相机，以免相机启动失败，但这种方式真的合理吗？其实并没有解决本质问题，如果0.5秒钟的时间并没有完全关闭系统相机呢？这里仍然会出现黑屏问题。</p>
+<p>于是继续查看系统文档，发现系统的 sampleCode AVCam-iOS中并没有专门用于前后台处理的逻辑，原来这里并不需要我们自己手动管理相机，系统会自动根据程序状态来判断是否需要关闭或者开启相机，如果按 home 进入<code>UIApplicationStateBackground</code> 状态，那么系统自动关闭相机并在进入<code>UIApplicationStateActive</code>状态时开启相机；如果是进入<code>UIApplicationStateInactive</code>状态，例如，双击 home 调出任务管理器，这时，相机并没有被关闭，仍然能够看到 preview 画面。</p>
+<p>我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作</li>
+<li>前后台切换时，无需手动管理 CaptureSession</li>
+</ul>
+]]></content>
+      <categories>
+        <category>iOS</category>
+      </categories>
+      <tags>
+        <tag>AVCaptureSession</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>NSView subview blocking drag/drop event</title>
+    <url>/2016/01/26/Objective-C/subview-blocking-drag-event/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2016/01/26/Objective-C/subview-blocking-drag-event/">原文链接</a></p>
+</blockquote>
+<p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p>
+<ol>
+<li>从 NSView 继承得到一个子类</li>
+<li>覆盖处理拖拽事件相关方法</li>
+<li>注册拖拽事件</li>
+</ol>
+<span id="more"></span>
+
+<p>开始的时候一切都很正常,直到某次发现拖拽到屏幕边缘响应较为灵敏,而<strong>拖拽到屏幕中间则不响应事件</strong>,APP页面大致是这样的:</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png"></p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。</p>
+<p>那么如何验证呢？其实也很简单，在自定义的NSView 中重载<code>draggingEnded：</code>方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 <code>NSView</code> 中添加的<code>NSImageView</code>作为 subview 会阻止拖拽事件的传递，原因是<code> NSImageView</code>本身可以处理拖拽事件，于是截获了本该自定义<code>NSView</code>处理的消息。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：<a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></p>
+<p>提供的解决方案有以下几种：</p>
+<ol>
+<li>不使用 <code>NSImageView</code>，而是采用自定义<code> NSView</code>的方式，然后重写<code>drawRect：</code>方法进行图片渲染。这个办法十分笨拙，并且不太方便。</li>
+<li>调用<code>unregisterDraggedTypes </code>方法，这样<code> NSImageView</code>就不会监听拖拽事件了，完美解决。</li>
+</ol>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></li>
+<li><a href="http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation">http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Mac</category>
+      </categories>
+      <tags>
+        <tag>Cocoa</tag>
+        <tag>NSView</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何实现 UITabbarController 的 State Preservation?</title>
     <url>/2016/01/19/Objective-C/UITabbarController-State-Preservation/</url>
     <content><![CDATA[<blockquote>
@@ -86,133 +169,40 @@
       </tags>
   </entry>
   <entry>
-    <title>常用汇编指令总结</title>
-    <url>/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/</url>
+    <title>如何取消 UIView 动画？</title>
+    <url>/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/</url>
     <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/">原文链接</a></p>
+<p><a href="http://samwei12.com/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/">原文链接</a></p>
 </blockquote>
+<p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
+<p>动画部分代码很简单，如下：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">						 <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">							 [<span class="keyword">self</span> hideFocus];</span><br><span class="line">						 &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
+
+<p>对焦框在0.3秒内进行两倍缩小到正常尺寸的一个动画，之后隐藏。</p>
 <span id="more"></span>
 
-<h2 id="浮点数相关"><a href="#浮点数相关" class="headerlink" title="浮点数相关"></a>浮点数相关</h2><h3 id="mm-unpacklo-ps"><a href="#mm-unpacklo-ps" class="headerlink" title="_mm_unpacklo_ps"></a><code>_mm_unpacklo_ps</code></h3><blockquote>
-<p>Selects and interleaves the lower two SP FP values from a and b.</p>
-</blockquote>
-<p>将两个128位浮点数的低64位分别取出，返回新的128位浮点数</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">INTERLEAVE_DWORDS</span>(src1[<span class="number">127</span>:<span class="number">0</span>], src2[<span class="number">127</span>:<span class="number">0</span>])&#123;</span><br><span class="line">	dst[<span class="number">31</span>:<span class="number">0</span>] := src1[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">63</span>:<span class="number">32</span>] := src2[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">95</span>:<span class="number">64</span>] := src1[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	dst[<span class="number">127</span>:<span class="number">96</span>] := src2[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	RETURN dst[<span class="number">127</span>:<span class="number">0</span>]</span><br><span class="line">&#125;	</span><br><span class="line"></span><br><span class="line">dst[<span class="number">127</span>:<span class="number">0</span>] := <span class="built_in">INTERLEAVE_DWORDS</span>(a[<span class="number">127</span>:<span class="number">0</span>], b[<span class="number">127</span>:<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+<h2 id="旧代码分析"><a href="#旧代码分析" class="headerlink" title="旧代码分析"></a>旧代码分析</h2><p>以前的代码在这部分的处理大致是这样的，</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:_touches];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UITouch</span> *touch = [_touches anyObject];</span><br><span class="line">    <span class="built_in">CGPoint</span> touchPoint = [touch locationInView:<span class="keyword">self</span>.view];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    [<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(touchFocus:) withObject: touches afterDelay:<span class="number">0.3</span>f];</span><br><span class="line">    </span><br><span class="line">- (<span class="keyword">void</span>)touchFocus:(<span class="built_in">NSSet</span> *)touches &#123;</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:touches];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 以下为具体对焦框显示部分</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>输入如果为：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,a1,a2,a3</span><br><span class="line">b0,b1,b2,b3</span><br></pre></td></tr></table></figure>
+<p>可以看出，代码逻辑大致为，截获屏幕点击事件，之后加入一个0.3秒的延时方法，如果用户0.3秒内再次点击对焦，则取消上一次的对焦事件；否则，执行对焦框动画。</p>
+<p>这个逻辑看似解决了用户快速点击对焦的问题，实际上如果用户真正快速点击屏幕时，会出现一个很奇怪的现象，就是对焦框始终存在，并且不会变换位置，等到停止点击屏幕后，对焦框才会响应最新的触控位置进行动画，另一个问题就是对焦始终存在迟滞感，因为点击屏幕后需要等待0.3秒才能看到动画。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>那么有什么更好的办法呢？系统难道没有提供终止动画的接口嘛？当然不是，其实只需要在用户再次点击屏幕时候调用<code>[_focusView.layer removeAllAnimations];</code>即可，其中具体的 view 为正在做动画的 view。</p>
+<p>这样做还有另外一个好处，再也不需要烦人的滞后感了，屏幕对焦始终跟手，同时直接终止动画，里面的 completion 都会照常调用，不存在副作用，很好地解决了这个问题。</p>
+<h2 id="新引入问题"><a href="#新引入问题" class="headerlink" title="新引入问题"></a>新引入问题</h2><p>最近遇到了一个新引入的问题，发现对焦框无法隐藏，经过调查，问题出在这里：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (finished) &#123;</span><br><span class="line">    [<span class="keyword">self</span> hideFocus];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>则输出结果为：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,b0,a1,b1</span><br></pre></td></tr></table></figure>
-
-<h3 id="mm-mul-ps"><a href="#mm-mul-ps" class="headerlink" title="_mm_mul_ps"></a><code>_mm_mul_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">FOR j := <span class="number">0</span> to <span class="number">3</span></span><br><span class="line">	i := j*<span class="number">32</span></span><br><span class="line">	dst[i+<span class="number">31</span>:i] := a[i+<span class="number">31</span>:i] * b[i+<span class="number">31</span>:i]</span><br><span class="line">ENDFOR</span><br></pre></td></tr></table></figure>
-
-<p>分别将两个128位浮点数的每个float相乘，结果仍然是128位浮点数<br>也就是:</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] * b[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">63</span>:<span class="number">32</span>] * b[<span class="number">63</span>:<span class="number">32</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] * b[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">127</span>:<span class="number">96</span>] * b[<span class="number">127</span>:<span class="number">96</span>]</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="mm-moveldup-ps"><a href="#mm-moveldup-ps" class="headerlink" title="_mm_moveldup_ps"></a><code>_mm_moveldup_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">95</span>:<span class="number">64</span>]</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>Source data: 0.100000 0.200000 0.300000 0.400000<br>Calling _mm_moveldup_ps to load the values.<br>Result: 0.100000 0.100000 0.300000 0.300000</p>
-</blockquote>
-<p>将128bit浮点数的第一个及第三个float分别复制到第二个及第四个float中</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
-<li><a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide">https://software.intel.com/sites/landingpage/IntrinsicsGuide</a></li>
-<li><a href="https://software.intel.com/en-us/node/524266">https://software.intel.com/en-us/node/524266</a></li>
-<li><a href="https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx">https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx</a></li>
-<li><a href="https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx">https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Assembly</category>
-      </categories>
-      <tags>
-        <tag>Cheatsheet</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>AVCaptureSession部分用法</title>
-    <url>/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/">原文链接</a></p>
-</blockquote>
-<h2 id="AVCaptureSession阻塞主线程问题"><a href="#AVCaptureSession阻塞主线程问题" class="headerlink" title="AVCaptureSession阻塞主线程问题"></a>AVCaptureSession阻塞主线程问题</h2><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>仔细看了文档之后，发现问题出在<code> stopRunning</code>这里，</p>
-<span id="more"></span>
-<p>苹果文档描述如下：</p>
-<blockquote>
-<p>Clients invoke -stopRunning to stop the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    stopped.</p>
-</blockquote>
-<p>重点是这个函数在 session 完全停止下来之前会始终阻塞线程， 同样的，在<code> startRunning</code>中：</p>
-<blockquote>
-<p>Clients invoke -startRunning to start the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    started up or failed.  A failure to start running is reported through the AVCaptureSessionRuntimeErrorNotification<br>    mechanism.</p>
-</blockquote>
-<p>因此这里必须放在后台线程中处理，否则，就会导致界面不响应，iOS8之后应该在这里做了优化，即使放在主线程做也没有很卡顿的现象，但 iOS7中，尤其是测试设备为4s，界面卡死问题很严重。</p>
-<p>开启和关闭相机部分代码改为：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 开启相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		[[<span class="keyword">self</span>.avCameraManager session] startRunning];</span><br><span class="line">	&#125;);</span><br><span class="line">	</span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="keyword">void</span>) &#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 关闭相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		<span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。</p>
-<h2 id="相机前后台切换问题"><a href="#相机前后台切换问题" class="headerlink" title="相机前后台切换问题"></a>相机前后台切换问题</h2><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(startRunningSession) withObject:<span class="literal">nil</span> afterDelay:<span class="number">0.5</span>];</span><br></pre></td></tr></table></figure>
-
-<p>当时我很奇怪，这里为什么要加延时呢？进入到前台时不是应该直接开启相机吗？于是我直接把这里改成了：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">self</span> startRunningSession];</span><br></pre></td></tr></table></figure>
-
-<p>没过多久，问题出现了，多次切换前后台之后发现，相机始终黑屏，这时，进入后台再回来，问题解决了，仔细加了 log 之后发现，出现黑屏的时候，确实也正确调用了启动 session，但是并没有收到系统相机启动成功的消息，反而收到了两次相机关闭的通知。</p>
-<p>那么之前代码中加了0.5秒延时的原因也就清楚了，是为了等待系统关闭相机之后，再调用开启相机，以免相机启动失败，但这种方式真的合理吗？其实并没有解决本质问题，如果0.5秒钟的时间并没有完全关闭系统相机呢？这里仍然会出现黑屏问题。</p>
-<p>于是继续查看系统文档，发现系统的 sampleCode AVCam-iOS中并没有专门用于前后台处理的逻辑，原来这里并不需要我们自己手动管理相机，系统会自动根据程序状态来判断是否需要关闭或者开启相机，如果按 home 进入<code>UIApplicationStateBackground</code> 状态，那么系统自动关闭相机并在进入<code>UIApplicationStateActive</code>状态时开启相机；如果是进入<code>UIApplicationStateInactive</code>状态，例如，双击 home 调出任务管理器，这时，相机并没有被关闭，仍然能够看到 preview 画面。</p>
-<p>我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。</p>
+<p>如果是直接使用<code> removeAllAnimations</code>接口停止动画的话，此处的<code> finished</code>参数有可能返回 NO，导致这段代码产生问题，所以这里如果中止动画，则需要重新进行判定。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li>AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作</li>
-<li>前后台切换时，无需手动管理 CaptureSession</li>
+<li>学会了 <code>removeAllAnimations</code>接口用法</li>
 </ul>
+<p>尽管这个是很基础的系统 API 调用，但是我之前一直都不知道，在此记录下来，希望能给予其他人些许帮助。</p>
 ]]></content>
       <categories>
         <category>iOS</category>
       </categories>
       <tags>
-        <tag>AVCaptureSession</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>NSView subview blocking drag/drop event</title>
-    <url>/2016/01/26/Objective-C/subview-blocking-drag-event/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2016/01/26/Objective-C/subview-blocking-drag-event/">原文链接</a></p>
-</blockquote>
-<p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p>
-<ol>
-<li>从 NSView 继承得到一个子类</li>
-<li>覆盖处理拖拽事件相关方法</li>
-<li>注册拖拽事件</li>
-</ol>
-<span id="more"></span>
-
-<p>开始的时候一切都很正常,直到某次发现拖拽到屏幕边缘响应较为灵敏,而<strong>拖拽到屏幕中间则不响应事件</strong>,APP页面大致是这样的:</p>
-<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png"></p>
-<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。</p>
-<p>那么如何验证呢？其实也很简单，在自定义的NSView 中重载<code>draggingEnded：</code>方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 <code>NSView</code> 中添加的<code>NSImageView</code>作为 subview 会阻止拖拽事件的传递，原因是<code> NSImageView</code>本身可以处理拖拽事件，于是截获了本该自定义<code>NSView</code>处理的消息。</p>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：<a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></p>
-<p>提供的解决方案有以下几种：</p>
-<ol>
-<li>不使用 <code>NSImageView</code>，而是采用自定义<code> NSView</code>的方式，然后重写<code>drawRect：</code>方法进行图片渲染。这个办法十分笨拙，并且不太方便。</li>
-<li>调用<code>unregisterDraggedTypes </code>方法，这样<code> NSImageView</code>就不会监听拖拽事件了，完美解决。</li>
-</ol>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
-<li><a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></li>
-<li><a href="http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation">http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Mac</category>
-      </categories>
-      <tags>
-        <tag>Cocoa</tag>
-        <tag>NSView</tag>
+        <tag>Animation</tag>
+        <tag>UIView</tag>
       </tags>
   </entry>
   <entry>
@@ -275,6 +265,125 @@
         <tag>Runtime</tag>
         <tag>Objective-C</tag>
         <tag>ARC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>常用汇编指令总结</title>
+    <url>/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/">原文链接</a></p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="浮点数相关"><a href="#浮点数相关" class="headerlink" title="浮点数相关"></a>浮点数相关</h2><h3 id="mm-unpacklo-ps"><a href="#mm-unpacklo-ps" class="headerlink" title="_mm_unpacklo_ps"></a><code>_mm_unpacklo_ps</code></h3><blockquote>
+<p>Selects and interleaves the lower two SP FP values from a and b.</p>
+</blockquote>
+<p>将两个128位浮点数的低64位分别取出，返回新的128位浮点数</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">INTERLEAVE_DWORDS</span>(src1[<span class="number">127</span>:<span class="number">0</span>], src2[<span class="number">127</span>:<span class="number">0</span>])&#123;</span><br><span class="line">	dst[<span class="number">31</span>:<span class="number">0</span>] := src1[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">63</span>:<span class="number">32</span>] := src2[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">95</span>:<span class="number">64</span>] := src1[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	dst[<span class="number">127</span>:<span class="number">96</span>] := src2[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	RETURN dst[<span class="number">127</span>:<span class="number">0</span>]</span><br><span class="line">&#125;	</span><br><span class="line"></span><br><span class="line">dst[<span class="number">127</span>:<span class="number">0</span>] := <span class="built_in">INTERLEAVE_DWORDS</span>(a[<span class="number">127</span>:<span class="number">0</span>], b[<span class="number">127</span>:<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+
+<p>输入如果为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,a1,a2,a3</span><br><span class="line">b0,b1,b2,b3</span><br></pre></td></tr></table></figure>
+
+<p>则输出结果为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,b0,a1,b1</span><br></pre></td></tr></table></figure>
+
+<h3 id="mm-mul-ps"><a href="#mm-mul-ps" class="headerlink" title="_mm_mul_ps"></a><code>_mm_mul_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">FOR j := <span class="number">0</span> to <span class="number">3</span></span><br><span class="line">	i := j*<span class="number">32</span></span><br><span class="line">	dst[i+<span class="number">31</span>:i] := a[i+<span class="number">31</span>:i] * b[i+<span class="number">31</span>:i]</span><br><span class="line">ENDFOR</span><br></pre></td></tr></table></figure>
+
+<p>分别将两个128位浮点数的每个float相乘，结果仍然是128位浮点数<br>也就是:</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] * b[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">63</span>:<span class="number">32</span>] * b[<span class="number">63</span>:<span class="number">32</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] * b[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">127</span>:<span class="number">96</span>] * b[<span class="number">127</span>:<span class="number">96</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="mm-moveldup-ps"><a href="#mm-moveldup-ps" class="headerlink" title="_mm_moveldup_ps"></a><code>_mm_moveldup_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">95</span>:<span class="number">64</span>]</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Source data: 0.100000 0.200000 0.300000 0.400000<br>Calling _mm_moveldup_ps to load the values.<br>Result: 0.100000 0.100000 0.300000 0.300000</p>
+</blockquote>
+<p>将128bit浮点数的第一个及第三个float分别复制到第二个及第四个float中</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide">https://software.intel.com/sites/landingpage/IntrinsicsGuide</a></li>
+<li><a href="https://software.intel.com/en-us/node/524266">https://software.intel.com/en-us/node/524266</a></li>
+<li><a href="https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx">https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx</a></li>
+<li><a href="https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx">https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Assembly</category>
+      </categories>
+      <tags>
+        <tag>Cheatsheet</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python模板引擎Jinja2使用简介</title>
+    <url>/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/">原文链接</a></p>
+</blockquote>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>最近在项目开发中，需要针对 Jenkins 项目进行配置，Jenkins 的 job 配置采用的是 xml，在维护配置模板的过程中就遇到了问题，因为逐步发现配置灵活性超出了字符串的范畴，本文旨在简单介绍 Python 下模板引擎模块 Jinja2 的使用。</p>
+<h2 id="什么是-Jinja2？"><a href="#什么是-Jinja2？" class="headerlink" title="什么是 Jinja2？"></a>什么是 Jinja2？</h2><blockquote>
+<p>Jinja2 是一个 Python 的功能齐全的模板引擎。它有完整的 unicode 支持，一个可选的集成沙箱执行环境，被广泛使用，以 BSD 许可证授权。</p>
+</blockquote>
+<p>以上是官方说明，简单来说，它提供了替换功能（变量替换）和一些强大的特性（控制流、继承等），可以快速生成数据文件，使得业务与数据分离开来，满足一些灵活多变的配置需求。</p>
+<span id="more"></span>
+
+<h2 id="为什么要使用-Jinja2？"><a href="#为什么要使用-Jinja2？" class="headerlink" title="为什么要使用 Jinja2？"></a>为什么要使用 Jinja2？</h2><p>拿 Jenkins 配置来说，如果要实现不同平台、不同项目的配置，有以下几种方案：</p>
+<ol>
+<li>直接进行字符串替换，使用 Python 字符串语法即可</li>
+<li>使用 XML 解析和生成模块，比较简便的是 ElementTree</li>
+<li>使用模板引擎，例如 Jinja2</li>
+</ol>
+<p>起初，我选用的是方案一，特点是简单粗暴，不需要额外的配置，例如，两个项目的 git 仓库配置可以采用如下代码实现：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 略去不相关代码</span></span><br><span class="line">template = <span class="string">b&quot;&quot;&quot;&lt;configVersion&gt;2&lt;/configVersion&gt;</span></span><br><span class="line"><span class="string">        &lt;userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">                &lt;url&gt;%(git_url)s&lt;/url&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">        &lt;/userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">        &lt;branches&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">                &lt;name&gt;%(git_branch)s&lt;/name&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">        &lt;/branches&gt;&quot;&quot;&quot;</span></span><br><span class="line">xml = template % &#123;<span class="string">&#x27;git_url&#x27;</span>:self.__git_url, <span class="string">&#x27;git_branch&#x27;</span>:self.__git_branch&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样，只需要外部传入地址及分支，即可获得不同的项目配置 xml，但缺点也很明显如果两个配置节点数目不相同或者里面的字段差别很大，那么就需要使用 <code>template2</code>、<code>template3</code>、<code>template4</code>等等，因此此方案仅适合配置需求较为简单，字段不是很复杂的场景。</p>
+<p>紧接着，开始调研快速生成不同 xml 数据的方案，找到了 <a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python%EF%BC%8C">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python，</a> 这里提到了两种方案，也就是上述的2、3。</p>
+<p>方案2的特点也很明显，可以完整控制 xml 中每个字段和属性，灵活性确实够了，能够满足我们的需求，但是有点大炮打蚊子的感觉，而且频繁的读写 xml 也比较消耗性能，业务逻辑也会随着配置的灵活性和多样性急遽膨胀，比如 Jenkins 项目配置，仓库地址、分支信息、ssh 信息、tag 字段、打包脚本等等，如果使用 xml 解析的话，针对这些节点都必须创建对应的业务逻辑，不是很推荐。</p>
+<p>那么我们的选择也比较简单了，Jinja 可以快速的替换生成我们业务需要的各种各样的数据，而且接入成本低，业务逻辑不会变化太大，下面简单介绍下本次项目中的使用。</p>
+<h2 id="Jinja2的简单使用教程"><a href="#Jinja2的简单使用教程" class="headerlink" title="Jinja2的简单使用教程"></a>Jinja2的简单使用教程</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>这个比较简单，看下文档即可，执行命令</p>
+<p><code>pip install jinja2</code></p>
+<h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>Jinja2中有一个名为<code>Environment</code>的对象，用于存储配置、全局变量，并且用于从文件系统中加载模板。即使你通过<code>Template</code>用字符串创建一个模板，Jinja2 也会自动为你创建一个环境。推荐使用这种方式进行模板配置而不是使用字符串，大多数程序使用一个环境即可。</p>
+<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><ol>
+<li>创建一个环境：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, PackageLoader, select_autoescape</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化 jinja 环境</span></span><br><span class="line">self.__env = Environment(</span><br><span class="line">	loader=PackageLoader(<span class="string">&#x27;模块名称&#x27;</span>, <span class="string">&#x27;模板文件夹&#x27;</span>),</span><br><span class="line">	autoescape=select_autoescape([<span class="string">&#x27;html&#x27;</span>, <span class="string">&#x27;xml&#x27;</span>])</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>加载一个模板：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__job_template = self.__env.get_template(<span class="string">&#x27;job_template.xml&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
+<li><p>接下来就是传递一些业务参数了，</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__config = self.__job_template.render(</span><br><span class="line">            git_url=self.__git_remote_url,</span><br><span class="line">            git_branch=self.__git_branch,</span><br><span class="line">            git_tag=self.__git_tag</span><br><span class="line">        )</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>以上都还是比较简单的 API 调用，核心使用部分在与如何在模板中通过 Jinja 支持的语法灵活的进行数据配置。</p>
+<h4 id="基本变量替换"><a href="#基本变量替换" class="headerlink" title="基本变量替换"></a>基本变量替换</h4><p>最基础的功能就是进行变量替换了，语法为<code>&#123;&#123;变量名&#125;&#125;</code>， 例如将 url 传递到 xml 中，模板中写法为(省略了不相关内容):</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">userRemoteConfigs</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>&#123;&#123;git_url&#125;&#125;<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">userRemoteConfigs</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后在代码中向上面一样调用 <code>template.render(git_url=&#39;xxx&#39;)</code>即可</p>
+<h4 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h4><p>Jinja 支持基本的<code>if</code>、<code>for</code>、宏等语法，这也是它最强大的地方，目前项目中我只用到了判断就够了。用法如下：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">&#123;% if push_tag %&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">targetRepoName</span>&gt;</span>origin<span class="tag">&lt;/<span class="name">targetRepoName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagName</span>&gt;</span>&#123;&#123;git_tag&#125;&#125;<span class="tag">&lt;/<span class="name">tagName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagMessage</span>&gt;</span><span class="tag">&lt;/<span class="name">tagMessage</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">createTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">createTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">updateTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">updateTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这段 xml 的逻辑就是如果传入了 <code>push_tag</code>变量且为<code>True</code>则在 Jenkins 配置中增加推送 git tag 节点，否则不做任何处理。</p>
+<p>除此之外，Jinja2 还支持循环，</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&lt;dl&gt;</span><br><span class="line">&#123;% <span class="keyword">for</span> key, value <span class="keyword">in</span> my_dict.iteritems() %&#125;</span><br><span class="line">    &lt;dt&gt;&#123;&#123; key|e &#125;&#125;&lt;/dt&gt;</span><br><span class="line">    &lt;dd&gt;&#123;&#123; value|e &#125;&#125;&lt;/dd&gt;</span><br><span class="line">&#123;% endfor %&#125;</span><br><span class="line">&lt;/dl&gt;</span><br></pre></td></tr></table></figure>
+
+<p>详细说明可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#for">http://docs.jinkan.org/docs/jinja2/templates.html#for</a></p>
+<h4 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h4><p>这部分由于目前项目配置还比较简单，暂时没用到，可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#id23">http://docs.jinkan.org/docs/jinja2/templates.html#id23</a></p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>对于简单的项目来说，上面提到的一些基本替换加控制流基本都能满足使用了， 稍微复杂一点的程序可以考虑使用继承和扩展。</p>
+<p>总的来说，Jinja2 既强大又简便，完美符合项目中一些HTML、XML 的业务配置需求，目前项目中本身有的三四个 xml 文件用了 Jinja2 之后缩减成一个，同时改动工作量大约只花了几个小时，真的很方便。</p>
+<blockquote>
+<p>参考资料：</p>
+<ul>
+<li><a href="http://jinja.pocoo.org/docs/2.10/">http://jinja.pocoo.org/docs/2.10/</a></li>
+<li><a href="http://docs.jinkan.org/docs/jinja2/index.html">http://docs.jinkan.org/docs/jinja2/index.html</a></li>
+<li><a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python</a></li>
+</ul>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>Jinja2</tag>
       </tags>
   </entry>
   <entry>
@@ -355,112 +464,155 @@
       </tags>
   </entry>
   <entry>
-    <title>如何取消 UIView 动画？</title>
-    <url>/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/</url>
+    <title>如何构建一个PKM系统</title>
+    <url>/2020/05/02/Thinking/%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAPKM%E7%B3%BB%E7%BB%9F/</url>
     <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/">原文链接</a></p>
+<p><a href="http://samwei12.com/2020/05/02/Thinking/%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AA%20PKM%20%E7%B3%BB%E7%BB%9F/">原文链接</a></p>
 </blockquote>
-<p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
-<p>动画部分代码很简单，如下：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">						 <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">							 [<span class="keyword">self</span> hideFocus];</span><br><span class="line">						 &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
-
-<p>对焦框在0.3秒内进行两倍缩小到正常尺寸的一个动画，之后隐藏。</p>
-<span id="more"></span>
-
-<h2 id="旧代码分析"><a href="#旧代码分析" class="headerlink" title="旧代码分析"></a>旧代码分析</h2><p>以前的代码在这部分的处理大致是这样的，</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:_touches];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UITouch</span> *touch = [_touches anyObject];</span><br><span class="line">    <span class="built_in">CGPoint</span> touchPoint = [touch locationInView:<span class="keyword">self</span>.view];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    [<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(touchFocus:) withObject: touches afterDelay:<span class="number">0.3</span>f];</span><br><span class="line">    </span><br><span class="line">- (<span class="keyword">void</span>)touchFocus:(<span class="built_in">NSSet</span> *)touches &#123;</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:touches];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 以下为具体对焦框显示部分</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看出，代码逻辑大致为，截获屏幕点击事件，之后加入一个0.3秒的延时方法，如果用户0.3秒内再次点击对焦，则取消上一次的对焦事件；否则，执行对焦框动画。</p>
-<p>这个逻辑看似解决了用户快速点击对焦的问题，实际上如果用户真正快速点击屏幕时，会出现一个很奇怪的现象，就是对焦框始终存在，并且不会变换位置，等到停止点击屏幕后，对焦框才会响应最新的触控位置进行动画，另一个问题就是对焦始终存在迟滞感，因为点击屏幕后需要等待0.3秒才能看到动画。</p>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>那么有什么更好的办法呢？系统难道没有提供终止动画的接口嘛？当然不是，其实只需要在用户再次点击屏幕时候调用<code>[_focusView.layer removeAllAnimations];</code>即可，其中具体的 view 为正在做动画的 view。</p>
-<p>这样做还有另外一个好处，再也不需要烦人的滞后感了，屏幕对焦始终跟手，同时直接终止动画，里面的 completion 都会照常调用，不存在副作用，很好地解决了这个问题。</p>
-<h2 id="新引入问题"><a href="#新引入问题" class="headerlink" title="新引入问题"></a>新引入问题</h2><p>最近遇到了一个新引入的问题，发现对焦框无法隐藏，经过调查，问题出在这里：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (finished) &#123;</span><br><span class="line">    [<span class="keyword">self</span> hideFocus];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果是直接使用<code> removeAllAnimations</code>接口停止动画的话，此处的<code> finished</code>参数有可能返回 NO，导致这段代码产生问题，所以这里如果中止动画，则需要重新进行判定。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li>学会了 <code>removeAllAnimations</code>接口用法</li>
-</ul>
-<p>尽管这个是很基础的系统 API 调用，但是我之前一直都不知道，在此记录下来，希望能给予其他人些许帮助。</p>
-]]></content>
-      <categories>
-        <category>iOS</category>
-      </categories>
-      <tags>
-        <tag>Animation</tag>
-        <tag>UIView</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Python模板引擎Jinja2使用简介</title>
-    <url>/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/">原文链接</a></p>
-</blockquote>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>最近在项目开发中，需要针对 Jenkins 项目进行配置，Jenkins 的 job 配置采用的是 xml，在维护配置模板的过程中就遇到了问题，因为逐步发现配置灵活性超出了字符串的范畴，本文旨在简单介绍 Python 下模板引擎模块 Jinja2 的使用。</p>
-<h2 id="什么是-Jinja2？"><a href="#什么是-Jinja2？" class="headerlink" title="什么是 Jinja2？"></a>什么是 Jinja2？</h2><blockquote>
-<p>Jinja2 是一个 Python 的功能齐全的模板引擎。它有完整的 unicode 支持，一个可选的集成沙箱执行环境，被广泛使用，以 BSD 许可证授权。</p>
-</blockquote>
-<p>以上是官方说明，简单来说，它提供了替换功能（变量替换）和一些强大的特性（控制流、继承等），可以快速生成数据文件，使得业务与数据分离开来，满足一些灵活多变的配置需求。</p>
-<span id="more"></span>
-
-<h2 id="为什么要使用-Jinja2？"><a href="#为什么要使用-Jinja2？" class="headerlink" title="为什么要使用 Jinja2？"></a>为什么要使用 Jinja2？</h2><p>拿 Jenkins 配置来说，如果要实现不同平台、不同项目的配置，有以下几种方案：</p>
-<ol>
-<li>直接进行字符串替换，使用 Python 字符串语法即可</li>
-<li>使用 XML 解析和生成模块，比较简便的是 ElementTree</li>
-<li>使用模板引擎，例如 Jinja2</li>
-</ol>
-<p>起初，我选用的是方案一，特点是简单粗暴，不需要额外的配置，例如，两个项目的 git 仓库配置可以采用如下代码实现：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 略去不相关代码</span></span><br><span class="line">template = <span class="string">b&quot;&quot;&quot;&lt;configVersion&gt;2&lt;/configVersion&gt;</span></span><br><span class="line"><span class="string">        &lt;userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">                &lt;url&gt;%(git_url)s&lt;/url&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">        &lt;/userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">        &lt;branches&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">                &lt;name&gt;%(git_branch)s&lt;/name&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">        &lt;/branches&gt;&quot;&quot;&quot;</span></span><br><span class="line">xml = template % &#123;<span class="string">&#x27;git_url&#x27;</span>:self.__git_url, <span class="string">&#x27;git_branch&#x27;</span>:self.__git_branch&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样，只需要外部传入地址及分支，即可获得不同的项目配置 xml，但缺点也很明显如果两个配置节点数目不相同或者里面的字段差别很大，那么就需要使用 <code>template2</code>、<code>template3</code>、<code>template4</code>等等，因此此方案仅适合配置需求较为简单，字段不是很复杂的场景。</p>
-<p>紧接着，开始调研快速生成不同 xml 数据的方案，找到了 <a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python%EF%BC%8C">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python，</a> 这里提到了两种方案，也就是上述的2、3。</p>
-<p>方案2的特点也很明显，可以完整控制 xml 中每个字段和属性，灵活性确实够了，能够满足我们的需求，但是有点大炮打蚊子的感觉，而且频繁的读写 xml 也比较消耗性能，业务逻辑也会随着配置的灵活性和多样性急遽膨胀，比如 Jenkins 项目配置，仓库地址、分支信息、ssh 信息、tag 字段、打包脚本等等，如果使用 xml 解析的话，针对这些节点都必须创建对应的业务逻辑，不是很推荐。</p>
-<p>那么我们的选择也比较简单了，Jinja 可以快速的替换生成我们业务需要的各种各样的数据，而且接入成本低，业务逻辑不会变化太大，下面简单介绍下本次项目中的使用。</p>
-<h2 id="Jinja2的简单使用教程"><a href="#Jinja2的简单使用教程" class="headerlink" title="Jinja2的简单使用教程"></a>Jinja2的简单使用教程</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>这个比较简单，看下文档即可，执行命令</p>
-<p><code>pip install jinja2</code></p>
-<h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>Jinja2中有一个名为<code>Environment</code>的对象，用于存储配置、全局变量，并且用于从文件系统中加载模板。即使你通过<code>Template</code>用字符串创建一个模板，Jinja2 也会自动为你创建一个环境。推荐使用这种方式进行模板配置而不是使用字符串，大多数程序使用一个环境即可。</p>
-<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><ol>
-<li>创建一个环境：</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, PackageLoader, select_autoescape</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化 jinja 环境</span></span><br><span class="line">self.__env = Environment(</span><br><span class="line">	loader=PackageLoader(<span class="string">&#x27;模块名称&#x27;</span>, <span class="string">&#x27;模板文件夹&#x27;</span>),</span><br><span class="line">	autoescape=select_autoescape([<span class="string">&#x27;html&#x27;</span>, <span class="string">&#x27;xml&#x27;</span>])</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li><p>加载一个模板：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__job_template = self.__env.get_template(<span class="string">&#x27;job_template.xml&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
-<li><p>接下来就是传递一些业务参数了，</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__config = self.__job_template.render(</span><br><span class="line">            git_url=self.__git_remote_url,</span><br><span class="line">            git_branch=self.__git_branch,</span><br><span class="line">            git_tag=self.__git_tag</span><br><span class="line">        )</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>以上都还是比较简单的 API 调用，核心使用部分在与如何在模板中通过 Jinja 支持的语法灵活的进行数据配置。</p>
-<h4 id="基本变量替换"><a href="#基本变量替换" class="headerlink" title="基本变量替换"></a>基本变量替换</h4><p>最基础的功能就是进行变量替换了，语法为<code>&#123;&#123;变量名&#125;&#125;</code>， 例如将 url 传递到 xml 中，模板中写法为(省略了不相关内容):</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">userRemoteConfigs</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>&#123;&#123;git_url&#125;&#125;<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">userRemoteConfigs</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>然后在代码中向上面一样调用 <code>template.render(git_url=&#39;xxx&#39;)</code>即可</p>
-<h4 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h4><p>Jinja 支持基本的<code>if</code>、<code>for</code>、宏等语法，这也是它最强大的地方，目前项目中我只用到了判断就够了。用法如下：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">&#123;% if push_tag %&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">targetRepoName</span>&gt;</span>origin<span class="tag">&lt;/<span class="name">targetRepoName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagName</span>&gt;</span>&#123;&#123;git_tag&#125;&#125;<span class="tag">&lt;/<span class="name">tagName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagMessage</span>&gt;</span><span class="tag">&lt;/<span class="name">tagMessage</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">createTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">createTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">updateTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">updateTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上面这段 xml 的逻辑就是如果传入了 <code>push_tag</code>变量且为<code>True</code>则在 Jenkins 配置中增加推送 git tag 节点，否则不做任何处理。</p>
-<p>除此之外，Jinja2 还支持循环，</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&lt;dl&gt;</span><br><span class="line">&#123;% <span class="keyword">for</span> key, value <span class="keyword">in</span> my_dict.iteritems() %&#125;</span><br><span class="line">    &lt;dt&gt;&#123;&#123; key|e &#125;&#125;&lt;/dt&gt;</span><br><span class="line">    &lt;dd&gt;&#123;&#123; value|e &#125;&#125;&lt;/dd&gt;</span><br><span class="line">&#123;% endfor %&#125;</span><br><span class="line">&lt;/dl&gt;</span><br></pre></td></tr></table></figure>
-
-<p>详细说明可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#for">http://docs.jinkan.org/docs/jinja2/templates.html#for</a></p>
-<h4 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h4><p>这部分由于目前项目配置还比较简单，暂时没用到，可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#id23">http://docs.jinkan.org/docs/jinja2/templates.html#id23</a></p>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>对于简单的项目来说，上面提到的一些基本替换加控制流基本都能满足使用了， 稍微复杂一点的程序可以考虑使用继承和扩展。</p>
-<p>总的来说，Jinja2 既强大又简便，完美符合项目中一些HTML、XML 的业务配置需求，目前项目中本身有的三四个 xml 文件用了 Jinja2 之后缩减成一个，同时改动工作量大约只花了几个小时，真的很方便。</p>
-<blockquote>
-<p>参考资料：</p>
 <ul>
-<li><a href="http://jinja.pocoo.org/docs/2.10/">http://jinja.pocoo.org/docs/2.10/</a></li>
-<li><a href="http://docs.jinkan.org/docs/jinja2/index.html">http://docs.jinkan.org/docs/jinja2/index.html</a></li>
-<li><a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python</a></li>
+<li>这篇文章是个人知识总结相关的第一篇文章，主要目的是为了阐述我们为什么需要一个 PKM 系统，并且简单对自己这几年亲身形成的PKM 系统进行总结。</li>
 </ul>
+<h2 id="PKM-是什么？"><a href="#PKM-是什么？" class="headerlink" title="PKM 是什么？"></a>PKM 是什么？</h2><ul>
+<li>PKM 是 Personal Knowledge Management 的缩写，我们先来看一下 Wikipedia 中的描述：</li>
+</ul>
+<blockquote>
+<p>Personal knowledge management (PKM) is a process of collecting information that a person uses to gather, classify, store, search, retrieve and share knowledge in their daily activities (Grundspenkis 2007) and the way in which these processes support work activities (Wright 2005). It is a response to the idea that knowledge workers need to be responsible for their own growth and learning (Smedley 2009). </p>
 </blockquote>
+<ul>
+<li>这个解释已经非常清晰了，PKM 就是一套个人知识管理系统，包括知识检索、收集、分类、分享等等，可以说我们在日常生活中每个人都在不停的使用 PKM，例如看新闻、刷抖音、刷微信公众号等等，都是一个不停获取信息的过程，那么我们为什么要梳理搭建属于自己的 PKM 呢？</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="为什么要构建自己的-PKM-系统？"><a href="#为什么要构建自己的-PKM-系统？" class="headerlink" title="为什么要构建自己的 PKM 系统？"></a>为什么要构建自己的 PKM 系统？</h2><ul>
+<li>大家都知道，我们目前处在一个知识爆炸的时代，虽然说各种信息和知识随手可以检索查看，但是对于绝大部分人来说，这其实并不是一件好事，相反，我认为弊端是大于好处的。</li>
+<li>为什么这么说呢？<ol>
+<li>大家可以思考一下自己每天使用手机的时间和次数，你可以先自己猜测一个数字，然后再使用一些手机时间追踪软件看一下真实数据，我相信大部分人猜测的时间都会比自己实际使用时间少很多。这里我推荐使用 <strong>OffScreen</strong> 这款软件，比起苹果系统自带的追踪多了很多指标，例如每天拿起多少次、走路时看手机的时间、晚上在床上玩了多久手机（这个维度很扎心，大家可以关注下）等等。我自己平均使用时长一般在 2~3 小时左右，每天拿起次数在 50 次左右。</li>
+<li>当然，手机使用时长并不能说明所有问题，但是手机上干扰因素实在是太多，这个大家可以看下系统自带的屏幕使用时间，里面有一栏是每天收到的通知次数，我自己基本上手机每天推送通知次数超过 300次，比如在写代码、学习的时候，微信推送了一条信息，打开手机回复完毕之后，顺便刷一会朋友圈，再看看公众号，链接点进去发现有个好玩的视频，不小心跳到了抖音，然后一天就过去了。是不是觉得这个场景似曾相识？大家要知道，目前有一大堆大公司聘请了高薪产品经理和数据挖掘工程师，他们做的事情就是想办法吸引你的注意力，让你不停地黏在手机上，他们通过收集你在各个页面、软件停留的数据，分析一下之后，对你喜欢看什么（比如抖音里面的大长腿）、喜欢玩什么等等一清二楚，这也就是为什么刷抖音之类的很难停下来，你会发现看到的视频很多都是喜欢看的，这种东西靠意志力很难克服。</li>
+<li>慢慢地，你就会发现自己的手机其实替代了你进行思考，比如今天要看什么、学什么，你以为是你主动控制的，其实都是手机里面各种软件操控你完成的，不信你可以回想一下自己每天使用手机的路径，是不是不自觉的解锁之后就会打开微信、微博看两眼？，<strong>习惯的力量是很可怕的，而且对于大部分来说受到的都是坏习惯的影响。</strong></li>
+</ol>
+</li>
+<li>怎么避免自己淹没在无谓知识的浪潮里面呢？这里简单介绍一下 <strong>DIKW 模型</strong> 和 <strong>学习金字塔</strong>。<ul>
+<li>DIKW：<ul>
+<li><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502102007.png" alt="20200502102007"></li>
+<li>它的核心思想其实也很简单， Data-&gt;Information-&gt;Knowledge-&gt;Wisdom 是符合金字塔模型的，尤其是从 Information 到 Knowledge 这里，平时大家刷的微信公众号、看的各种鸡汤文、背的单词，看似也都在努力学习，其实他们大部分都停留在信息这一步，并没有转换成你的知识，而知道了这些知识之后，真正到把它们转换为自己的技能，中间又有一个非常大的 gap，所以其实花了大量的时间，自我成长提升却非常少。</li>
+</ul>
+</li>
+<li>学习金字塔：<ul>
+<li><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502114143.png" alt="20200502114143"></li>
+<li>学习效率从低到高大体上分别是文字阅读、音频、视频、演示 Demo、实践、分享教学。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>这里的核心其实总结下来就是几点：<ol>
+<li><strong>不要把别人的知识当做自己的</strong>，很多人（包括我自己）喜欢收藏各种知识，比如买书、买教程、看到好文章先收藏再稍后读（其实根本不读）。</li>
+<li><strong>没有输出的知识是很难转换为技能的</strong>，很多东西明明自己是看过的，但是仅限于知道理论知识，很快就忘了，下次遇到还是需要 Google，这里需要养成分享的习惯，试想一下，如果你正在看的书或者知识点，老板过来让你下周准备一次分享，是不是立马就更认真了，为了不出丑，不被挑战，你必然会花费更多的心思学习，同时会主动思考大家会问什么问题，提前做好准备，那么经历这么一次分享之后，对应的知识点，过来听讲的人说不定很快就忘了，但是你自己一定可以牢牢记住很久。</li>
+<li><strong>定期 Review</strong>，这个也很好理解，知识的记忆是符合 <strong>艾宾浩斯记忆曲线</strong> 的，可以自行 Google 一下，定期复习确保不会遗忘。</li>
+</ol>
+</li>
+</ul>
+<h2 id="我是如何搭建自己的-PKM-系统的？"><a href="#我是如何搭建自己的-PKM-系统的？" class="headerlink" title="我是如何搭建自己的 PKM 系统的？"></a>我是如何搭建自己的 PKM 系统的？</h2><ul>
+<li>俗话说，”工欲善其事必先利其器“，说了这么多，终于到了本文的核心内容，简单分享总结一下我这几年形成的一套 PKM 体系。</li>
+<li>通过前面的介绍，大家应该也都明白，如果想要把信息和他人的知识变为自己的知识和技能，那么最起码需要完成一个闭环，就是 收集-&gt;整理-&gt;输出-&gt;复习。只有自己实践完成之后，能够归纳整理并且分享给他人的知识才能进一步巩固。</li>
+<li><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502134625.png" alt="20200502134625"></li>
+<li>下面就分别对这其中的环节进行详细展开，这里事先说明下，我平时的工作环境是 Mac 全家桶，尽管我这里推荐的都是一些跨平台软件，但是部分 case 可能有所不同。</li>
+</ul>
+<h3 id="信息输入"><a href="#信息输入" class="headerlink" title="信息输入"></a>信息输入</h3><ul>
+<li><p>在当下这么一个信息爆炸的时代，我们所缺少的不是如何收集知识，而是如何主动获取知识和辨别整理。我个人通常的信息来源有这些：<strong>Google（是的没错）、RSS 订阅、微信公众号</strong>。</p>
+</li>
+<li><p>这些信息大部分是通过手机获取的，也可以利用碎片时间阅读，例如等公交、排队等等（不建议吃饭或者上厕所时候看，会影响身体监控）。核心功能诉求如下：</p>
+<ol>
+<li><strong>跨平台</strong>，尤其是手机端，体验一定要好</li>
+<li><strong>速度要快</strong>，这里的速度快包括几个方面，网络速度、文章保存速度等，例如 Raindrop.io 这种，保存一个书签需要转圈 3s 左右，且还需要关心分类文件夹等，基本上可以直接排除，我理解大部分情况下只保存网址即可，哪怕你把网址复制下来贴到滴答清单都可以</li>
+<li>部分重要信息需要能够离线保存查看，不是强诉求</li>
+</ol>
+</li>
+<li><p>这里有几个过滤筛选信息的原则：</p>
+<ol>
+<li>尽可能收集英文资料，原因大家应该都能想到，目前大部分的知识分享都是由英语世界的牛人们发起的，国内各种博客公众号基本都是看了一遍之后自己转手翻译或者加工之后分享的，当然这样的好处就是对于新手来说，更加便于理解，坏处更是显而易见，你收集到的知识都是别人咀嚼过一次的，可能会有很多偏差。所以这里首先你要有一个能够任意查阅国外优质资源的途径（原因大家都懂），然后尽可能使用一些英文关键词进行检索。</li>
+<li>尽可能主动获取知识，否则一定要做好<strong>过滤</strong>。这一点我目前做的也很不好，正在逐步改善，什么意思呢？不要让自己被信息淹没，而是要主动去检索。这里一个比较好的方式就是通过 RSS 订阅或者关注一些优质博客，毕竟个人的精力是有限的，最忌讳看到什么都想学一下，关注几百个微信公众号，每天沉迷在刷各种热门知识的快感中，比如区块链、机器学习等等，实际上工作中根本用不到。<strong>热点是永远跟不完的，尽量学会掌握核心知识，这些知识大部分都是通用的。</strong></li>
+<li>快速区分出哪些信息需要进一步跟进。由于大部分时间这类文章或者咨询都是在等公交、排队等碎片时间接触到的，那么就需要有一个快速鉴别和定期检阅的机制，也就是决定哪些资料需要 Read Later。</li>
+<li><strong>避免 Read Later 变成 Read Never</strong>。这点我也在努力改进，目前 Pocket 里面堆积了 300+ 文章没有看。</li>
+</ol>
+</li>
+<li><p>这里推荐几款我自己在使用的软件：</p>
+<ul>
+<li><del>GFW</del>：不可说。</li>
+<li>RSS： <strong>Reeder4</strong>，老牌应用了，不多说，体验很好，可以使用美国区账号购买 Redeem Code，价格还是比较划算的，印象中十几块钱就可以。</li>
+<li>信息收集类软件：<strong>Pinbox</strong>，这类软件非常多，大体上分为两种，一种是以 Pinboard 为主的书签收集类，同类产品还有 PinBox、Raindrop.io 等；另一种以 Pocket 为首的正宗稍后读类，还有 Instapaper、收趣云等等，Evernote 也算是这类软件，当然它本身是做笔记的，只是网页剪切功能太强大了而已。从阅读体验上来说当然是 Pocket 这类软件更好，不过由于它本身带有的一些社交属性及归档功能，很容易让它变成第二个 Evernote，让你变成一只仓鼠。所以这里我选择了 Pinbox 作为我自己的收集工具，其实单从功能上来说，Pinboard 和 Raindrop.io 做的都比 Pinbox 更好，但是他们的服务器都在国外，网络实在是不够稳定，就这一点上已经被排除了，收趣各方面都不错，但是免费版不支持导出是致命伤，且现在感觉有点凉了，基本没在维护，上一次更新已经是一年多前了，于是只剩下 Pinbox 可选。关于这类软件的测评可以单独写一篇文章了，后面有时间我会更新。</li>
+<li>清单待办类：<strong>滴答清单</strong>，免费版已经足够使用，我比较看重的是它的自然语言识别和跨平台快速实时同步功能，至于其他的类似番茄钟、日历视图等高级功能属于锦上添花，如果你不打算专门为此付费，完全不影响使用。另外它还有一个比较好的亮点功能就是可以把任务以看板视图查看，比较方便。</li>
+<li>书籍类：<strong>MarginNote</strong>，针对深度阅读的诉求，例如阅读书籍等，推荐使用电子书，原因是 IT 类书籍更新迭代较快，，当然一些经典书籍，例如《代码大全》、《重构》等，是可以买一本时时翻阅的，MarginNote 阅读电子书十分方便，可以导入 PDF 批注，同时可以配合 Pad 版本手写批注等，还支持导出笔记为脑图、复习卡片导出为 Anki 等等，功能十分强大。</li>
+</ul>
+</li>
+</ul>
+<h3 id="整理归纳"><a href="#整理归纳" class="headerlink" title="整理归纳"></a>整理归纳</h3><ul>
+<li>获取到自己需要的信息之后需要做的事情就是对这些信息进行分门别类。这里有两种方式进行分类，一种按照目录结构进行分类；另一种是按照标签系统进行分类。有很多关于这方面的话题，在这里我不多赘述，我个人更倾向于使用目录结构，可以配合标签使用，单目录+搜索是必不可少的，通常来说，如果你连搜索的关键词都想不起来，那么说明这个知识点根本就还没在你的大脑里面形成初步印象，那么退回到上一步是更合适的。</li>
+<li>这一步主要的诉求有这么几个：<ol>
+<li>需要对已经存入稍后读的文章进行细品，或者需要实践，之后把核心信息提取出来，进行归纳，这里需要一个<strong>快速整理大纲</strong>的软件。</li>
+<li>如果是看到一些比较好的书单或者类似于学习计划等，需要汇总到自己的个人学习计划中，并且转换为年度、月度、周计划，定期 check，这里有一个模型叫做 <strong>PDCA</strong>，大家可以检索下，它是 Plan、DO、 Check、Action 的缩写，意思是说针对某个目标，需要先进行计划，之后实践，定期 check 学习成果，最后总结反馈，以便下一次学习计划使用。下图就是我自己在用的周报模板。<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502180750.png" alt="20200502180750"></li>
+</ol>
+</li>
+<li>在这里我主要使用的是 <strong>Dynalist</strong> 这款软件，它是大纲类笔记软件的一种，同类型的软件还有 Workflowy、幕布等等，其实思维导图也是一种大纲类软件，不过更倾向于平铺对某个知识进行介绍，不适合查看过长的列表，当然你可以加 N 个节点，但是这样无法做到一眼浏览完整体结构，也就失去了导图的意义；Dynalist 这类列表型笔记的好处就是可以一直添加列表项，缺点就是不够直观，不过它的 Pro 版本可以查看导图，一定程度上弥补了这个问题。</li>
+<li>之前我的大量笔记框架都是基于 Xmind 处理的，用了大概两年的样子，但是一直有点不爽的地方在于，Xmind 无法支持 Markdown 格式，插入图片十分不方便，且多个知识点之间联动也比较麻烦。有的知识点可能归属于多个分类，Xmind 只能做到树状结构，无法支持网状知识点关联，也没有办法对所有的导图中某个知识点进行检索。之前的解决方案是使用 Xmind 作为大纲，具体的叶子节点，通过本地 Markdown 链接的方式处理，终归比较麻烦。Dynalist 很完美的解决了这个问题，它支持大部分 Markdown 语法，包括图片、链接等，同时内置了快速链接内部节点的方式，同时可以在所有笔记中全文检索，还支持标签系统，这些都是 Xmind 或者 VSCode 解决不了的问题。</li>
+<li>关于 Dynalist 的测评文章网上有很多，后续有机会我会把导图、列表笔记、 VSCode + Markdown 笔记的优劣对比详细再写一篇文章，Dynalist唯一的缺点就是 Pro 版本太贵，如果大家有兴趣，可以使用我的邀请链接注册，你可以得到一个月的 Pro 时间（价值 10 刀），而我可以获得 5 刀的抵扣券, <a href="https://dynalist.io/invite/pxG1VA">https://dynalist.io/invite/pxG1VA</a> 。</li>
+</ul>
+<h3 id="输出分享"><a href="#输出分享" class="headerlink" title="输出分享"></a>输出分享</h3><ul>
+<li>当你梳理完知识点之后，还需要进一步实践并且输出，这样它才能变成你自己的观点或者知识。Dynalist 或者导图只适合于梳理思路，整理大纲等，并不适合长文书写，如果你需要对某个知识点进行自己的阐述、或者需要写一篇读后感等等，你一定还需要一套专门用于写作的工具，它需要这些功能：<ol>
+<li>绘图工具，很多时候，我们如果想要把知识点清晰的说明出来，就需要绘制成各种图表，例如常见的示意图、阅读源码用到的流程图、时序图等等。这里我使用的软件分别是 <strong>edrawmax</strong> 和 <strong>astah</strong>。<ol>
+<li>edrawmax 提供了大量的绘图模板，例如金字塔、瀑布流、流程图等等，大大的提升了绘图效率。同类型的软件还有 Google 的 draw.io，OmniGraffle 等，也很好用，不过模板方面不尽人意。</li>
+<li>astah 是专门用于软件开发设计使用的工具，绘制 UML、流程图、ER 图等十分专业，界面略简陋，但是功能十分强大，而且比较全面，不需要来回切换软件。</li>
+</ol>
+</li>
+<li>图床：有了自己绘制的各种图片，我们还需要一个图床用于上传图片，这里我选择使用的是阿里云 OSS，优点是性能稳定、上传速度极快，基本上是秒传，同时价格比较便宜，平均一个月 10 块钱左右，用于个人博客足够了。搭配使用 <strong>PicGo</strong> 效果就更棒了，或者可以配合 Typora 直接在粘贴图片时候自动上传。</li>
+<li>Markdown 编辑器：Markdown 编辑器是近几年一个很火爆的话题，同类型的软件大概有好几十个，我自己用过的就包括 MacDown、Marked、MWeb、Typora、Bear 等等。最终选择使用 VSCode+Markdown 插件的形式，比较简洁清晰，而且 VSCode 查找文件、使用命令行操作 Git 等十分方便，不用来回切换。</li>
+<li>个人博客：这里其实不一定需要自己建站，现在博客方案很多种，可以使用博客园、CSDN、简书，也可以建立个人微信公众号，等等。说到底，重要的是产出的内容和是否能够坚持下来，中间的工具都是辅助而已，博客搭建的再漂亮没有文章也是白扯。我个人是用的 GitHub 的 page + Hexo 搭建的博客，好处是归档比较方便，有 Git 提交记录，有分类有 tag，可以再自己买一个域名，也可以直接使用 GitHub 的域名。这部分内容可以参考我之前的文章：<a href="http://samwei12.com/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">如何使用 Hexo 搭建个人博客</a>。</li>
+</ol>
+</li>
+</ul>
+<h3 id="定期-Review"><a href="#定期-Review" class="headerlink" title="定期 Review"></a>定期 Review</h3><ul>
+<li>按照”艾宾浩斯记忆曲线“理论，我们已经学会的知识需要定期回顾整理，才能牢牢记住，这一步我通常的做法是制作记忆卡片，使用的软件是 <strong>Anki</strong>，网上教程很多，这里不再赘述。</li>
+<li>需要说明的一点是，定期 Review 的核心在于 <strong>定期</strong>，如何能够坚持下来是很关键的，这里推荐一款名为 <strong>Streaks</strong> 的软件，它的功能十分简单单一，就是用于养成习惯，亮点是可以跟苹果的健康系统打通，自动读取你的起床时间、睡眠时间进行打卡。</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li>经过上面这些介绍，现在简单总结一下我个人的一个学习工作流程：<ol>
+<li>首先是信息输入，分为碎片信息、日常待办及书籍阅读。针对碎片信息，先进行过滤筛选，看看是不是要进一步了解学习，如果需要再放到 <strong>Pinbox</strong> 中；日常待办事项，通常我使用 <strong>滴答清单</strong> 处理，可以配合番茄钟使用；深度书籍阅读，电子书我一般使用 <strong>MarginNote</strong> 进行阅读，便于提取信息和整理导图。这里不建议在手机上进行深入阅读，手机也不是很合适，干扰因素太多，尽量减少手机使用时长，还是应该每天专门抽时间在电脑前查看整理收集到的碎片信息。</li>
+<li>之后是归纳整理，这一步需要将各个信息来源所收集到的信息知识进行分门别类，这里按照功能会划分一些固定的目录，例如编程、个人思考、旅行、日常等等，目前使用 <strong>Dynalist</strong> 用来整理大纲。对于一些碎片文章，如果已经整理完毕大纲，则根据是否需要归档来决定要不要将对应的网页进行本地保存，这里推荐一款 Chrome 的插件 <strong>SingleFile</strong>，用于将网页内容全部下载到本地一个单独的 html 文件中，即使网站挂了也能继续翻阅；如果不需要保存，那么仅作为一个参考资料，贴个链接即可。这样可以最大程度上避免 Pinbox 中的信息堆积如山，以至于再也不去查看。同时，目前我也在使用 <strong>Dynalist</strong> 进行个人工作学习计划的整理，而没有采用专门的 Trello 之类的软件，避免来回切换产生的成本。</li>
+<li>然后就是最重要的输出分享，对于一些编程类知识，还需要进行实践，可以针对每个分类单独建一个 GitHub 仓库，用于记录学习，同时把一些知识点归纳成图表，发到自己的博客上，对外进行输出，这里也可以采用跟其他同事同学一起讨论的方式，效率更高。如果觉得需要分享给其他人看，并且要有交流，推荐使用<strong>博客园</strong>，可以配合 MWeb 的 Metablog 支持同时发布到多个博客平台上。</li>
+<li>最后就是把自己已经学习到的知识点，录入到 <strong>Anki</strong> 中，进行定期复习，避免遗忘。</li>
+</ol>
+</li>
+</ul>
+<h2 id="PKM-常见误区"><a href="#PKM-常见误区" class="headerlink" title="PKM 常见误区"></a>PKM 常见误区</h2><ul>
+<li>这里总结一下 PKM 容易进入的误区：</li>
+</ul>
+<ol>
+<li><strong>折腾工具</strong>：尽可能开始明确一套工具体系，然后一直用下去。这个我觉得是绝大部分人会犯的的主要错误（当然包括我）。由于我个人比较喜欢尝试各种新鲜的工具，这些年也浪费了大量的时间，先后使用过 Evernote、为知笔记、MWeb、Xmind 等等，中间各种迁移，花了很多精力不说，部分信息还出现了丢失。目前在逐步克服这个毛病，希望大家不要走我的老路。这里列一下我自己这些年折腾工具摸出来的经验，希望对大家明确合适自己的工具起到帮助：<ol>
+<li><strong>尽可能不要全部依赖免费工具</strong>：现在大家对软件的付费意愿原来越强了，我这里还是简单提一下，不要只是因为某个软件免费而使用它，<strong>Pinboard</strong> 的作者就坚持提供付费服务，产品定价随着购买用户增多而提高，目前已经是每年 22 刀，并且做的越来越好，<strong>免费的往往是最贵的</strong>，我现在越来越能理解这一点。因为免费通常是要付出代价的，比如开发者一直拿不到收获，停止更新了，这时候你就不得不寻找下一个合适的工具，同时还要进行大量的迁移工作，中间会浪费大量的时间，世界上大部分事情都是不公平的，但只有时间，对每个人都是最公平的，所以最宝贵的是你的时间，而不是购买软件的那几十或者几百块钱。写到这里我不得不再次强推一下 Mac 下的 <strong>Manico</strong> 这款软件，它的功能很单一，就是可以帮助你快速切换软件，任意时刻快速按一个快捷键就能打开编辑器、打开钉钉、打开网页，而不是打开 Spotlight 或者 Alfred 再敲软件名，或者用鼠标在 Dock 中寻找，每次大约能节省 1~2 秒，每天大约能节省 5-6 分钟的样子，它现在是我使用频率最高的软件，没有之一，而且很良心的只要 25￥，这个钱是我花过最值的一次。附上我的近 30 天使用截图。 <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502182226.png" alt="20200502182226"></li>
+<li><strong>格式越简单越好</strong>：就像很多人现在还喜欢用笔和纸记录笔记一样，互联网发展的速度相当之快，但是兼容性也随之变差，记录想法的工具，最好是足够简单，这也是近些年 Markdown 能够这么火爆的原因。这么多年过去了，txt 格式一样是任何软件都可以支持的，而不是各种奇怪的软件自定义格式，所以尽量避开那些自定义自己格式和规范的软件，尤其是创业公司的，软件或者公司随时可能会倒闭，到时候倒霉的还是用户。这也是我为什么没有选择使用 <strong>Bear</strong>、<strong>Ulysses</strong> 等软件的原因，他们都定义了自己的 Markdown 语法，未来切换迁移成本会比较高。当然现在也还有一些软件走了极端，类似 <strong>Taskpaper</strong> 这种，全部使用文本文件，不是不可以，而是没有必要，如何在易用性和兼容性中间做取舍，要看大家各自的选择了。我个人建议，对于一些价值不是很大的，比如购物清单、待办事项等，可以优先考虑易用性和稳定性；而对于一些需要长久保存翻看的，例如个人博客、年度总结、工作思考等，选用一些相对通用的格式，类似 Markdown、Opml、HTML 等等。</li>
+<li><strong>除非是网络实在不可用，否则尽可能选用国外产品</strong>：倒不是说崇洋媚外，但是我这些年使用软件的心得告诉我，大部分情况下，国产软件不好用。这里指的并不是说功能不够好，而是国内软件氛围普遍较差，大部分软件免费版本砍掉了一些核心功能，逼着你必须付费，然而付费之后发现核心功能还是不够稳定。另一方面，国内产品通常没有足够的克制性，这点上做的最好的是微信，这么多年来，新增功能屈指可数，但是核心功能稳定的一比，假如微信也每年新增 n 个功能，各种摇一摇、视频号强制推广，但是聊天会丢失消息、偶尔连不上网，它绝对做不到如今的规模。反例太多了，比如我前两年用的收趣，刚开始出来的时候真的是好用，同步速度很快，且跟微信打通，直接在微信里面就可以保存文章，解决了一个大难题，但是逐渐就变味了，推出会员制、免费版不允许导出、加了各种花里胡哨的功能，于是我只能放弃它，更恶心的在于如果我想从它上面退出，必须要先买一个会员，否则我的内容导出不了，只能一个个打开拷贝链接，再迁移到 Raindrop.io 或者 Pinbox。国内产品通常都存在这个问题，你在上面产生的任何数据都是归属于他们，而不是你自己，国外公司的产品基本都没这个问题，哪怕是免费版本，你的各种数据在需要的时候都可以自行导出，可能是国内外对数据隐私的看法不同吧。另一个反例就是百度云盘，真的是喂屎给用户，为了不吃屎，只能花钱，而不是说确保核心功能可用的情况下，让用户自愿付费购买额外功能。</li>
+</ol>
+</li>
+<li><strong>仓鼠党</strong>：这个问题想必也有大部分人存在（包括我自己），曾经我的 Evernote 里面保存了上千篇文章和网页，以致于我后面都不想打开它，因为它剪切保存文章功能实在是太方便了，网上随便看到一篇文章就点击保存，动动手指头，分分钟就保存几十篇，然而一篇文章就需要花费几十分钟仔细阅读，有时候还要敲代码，时间就更久了，慢慢的，你会发现文章堆积如山，再也不想看了。我现在也同样存在这个问题，目前缓解的做法之一，就是把那些不能立马用到的或者曾经觉得有用现在用不到的文章全部删掉，不要觉得心疼或者可惜，换个角度考虑，这种文章网上一搜一大把，尽量做到关注到某个主题的时候，主动检索相关信息和知识，而不是推送过来的消息全部保存，然后 <strong>Read Never</strong>，共勉。</li>
+<li>停止打 tag：标签系统并不是很符合人类的思维习惯，可能你并没有注意到，你打的那些标签大部分从来没有检索过，反正我自己平时查阅个人知识的时候就是直接在整个知识库里面全文搜索，直接使用 VSCode 或者 Dynalist 的搜索功能即可。</li>
+<li>停止笔记分类焦虑：看到一篇文章的时候，不要一直纠结它的分类，或者动不动隔段时间就要对笔记进行一次大扫除，确保所有的笔记都在合适的目录下，很多时候有些知识点是很难讲清楚放在 A 还是放在 B 下面，它可能都涉及到。这时候不得不提一下，Dynalist 的内链十分方便，而且对每一个节点都会生成一个唯一链接，如果不是经常改变节点名称的话（大部分情况下改节点名也没问题），即使挪动了目录，对应的内链都不会失效，这点比自己用 Markdown 生成本地文件链接要好太多了。之前我尝试过用 Xmind + 本地文件链接跳转方式管理各种导图，后来就是因为文件位置或者名称一改，链接全部失效，只能作罢。所以使用 Dynalist 可以让你忽略目录分类变更，不用一开始就想尽办法把笔记放在合适的位置，别在这上面浪费时间。</li>
+<li>尽可能简化你的工作流，不要增加太多步骤，步骤越长，越难坚持。</li>
+</ol>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><ul>
+<li>这篇文章基本上总结到了我这几年个人知识管理的关键点，包括一些工具的挑选原则、具体的使用心得、一些常见的误区等等，希望对大家有所帮助。</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://en.wikipedia.org/wiki/Personal_knowledge_management">Wikipedia</a></li>
+<li><a href="https://medium.com/@axtonliu/how-to-build-an-efficient-personal-knowledge-management-system-355332ae5991">How To Build an Efficient Personal Knowledge Management System</a></li>
+<li><a href="https://dynalist.io/d/2pKguSbUt4PK58fuinbTsdWj#z=wCvySzD71orXrlkYhGM2x9OR">PKM 常见误区</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/39630918">清单笔记</a></li>
+</ul>
 ]]></content>
       <categories>
-        <category>Python</category>
+        <category>Thinking</category>
       </categories>
       <tags>
-        <tag>Jinja2</tag>
+        <tag>PKM</tag>
+        <tag>DIKW</tag>
       </tags>
   </entry>
   <entry>
@@ -705,158 +857,6 @@
       </categories>
       <tags>
         <tag>JDBC</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何构建一个PKM系统</title>
-    <url>/2020/05/02/Thinking/%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAPKM%E7%B3%BB%E7%BB%9F/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2020/05/02/Thinking/%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AA%20PKM%20%E7%B3%BB%E7%BB%9F/">原文链接</a></p>
-</blockquote>
-<ul>
-<li>这篇文章是个人知识总结相关的第一篇文章，主要目的是为了阐述我们为什么需要一个 PKM 系统，并且简单对自己这几年亲身形成的PKM 系统进行总结。</li>
-</ul>
-<h2 id="PKM-是什么？"><a href="#PKM-是什么？" class="headerlink" title="PKM 是什么？"></a>PKM 是什么？</h2><ul>
-<li>PKM 是 Personal Knowledge Management 的缩写，我们先来看一下 Wikipedia 中的描述：</li>
-</ul>
-<blockquote>
-<p>Personal knowledge management (PKM) is a process of collecting information that a person uses to gather, classify, store, search, retrieve and share knowledge in their daily activities (Grundspenkis 2007) and the way in which these processes support work activities (Wright 2005). It is a response to the idea that knowledge workers need to be responsible for their own growth and learning (Smedley 2009). </p>
-</blockquote>
-<ul>
-<li>这个解释已经非常清晰了，PKM 就是一套个人知识管理系统，包括知识检索、收集、分类、分享等等，可以说我们在日常生活中每个人都在不停的使用 PKM，例如看新闻、刷抖音、刷微信公众号等等，都是一个不停获取信息的过程，那么我们为什么要梳理搭建属于自己的 PKM 呢？</li>
-</ul>
-<span id="more"></span>
-
-<h2 id="为什么要构建自己的-PKM-系统？"><a href="#为什么要构建自己的-PKM-系统？" class="headerlink" title="为什么要构建自己的 PKM 系统？"></a>为什么要构建自己的 PKM 系统？</h2><ul>
-<li>大家都知道，我们目前处在一个知识爆炸的时代，虽然说各种信息和知识随手可以检索查看，但是对于绝大部分人来说，这其实并不是一件好事，相反，我认为弊端是大于好处的。</li>
-<li>为什么这么说呢？<ol>
-<li>大家可以思考一下自己每天使用手机的时间和次数，你可以先自己猜测一个数字，然后再使用一些手机时间追踪软件看一下真实数据，我相信大部分人猜测的时间都会比自己实际使用时间少很多。这里我推荐使用 <strong>OffScreen</strong> 这款软件，比起苹果系统自带的追踪多了很多指标，例如每天拿起多少次、走路时看手机的时间、晚上在床上玩了多久手机（这个维度很扎心，大家可以关注下）等等。我自己平均使用时长一般在 2~3 小时左右，每天拿起次数在 50 次左右。</li>
-<li>当然，手机使用时长并不能说明所有问题，但是手机上干扰因素实在是太多，这个大家可以看下系统自带的屏幕使用时间，里面有一栏是每天收到的通知次数，我自己基本上手机每天推送通知次数超过 300次，比如在写代码、学习的时候，微信推送了一条信息，打开手机回复完毕之后，顺便刷一会朋友圈，再看看公众号，链接点进去发现有个好玩的视频，不小心跳到了抖音，然后一天就过去了。是不是觉得这个场景似曾相识？大家要知道，目前有一大堆大公司聘请了高薪产品经理和数据挖掘工程师，他们做的事情就是想办法吸引你的注意力，让你不停地黏在手机上，他们通过收集你在各个页面、软件停留的数据，分析一下之后，对你喜欢看什么（比如抖音里面的大长腿）、喜欢玩什么等等一清二楚，这也就是为什么刷抖音之类的很难停下来，你会发现看到的视频很多都是喜欢看的，这种东西靠意志力很难克服。</li>
-<li>慢慢地，你就会发现自己的手机其实替代了你进行思考，比如今天要看什么、学什么，你以为是你主动控制的，其实都是手机里面各种软件操控你完成的，不信你可以回想一下自己每天使用手机的路径，是不是不自觉的解锁之后就会打开微信、微博看两眼？，<strong>习惯的力量是很可怕的，而且对于大部分来说受到的都是坏习惯的影响。</strong></li>
-</ol>
-</li>
-<li>怎么避免自己淹没在无谓知识的浪潮里面呢？这里简单介绍一下 <strong>DIKW 模型</strong> 和 <strong>学习金字塔</strong>。<ul>
-<li>DIKW：<ul>
-<li><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502102007.png" alt="20200502102007"></li>
-<li>它的核心思想其实也很简单， Data-&gt;Information-&gt;Knowledge-&gt;Wisdom 是符合金字塔模型的，尤其是从 Information 到 Knowledge 这里，平时大家刷的微信公众号、看的各种鸡汤文、背的单词，看似也都在努力学习，其实他们大部分都停留在信息这一步，并没有转换成你的知识，而知道了这些知识之后，真正到把它们转换为自己的技能，中间又有一个非常大的 gap，所以其实花了大量的时间，自我成长提升却非常少。</li>
-</ul>
-</li>
-<li>学习金字塔：<ul>
-<li><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502114143.png" alt="20200502114143"></li>
-<li>学习效率从低到高大体上分别是文字阅读、音频、视频、演示 Demo、实践、分享教学。</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>这里的核心其实总结下来就是几点：<ol>
-<li><strong>不要把别人的知识当做自己的</strong>，很多人（包括我自己）喜欢收藏各种知识，比如买书、买教程、看到好文章先收藏再稍后读（其实根本不读）。</li>
-<li><strong>没有输出的知识是很难转换为技能的</strong>，很多东西明明自己是看过的，但是仅限于知道理论知识，很快就忘了，下次遇到还是需要 Google，这里需要养成分享的习惯，试想一下，如果你正在看的书或者知识点，老板过来让你下周准备一次分享，是不是立马就更认真了，为了不出丑，不被挑战，你必然会花费更多的心思学习，同时会主动思考大家会问什么问题，提前做好准备，那么经历这么一次分享之后，对应的知识点，过来听讲的人说不定很快就忘了，但是你自己一定可以牢牢记住很久。</li>
-<li><strong>定期 Review</strong>，这个也很好理解，知识的记忆是符合 <strong>艾宾浩斯记忆曲线</strong> 的，可以自行 Google 一下，定期复习确保不会遗忘。</li>
-</ol>
-</li>
-</ul>
-<h2 id="我是如何搭建自己的-PKM-系统的？"><a href="#我是如何搭建自己的-PKM-系统的？" class="headerlink" title="我是如何搭建自己的 PKM 系统的？"></a>我是如何搭建自己的 PKM 系统的？</h2><ul>
-<li>俗话说，”工欲善其事必先利其器“，说了这么多，终于到了本文的核心内容，简单分享总结一下我这几年形成的一套 PKM 体系。</li>
-<li>通过前面的介绍，大家应该也都明白，如果想要把信息和他人的知识变为自己的知识和技能，那么最起码需要完成一个闭环，就是 收集-&gt;整理-&gt;输出-&gt;复习。只有自己实践完成之后，能够归纳整理并且分享给他人的知识才能进一步巩固。</li>
-<li><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502134625.png" alt="20200502134625"></li>
-<li>下面就分别对这其中的环节进行详细展开，这里事先说明下，我平时的工作环境是 Mac 全家桶，尽管我这里推荐的都是一些跨平台软件，但是部分 case 可能有所不同。</li>
-</ul>
-<h3 id="信息输入"><a href="#信息输入" class="headerlink" title="信息输入"></a>信息输入</h3><ul>
-<li><p>在当下这么一个信息爆炸的时代，我们所缺少的不是如何收集知识，而是如何主动获取知识和辨别整理。我个人通常的信息来源有这些：<strong>Google（是的没错）、RSS 订阅、微信公众号</strong>。</p>
-</li>
-<li><p>这些信息大部分是通过手机获取的，也可以利用碎片时间阅读，例如等公交、排队等等（不建议吃饭或者上厕所时候看，会影响身体监控）。核心功能诉求如下：</p>
-<ol>
-<li><strong>跨平台</strong>，尤其是手机端，体验一定要好</li>
-<li><strong>速度要快</strong>，这里的速度快包括几个方面，网络速度、文章保存速度等，例如 Raindrop.io 这种，保存一个书签需要转圈 3s 左右，且还需要关心分类文件夹等，基本上可以直接排除，我理解大部分情况下只保存网址即可，哪怕你把网址复制下来贴到滴答清单都可以</li>
-<li>部分重要信息需要能够离线保存查看，不是强诉求</li>
-</ol>
-</li>
-<li><p>这里有几个过滤筛选信息的原则：</p>
-<ol>
-<li>尽可能收集英文资料，原因大家应该都能想到，目前大部分的知识分享都是由英语世界的牛人们发起的，国内各种博客公众号基本都是看了一遍之后自己转手翻译或者加工之后分享的，当然这样的好处就是对于新手来说，更加便于理解，坏处更是显而易见，你收集到的知识都是别人咀嚼过一次的，可能会有很多偏差。所以这里首先你要有一个能够任意查阅国外优质资源的途径（原因大家都懂），然后尽可能使用一些英文关键词进行检索。</li>
-<li>尽可能主动获取知识，否则一定要做好<strong>过滤</strong>。这一点我目前做的也很不好，正在逐步改善，什么意思呢？不要让自己被信息淹没，而是要主动去检索。这里一个比较好的方式就是通过 RSS 订阅或者关注一些优质博客，毕竟个人的精力是有限的，最忌讳看到什么都想学一下，关注几百个微信公众号，每天沉迷在刷各种热门知识的快感中，比如区块链、机器学习等等，实际上工作中根本用不到。<strong>热点是永远跟不完的，尽量学会掌握核心知识，这些知识大部分都是通用的。</strong></li>
-<li>快速区分出哪些信息需要进一步跟进。由于大部分时间这类文章或者咨询都是在等公交、排队等碎片时间接触到的，那么就需要有一个快速鉴别和定期检阅的机制，也就是决定哪些资料需要 Read Later。</li>
-<li><strong>避免 Read Later 变成 Read Never</strong>。这点我也在努力改进，目前 Pocket 里面堆积了 300+ 文章没有看。</li>
-</ol>
-</li>
-<li><p>这里推荐几款我自己在使用的软件：</p>
-<ul>
-<li><del>GFW</del>：不可说。</li>
-<li>RSS： <strong>Reeder4</strong>，老牌应用了，不多说，体验很好，可以使用美国区账号购买 Redeem Code，价格还是比较划算的，印象中十几块钱就可以。</li>
-<li>信息收集类软件：<strong>Pinbox</strong>，这类软件非常多，大体上分为两种，一种是以 Pinboard 为主的书签收集类，同类产品还有 PinBox、Raindrop.io 等；另一种以 Pocket 为首的正宗稍后读类，还有 Instapaper、收趣云等等，Evernote 也算是这类软件，当然它本身是做笔记的，只是网页剪切功能太强大了而已。从阅读体验上来说当然是 Pocket 这类软件更好，不过由于它本身带有的一些社交属性及归档功能，很容易让它变成第二个 Evernote，让你变成一只仓鼠。所以这里我选择了 Pinbox 作为我自己的收集工具，其实单从功能上来说，Pinboard 和 Raindrop.io 做的都比 Pinbox 更好，但是他们的服务器都在国外，网络实在是不够稳定，就这一点上已经被排除了，收趣各方面都不错，但是免费版不支持导出是致命伤，且现在感觉有点凉了，基本没在维护，上一次更新已经是一年多前了，于是只剩下 Pinbox 可选。关于这类软件的测评可以单独写一篇文章了，后面有时间我会更新。</li>
-<li>清单待办类：<strong>滴答清单</strong>，免费版已经足够使用，我比较看重的是它的自然语言识别和跨平台快速实时同步功能，至于其他的类似番茄钟、日历视图等高级功能属于锦上添花，如果你不打算专门为此付费，完全不影响使用。另外它还有一个比较好的亮点功能就是可以把任务以看板视图查看，比较方便。</li>
-<li>书籍类：<strong>MarginNote</strong>，针对深度阅读的诉求，例如阅读书籍等，推荐使用电子书，原因是 IT 类书籍更新迭代较快，，当然一些经典书籍，例如《代码大全》、《重构》等，是可以买一本时时翻阅的，MarginNote 阅读电子书十分方便，可以导入 PDF 批注，同时可以配合 Pad 版本手写批注等，还支持导出笔记为脑图、复习卡片导出为 Anki 等等，功能十分强大。</li>
-</ul>
-</li>
-</ul>
-<h3 id="整理归纳"><a href="#整理归纳" class="headerlink" title="整理归纳"></a>整理归纳</h3><ul>
-<li>获取到自己需要的信息之后需要做的事情就是对这些信息进行分门别类。这里有两种方式进行分类，一种按照目录结构进行分类；另一种是按照标签系统进行分类。有很多关于这方面的话题，在这里我不多赘述，我个人更倾向于使用目录结构，可以配合标签使用，单目录+搜索是必不可少的，通常来说，如果你连搜索的关键词都想不起来，那么说明这个知识点根本就还没在你的大脑里面形成初步印象，那么退回到上一步是更合适的。</li>
-<li>这一步主要的诉求有这么几个：<ol>
-<li>需要对已经存入稍后读的文章进行细品，或者需要实践，之后把核心信息提取出来，进行归纳，这里需要一个<strong>快速整理大纲</strong>的软件。</li>
-<li>如果是看到一些比较好的书单或者类似于学习计划等，需要汇总到自己的个人学习计划中，并且转换为年度、月度、周计划，定期 check，这里有一个模型叫做 <strong>PDCA</strong>，大家可以检索下，它是 Plan、DO、 Check、Action 的缩写，意思是说针对某个目标，需要先进行计划，之后实践，定期 check 学习成果，最后总结反馈，以便下一次学习计划使用。下图就是我自己在用的周报模板。<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502180750.png" alt="20200502180750"></li>
-</ol>
-</li>
-<li>在这里我主要使用的是 <strong>Dynalist</strong> 这款软件，它是大纲类笔记软件的一种，同类型的软件还有 Workflowy、幕布等等，其实思维导图也是一种大纲类软件，不过更倾向于平铺对某个知识进行介绍，不适合查看过长的列表，当然你可以加 N 个节点，但是这样无法做到一眼浏览完整体结构，也就失去了导图的意义；Dynalist 这类列表型笔记的好处就是可以一直添加列表项，缺点就是不够直观，不过它的 Pro 版本可以查看导图，一定程度上弥补了这个问题。</li>
-<li>之前我的大量笔记框架都是基于 Xmind 处理的，用了大概两年的样子，但是一直有点不爽的地方在于，Xmind 无法支持 Markdown 格式，插入图片十分不方便，且多个知识点之间联动也比较麻烦。有的知识点可能归属于多个分类，Xmind 只能做到树状结构，无法支持网状知识点关联，也没有办法对所有的导图中某个知识点进行检索。之前的解决方案是使用 Xmind 作为大纲，具体的叶子节点，通过本地 Markdown 链接的方式处理，终归比较麻烦。Dynalist 很完美的解决了这个问题，它支持大部分 Markdown 语法，包括图片、链接等，同时内置了快速链接内部节点的方式，同时可以在所有笔记中全文检索，还支持标签系统，这些都是 Xmind 或者 VSCode 解决不了的问题。</li>
-<li>关于 Dynalist 的测评文章网上有很多，后续有机会我会把导图、列表笔记、 VSCode + Markdown 笔记的优劣对比详细再写一篇文章，Dynalist唯一的缺点就是 Pro 版本太贵，如果大家有兴趣，可以使用我的邀请链接注册，你可以得到一个月的 Pro 时间（价值 10 刀），而我可以获得 5 刀的抵扣券, <a href="https://dynalist.io/invite/pxG1VA">https://dynalist.io/invite/pxG1VA</a> 。</li>
-</ul>
-<h3 id="输出分享"><a href="#输出分享" class="headerlink" title="输出分享"></a>输出分享</h3><ul>
-<li>当你梳理完知识点之后，还需要进一步实践并且输出，这样它才能变成你自己的观点或者知识。Dynalist 或者导图只适合于梳理思路，整理大纲等，并不适合长文书写，如果你需要对某个知识点进行自己的阐述、或者需要写一篇读后感等等，你一定还需要一套专门用于写作的工具，它需要这些功能：<ol>
-<li>绘图工具，很多时候，我们如果想要把知识点清晰的说明出来，就需要绘制成各种图表，例如常见的示意图、阅读源码用到的流程图、时序图等等。这里我使用的软件分别是 <strong>edrawmax</strong> 和 <strong>astah</strong>。<ol>
-<li>edrawmax 提供了大量的绘图模板，例如金字塔、瀑布流、流程图等等，大大的提升了绘图效率。同类型的软件还有 Google 的 draw.io，OmniGraffle 等，也很好用，不过模板方面不尽人意。</li>
-<li>astah 是专门用于软件开发设计使用的工具，绘制 UML、流程图、ER 图等十分专业，界面略简陋，但是功能十分强大，而且比较全面，不需要来回切换软件。</li>
-</ol>
-</li>
-<li>图床：有了自己绘制的各种图片，我们还需要一个图床用于上传图片，这里我选择使用的是阿里云 OSS，优点是性能稳定、上传速度极快，基本上是秒传，同时价格比较便宜，平均一个月 10 块钱左右，用于个人博客足够了。搭配使用 <strong>PicGo</strong> 效果就更棒了，或者可以配合 Typora 直接在粘贴图片时候自动上传。</li>
-<li>Markdown 编辑器：Markdown 编辑器是近几年一个很火爆的话题，同类型的软件大概有好几十个，我自己用过的就包括 MacDown、Marked、MWeb、Typora、Bear 等等。最终选择使用 VSCode+Markdown 插件的形式，比较简洁清晰，而且 VSCode 查找文件、使用命令行操作 Git 等十分方便，不用来回切换。</li>
-<li>个人博客：这里其实不一定需要自己建站，现在博客方案很多种，可以使用博客园、CSDN、简书，也可以建立个人微信公众号，等等。说到底，重要的是产出的内容和是否能够坚持下来，中间的工具都是辅助而已，博客搭建的再漂亮没有文章也是白扯。我个人是用的 GitHub 的 page + Hexo 搭建的博客，好处是归档比较方便，有 Git 提交记录，有分类有 tag，可以再自己买一个域名，也可以直接使用 GitHub 的域名。这部分内容可以参考我之前的文章：<a href="http://samwei12.com/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">如何使用 Hexo 搭建个人博客</a>。</li>
-</ol>
-</li>
-</ul>
-<h3 id="定期-Review"><a href="#定期-Review" class="headerlink" title="定期 Review"></a>定期 Review</h3><ul>
-<li>按照”艾宾浩斯记忆曲线“理论，我们已经学会的知识需要定期回顾整理，才能牢牢记住，这一步我通常的做法是制作记忆卡片，使用的软件是 <strong>Anki</strong>，网上教程很多，这里不再赘述。</li>
-<li>需要说明的一点是，定期 Review 的核心在于 <strong>定期</strong>，如何能够坚持下来是很关键的，这里推荐一款名为 <strong>Streaks</strong> 的软件，它的功能十分简单单一，就是用于养成习惯，亮点是可以跟苹果的健康系统打通，自动读取你的起床时间、睡眠时间进行打卡。</li>
-</ul>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
-<li>经过上面这些介绍，现在简单总结一下我个人的一个学习工作流程：<ol>
-<li>首先是信息输入，分为碎片信息、日常待办及书籍阅读。针对碎片信息，先进行过滤筛选，看看是不是要进一步了解学习，如果需要再放到 <strong>Pinbox</strong> 中；日常待办事项，通常我使用 <strong>滴答清单</strong> 处理，可以配合番茄钟使用；深度书籍阅读，电子书我一般使用 <strong>MarginNote</strong> 进行阅读，便于提取信息和整理导图。这里不建议在手机上进行深入阅读，手机也不是很合适，干扰因素太多，尽量减少手机使用时长，还是应该每天专门抽时间在电脑前查看整理收集到的碎片信息。</li>
-<li>之后是归纳整理，这一步需要将各个信息来源所收集到的信息知识进行分门别类，这里按照功能会划分一些固定的目录，例如编程、个人思考、旅行、日常等等，目前使用 <strong>Dynalist</strong> 用来整理大纲。对于一些碎片文章，如果已经整理完毕大纲，则根据是否需要归档来决定要不要将对应的网页进行本地保存，这里推荐一款 Chrome 的插件 <strong>SingleFile</strong>，用于将网页内容全部下载到本地一个单独的 html 文件中，即使网站挂了也能继续翻阅；如果不需要保存，那么仅作为一个参考资料，贴个链接即可。这样可以最大程度上避免 Pinbox 中的信息堆积如山，以至于再也不去查看。同时，目前我也在使用 <strong>Dynalist</strong> 进行个人工作学习计划的整理，而没有采用专门的 Trello 之类的软件，避免来回切换产生的成本。</li>
-<li>然后就是最重要的输出分享，对于一些编程类知识，还需要进行实践，可以针对每个分类单独建一个 GitHub 仓库，用于记录学习，同时把一些知识点归纳成图表，发到自己的博客上，对外进行输出，这里也可以采用跟其他同事同学一起讨论的方式，效率更高。如果觉得需要分享给其他人看，并且要有交流，推荐使用<strong>博客园</strong>，可以配合 MWeb 的 Metablog 支持同时发布到多个博客平台上。</li>
-<li>最后就是把自己已经学习到的知识点，录入到 <strong>Anki</strong> 中，进行定期复习，避免遗忘。</li>
-</ol>
-</li>
-</ul>
-<h2 id="PKM-常见误区"><a href="#PKM-常见误区" class="headerlink" title="PKM 常见误区"></a>PKM 常见误区</h2><ul>
-<li>这里总结一下 PKM 容易进入的误区：</li>
-</ul>
-<ol>
-<li><strong>折腾工具</strong>：尽可能开始明确一套工具体系，然后一直用下去。这个我觉得是绝大部分人会犯的的主要错误（当然包括我）。由于我个人比较喜欢尝试各种新鲜的工具，这些年也浪费了大量的时间，先后使用过 Evernote、为知笔记、MWeb、Xmind 等等，中间各种迁移，花了很多精力不说，部分信息还出现了丢失。目前在逐步克服这个毛病，希望大家不要走我的老路。这里列一下我自己这些年折腾工具摸出来的经验，希望对大家明确合适自己的工具起到帮助：<ol>
-<li><strong>尽可能不要全部依赖免费工具</strong>：现在大家对软件的付费意愿原来越强了，我这里还是简单提一下，不要只是因为某个软件免费而使用它，<strong>Pinboard</strong> 的作者就坚持提供付费服务，产品定价随着购买用户增多而提高，目前已经是每年 22 刀，并且做的越来越好，<strong>免费的往往是最贵的</strong>，我现在越来越能理解这一点。因为免费通常是要付出代价的，比如开发者一直拿不到收获，停止更新了，这时候你就不得不寻找下一个合适的工具，同时还要进行大量的迁移工作，中间会浪费大量的时间，世界上大部分事情都是不公平的，但只有时间，对每个人都是最公平的，所以最宝贵的是你的时间，而不是购买软件的那几十或者几百块钱。写到这里我不得不再次强推一下 Mac 下的 <strong>Manico</strong> 这款软件，它的功能很单一，就是可以帮助你快速切换软件，任意时刻快速按一个快捷键就能打开编辑器、打开钉钉、打开网页，而不是打开 Spotlight 或者 Alfred 再敲软件名，或者用鼠标在 Dock 中寻找，每次大约能节省 1~2 秒，每天大约能节省 5-6 分钟的样子，它现在是我使用频率最高的软件，没有之一，而且很良心的只要 25￥，这个钱是我花过最值的一次。附上我的近 30 天使用截图。 <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200502182226.png" alt="20200502182226"></li>
-<li><strong>格式越简单越好</strong>：就像很多人现在还喜欢用笔和纸记录笔记一样，互联网发展的速度相当之快，但是兼容性也随之变差，记录想法的工具，最好是足够简单，这也是近些年 Markdown 能够这么火爆的原因。这么多年过去了，txt 格式一样是任何软件都可以支持的，而不是各种奇怪的软件自定义格式，所以尽量避开那些自定义自己格式和规范的软件，尤其是创业公司的，软件或者公司随时可能会倒闭，到时候倒霉的还是用户。这也是我为什么没有选择使用 <strong>Bear</strong>、<strong>Ulysses</strong> 等软件的原因，他们都定义了自己的 Markdown 语法，未来切换迁移成本会比较高。当然现在也还有一些软件走了极端，类似 <strong>Taskpaper</strong> 这种，全部使用文本文件，不是不可以，而是没有必要，如何在易用性和兼容性中间做取舍，要看大家各自的选择了。我个人建议，对于一些价值不是很大的，比如购物清单、待办事项等，可以优先考虑易用性和稳定性；而对于一些需要长久保存翻看的，例如个人博客、年度总结、工作思考等，选用一些相对通用的格式，类似 Markdown、Opml、HTML 等等。</li>
-<li><strong>除非是网络实在不可用，否则尽可能选用国外产品</strong>：倒不是说崇洋媚外，但是我这些年使用软件的心得告诉我，大部分情况下，国产软件不好用。这里指的并不是说功能不够好，而是国内软件氛围普遍较差，大部分软件免费版本砍掉了一些核心功能，逼着你必须付费，然而付费之后发现核心功能还是不够稳定。另一方面，国内产品通常没有足够的克制性，这点上做的最好的是微信，这么多年来，新增功能屈指可数，但是核心功能稳定的一比，假如微信也每年新增 n 个功能，各种摇一摇、视频号强制推广，但是聊天会丢失消息、偶尔连不上网，它绝对做不到如今的规模。反例太多了，比如我前两年用的收趣，刚开始出来的时候真的是好用，同步速度很快，且跟微信打通，直接在微信里面就可以保存文章，解决了一个大难题，但是逐渐就变味了，推出会员制、免费版不允许导出、加了各种花里胡哨的功能，于是我只能放弃它，更恶心的在于如果我想从它上面退出，必须要先买一个会员，否则我的内容导出不了，只能一个个打开拷贝链接，再迁移到 Raindrop.io 或者 Pinbox。国内产品通常都存在这个问题，你在上面产生的任何数据都是归属于他们，而不是你自己，国外公司的产品基本都没这个问题，哪怕是免费版本，你的各种数据在需要的时候都可以自行导出，可能是国内外对数据隐私的看法不同吧。另一个反例就是百度云盘，真的是喂屎给用户，为了不吃屎，只能花钱，而不是说确保核心功能可用的情况下，让用户自愿付费购买额外功能。</li>
-</ol>
-</li>
-<li><strong>仓鼠党</strong>：这个问题想必也有大部分人存在（包括我自己），曾经我的 Evernote 里面保存了上千篇文章和网页，以致于我后面都不想打开它，因为它剪切保存文章功能实在是太方便了，网上随便看到一篇文章就点击保存，动动手指头，分分钟就保存几十篇，然而一篇文章就需要花费几十分钟仔细阅读，有时候还要敲代码，时间就更久了，慢慢的，你会发现文章堆积如山，再也不想看了。我现在也同样存在这个问题，目前缓解的做法之一，就是把那些不能立马用到的或者曾经觉得有用现在用不到的文章全部删掉，不要觉得心疼或者可惜，换个角度考虑，这种文章网上一搜一大把，尽量做到关注到某个主题的时候，主动检索相关信息和知识，而不是推送过来的消息全部保存，然后 <strong>Read Never</strong>，共勉。</li>
-<li>停止打 tag：标签系统并不是很符合人类的思维习惯，可能你并没有注意到，你打的那些标签大部分从来没有检索过，反正我自己平时查阅个人知识的时候就是直接在整个知识库里面全文搜索，直接使用 VSCode 或者 Dynalist 的搜索功能即可。</li>
-<li>停止笔记分类焦虑：看到一篇文章的时候，不要一直纠结它的分类，或者动不动隔段时间就要对笔记进行一次大扫除，确保所有的笔记都在合适的目录下，很多时候有些知识点是很难讲清楚放在 A 还是放在 B 下面，它可能都涉及到。这时候不得不提一下，Dynalist 的内链十分方便，而且对每一个节点都会生成一个唯一链接，如果不是经常改变节点名称的话（大部分情况下改节点名也没问题），即使挪动了目录，对应的内链都不会失效，这点比自己用 Markdown 生成本地文件链接要好太多了。之前我尝试过用 Xmind + 本地文件链接跳转方式管理各种导图，后来就是因为文件位置或者名称一改，链接全部失效，只能作罢。所以使用 Dynalist 可以让你忽略目录分类变更，不用一开始就想尽办法把笔记放在合适的位置，别在这上面浪费时间。</li>
-<li>尽可能简化你的工作流，不要增加太多步骤，步骤越长，越难坚持。</li>
-</ol>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><ul>
-<li>这篇文章基本上总结到了我这几年个人知识管理的关键点，包括一些工具的挑选原则、具体的使用心得、一些常见的误区等等，希望对大家有所帮助。</li>
-</ul>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
-<li><a href="https://en.wikipedia.org/wiki/Personal_knowledge_management">Wikipedia</a></li>
-<li><a href="https://medium.com/@axtonliu/how-to-build-an-efficient-personal-knowledge-management-system-355332ae5991">How To Build an Efficient Personal Knowledge Management System</a></li>
-<li><a href="https://dynalist.io/d/2pKguSbUt4PK58fuinbTsdWj#z=wCvySzD71orXrlkYhGM2x9OR">PKM 常见误区</a></li>
-<li><a href="https://zhuanlan.zhihu.com/p/39630918">清单笔记</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Thinking</category>
-      </categories>
-      <tags>
-        <tag>PKM</tag>
-        <tag>DIKW</tag>
       </tags>
   </entry>
   <entry>
