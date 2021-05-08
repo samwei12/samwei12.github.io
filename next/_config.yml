@@ -1,0 +1,157 @@
+# https://theme-next.js.org/docs/theme-settings/
+
+# Allow to cache content generation.
+cache:
+  enable: true
+
+# Remove unnecessary files after hexo generate.
+minify: true
+
+# ---------------------------------------------------------------
+# Scheme Settings
+# ---------------------------------------------------------------
+
+#scheme: Muse
+# scheme: Mist
+# scheme: Pisces
+scheme: Gemini
+
+# ---------------------------------------------------------------
+# Menu Settings
+# ---------------------------------------------------------------
+
+# When running the site in a subdirectory (e.g. domain.tld/blog), remove the leading slash from link value (/archives -> archives).
+# Usage: `Key: /link/ || icon`
+# Key is the name of menu item. If the translation for this item is available, the translated text will be loaded, otherwise the Key name will be used. Key is case-senstive.
+# Value before `||` delimeter is the target link.
+# Value after `||` delimeter is the name of FontAwesome icon. If icon (with or without delimeter) is not specified, question icon will be loaded.
+# External url should start with http:// or https://
+# menu:
+#   home: / || fa fa-home
+#   about: /about/ || fa fa-user
+#   tags: /tags/ || fa fa-tags
+#   categories: /categories/ || fa fa-th
+#   archives: /archives/ || fa fa-archive
+#   #schedule: /schedule/ || fa fa-calendar
+#   # sitemap: /sitemap.xml || fa fa-sitemap
+#   #commonweal: /404/ || fa fa-heartbeat
+
+menu:
+  home: / || fa fa-home
+  #about: /about/ || fa fa-user
+  #tags: /tags/ || fa fa-tags
+  #categories: /categories/ || fa fa-th
+  archives: /archives/ || fa fa-archive
+  #schedule: /schedule/ || fa fa-calendar
+  #sitemap: /sitemap.xml || fa fa-sitemap
+  #commonweal: /404/ || fa fa-heartbeat
+
+
+# Enable / Disable menu icons / item badges.
+menu_settings:
+  icons: true
+  badges: true
+
+# # ---------------------------------------------------------------
+# # Sidebar Settings
+# # See: https://theme-next.org/docs/theme-settings/sidebar
+# # ---------------------------------------------------------------
+
+# # Posts / Categories / Tags in sidebar.
+# site_state: true
+
+# # Social Links
+# # Usage: `Key: permalink || icon`
+# # Key is the link label showing to end users.
+# # Value before `||` delimeter is the target permalink.
+# # Value after `||` delimeter is the name of FontAwesome icon. If icon (with or without delimeter) is not specified, globe icon will be loaded.
+# social:
+#   GitHub: https://github.com/samwei12 || github
+#   E-Mail: mailto:dongxiaosen@icloud.com || envelope
+#   #Weibo: https://weibo.com/yourname || weibo
+#   #Google: https://plus.google.com/yourname || google
+#   #Twitter: https://twitter.com/yourname || twitter
+#   #FB Page: https://www.facebook.com/yourname || facebook
+#   #VK Group: https://vk.com/yourname || vk
+#   #StackOverflow: https://stackoverflow.com/yourname || stack-overflow
+#   #YouTube: https://youtube.com/yourname || youtube
+#   #Instagram: https://instagram.com/yourname || instagram
+#   #Skype: skype:yourname?call|chat || skype
+
+# social_icons:
+#   enable: true
+#   icons_only: false
+#   transition: false
+
+# # Blog rolls
+# links_icon: link
+# links_title: Links
+# links_layout: block
+# #links_layout: inline
+# links:
+#   #Title: http://example.com
+
+# # Sidebar Avatar
+# avatar:
+#   # In theme directory (source/images): /images/avatar.gif
+#   # In site directory (source/uploads): /uploads/avatar.gif
+#   # You can also use other linking images.
+#   url: https://img.alicdn.com/tfs/TB1BCMNCMmTBuNjy1XbXXaMrVXa-460-460.jpg #/images/avatar.gif
+#   # If true, the avatar would be dispalyed in circle.
+#   rounded: true
+#   # The value of opacity should be choose from 0 to 1 to set the opacity of the avatar.
+#   opacity: 1
+#   # If true, the avatar would be rotated with the cursor.
+#   rotated: false
+
+# # Table Of Contents in the Sidebar
+# toc:
+#   enable: true
+#   # Automatically add list number to toc.
+#   number: true
+#   # If true, all words will placed on next lines if header width longer then sidebar width.
+#   wrap: false
+#   # If true, all level of TOC in a post will be displayed, rather than the activated part of it.
+#   expand_all: false
+#   # Maximum heading depth of generated toc. You can set it in one post through `toc_max_depth` in Front Matter.
+#   max_depth: 6
+
+# sidebar:
+#   # Sidebar Position, available values: left | right (only for Pisces | Gemini).
+#   position: left
+#   #position: right
+
+#   # Manual define the sidebar width. If commented, will be default for:
+#   # Muse | Mist: 320
+#   # Pisces | Gemini: 240
+#   #width: 300
+
+#   # Sidebar Display, available values (only for Muse | Mist):
+#   #  - post    expand on posts automatically. Default.
+#   #  - always  expand for all pages automatically.
+#   #  - hide    expand only when click on the sidebar toggle icon.
+#   #  - remove  totally remove sidebar including sidebar toggle.
+#   display: post
+
+#   # Sidebar offset from top menubar in pixels (only for Pisces | Gemini).
+#   offset: 12
+#   # Enable sidebar on narrow view (only for Muse | Mist).
+#   onmobile: false
+#   # Click any blank part of the page to close sidebar (only for Muse | Mist).
+#   dimmer: false
+
+# back2top:
+#   enable: true
+#   # Back to top in sidebar.
+#   sidebar: false
+#   # Scroll percent label in b2t button.
+#   scrollpercent: false
+
+# # A button to open designated chat widget in sidebar.
+# # Firstly, you need enable the chat service you want to activate its sidebar button.
+# chat:
+#   enable: false
+#   #service: chatra
+#   #service: tidio
+#   icon: comment # icon in Font Awesome 4, set false to disable icon
+#   text: Chat # button text, change it as you wish
