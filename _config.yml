@@ -4,18 +4,18 @@
 
 # Site
 title: samwei12's blog
-subtitle: Stay hungry, stay foolish
-description: Stay hungry, stay foolish
+subtitle: Stay hungry, stay foolish.
+description: I hear and I forget. I see and I remember. I do and I understand.
 author: samwei12
 language: zh-Hans
-email: samwei12@icloud.com
+email: dongxiaosen@icloud.com
 timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
 # url: http://samwei12.github.io
 # url: http://samwei12.gitcafe.io
-url: http://samwei12.com
+url: http://blog.samwei12.cn
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
