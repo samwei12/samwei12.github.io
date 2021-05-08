@@ -1,126 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>AVCaptureSession部分用法</title>
-    <url>/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/">原文链接</a></p>
-</blockquote>
-<h2 id="AVCaptureSession阻塞主线程问题"><a href="#AVCaptureSession阻塞主线程问题" class="headerlink" title="AVCaptureSession阻塞主线程问题"></a>AVCaptureSession阻塞主线程问题</h2><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>仔细看了文档之后，发现问题出在<code> stopRunning</code>这里，</p>
-<span id="more"></span>
-<p>苹果文档描述如下：</p>
-<blockquote>
-<p>Clients invoke -stopRunning to stop the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    stopped.</p>
-</blockquote>
-<p>重点是这个函数在 session 完全停止下来之前会始终阻塞线程， 同样的，在<code> startRunning</code>中：</p>
-<blockquote>
-<p>Clients invoke -startRunning to start the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    started up or failed.  A failure to start running is reported through the AVCaptureSessionRuntimeErrorNotification<br>    mechanism.</p>
-</blockquote>
-<p>因此这里必须放在后台线程中处理，否则，就会导致界面不响应，iOS8之后应该在这里做了优化，即使放在主线程做也没有很卡顿的现象，但 iOS7中，尤其是测试设备为4s，界面卡死问题很严重。</p>
-<p>开启和关闭相机部分代码改为：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 开启相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		[[<span class="keyword">self</span>.avCameraManager session] startRunning];</span><br><span class="line">	&#125;);</span><br><span class="line">	</span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="keyword">void</span>) &#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 关闭相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		<span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。</p>
-<h2 id="相机前后台切换问题"><a href="#相机前后台切换问题" class="headerlink" title="相机前后台切换问题"></a>相机前后台切换问题</h2><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(startRunningSession) withObject:<span class="literal">nil</span> afterDelay:<span class="number">0.5</span>];</span><br></pre></td></tr></table></figure>
-
-<p>当时我很奇怪，这里为什么要加延时呢？进入到前台时不是应该直接开启相机吗？于是我直接把这里改成了：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">self</span> startRunningSession];</span><br></pre></td></tr></table></figure>
-
-<p>没过多久，问题出现了，多次切换前后台之后发现，相机始终黑屏，这时，进入后台再回来，问题解决了，仔细加了 log 之后发现，出现黑屏的时候，确实也正确调用了启动 session，但是并没有收到系统相机启动成功的消息，反而收到了两次相机关闭的通知。</p>
-<p>那么之前代码中加了0.5秒延时的原因也就清楚了，是为了等待系统关闭相机之后，再调用开启相机，以免相机启动失败，但这种方式真的合理吗？其实并没有解决本质问题，如果0.5秒钟的时间并没有完全关闭系统相机呢？这里仍然会出现黑屏问题。</p>
-<p>于是继续查看系统文档，发现系统的 sampleCode AVCam-iOS中并没有专门用于前后台处理的逻辑，原来这里并不需要我们自己手动管理相机，系统会自动根据程序状态来判断是否需要关闭或者开启相机，如果按 home 进入<code>UIApplicationStateBackground</code> 状态，那么系统自动关闭相机并在进入<code>UIApplicationStateActive</code>状态时开启相机；如果是进入<code>UIApplicationStateInactive</code>状态，例如，双击 home 调出任务管理器，这时，相机并没有被关闭，仍然能够看到 preview 画面。</p>
-<p>我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li>AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作</li>
-<li>前后台切换时，无需手动管理 CaptureSession</li>
-</ul>
-]]></content>
-      <categories>
-        <category>iOS</category>
-      </categories>
-      <tags>
-        <tag>AVCaptureSession</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>NSView subview blocking drag/drop event</title>
-    <url>/2016/01/26/Objective-C/subview-blocking-drag-event/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2016/01/26/Objective-C/subview-blocking-drag-event/">原文链接</a></p>
-</blockquote>
-<p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p>
-<ol>
-<li>从 NSView 继承得到一个子类</li>
-<li>覆盖处理拖拽事件相关方法</li>
-<li>注册拖拽事件</li>
-</ol>
-<span id="more"></span>
-
-<p>开始的时候一切都很正常,直到某次发现拖拽到屏幕边缘响应较为灵敏,而<strong>拖拽到屏幕中间则不响应事件</strong>,APP页面大致是这样的:</p>
-<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png"></p>
-<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。</p>
-<p>那么如何验证呢？其实也很简单，在自定义的NSView 中重载<code>draggingEnded：</code>方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 <code>NSView</code> 中添加的<code>NSImageView</code>作为 subview 会阻止拖拽事件的传递，原因是<code> NSImageView</code>本身可以处理拖拽事件，于是截获了本该自定义<code>NSView</code>处理的消息。</p>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：<a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></p>
-<p>提供的解决方案有以下几种：</p>
-<ol>
-<li>不使用 <code>NSImageView</code>，而是采用自定义<code> NSView</code>的方式，然后重写<code>drawRect：</code>方法进行图片渲染。这个办法十分笨拙，并且不太方便。</li>
-<li>调用<code>unregisterDraggedTypes </code>方法，这样<code> NSImageView</code>就不会监听拖拽事件了，完美解决。</li>
-</ol>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
-<li><a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></li>
-<li><a href="http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation">http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Mac</category>
-      </categories>
-      <tags>
-        <tag>Cocoa</tag>
-        <tag>NSView</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何取消 UIView 动画？</title>
-    <url>/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/">原文链接</a></p>
-</blockquote>
-<p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
-<p>动画部分代码很简单，如下：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">						 <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">							 [<span class="keyword">self</span> hideFocus];</span><br><span class="line">						 &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
-
-<p>对焦框在0.3秒内进行两倍缩小到正常尺寸的一个动画，之后隐藏。</p>
-<span id="more"></span>
-
-<h2 id="旧代码分析"><a href="#旧代码分析" class="headerlink" title="旧代码分析"></a>旧代码分析</h2><p>以前的代码在这部分的处理大致是这样的，</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:_touches];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UITouch</span> *touch = [_touches anyObject];</span><br><span class="line">    <span class="built_in">CGPoint</span> touchPoint = [touch locationInView:<span class="keyword">self</span>.view];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    [<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(touchFocus:) withObject: touches afterDelay:<span class="number">0.3</span>f];</span><br><span class="line">    </span><br><span class="line">- (<span class="keyword">void</span>)touchFocus:(<span class="built_in">NSSet</span> *)touches &#123;</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:touches];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 以下为具体对焦框显示部分</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看出，代码逻辑大致为，截获屏幕点击事件，之后加入一个0.3秒的延时方法，如果用户0.3秒内再次点击对焦，则取消上一次的对焦事件；否则，执行对焦框动画。</p>
-<p>这个逻辑看似解决了用户快速点击对焦的问题，实际上如果用户真正快速点击屏幕时，会出现一个很奇怪的现象，就是对焦框始终存在，并且不会变换位置，等到停止点击屏幕后，对焦框才会响应最新的触控位置进行动画，另一个问题就是对焦始终存在迟滞感，因为点击屏幕后需要等待0.3秒才能看到动画。</p>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>那么有什么更好的办法呢？系统难道没有提供终止动画的接口嘛？当然不是，其实只需要在用户再次点击屏幕时候调用<code>[_focusView.layer removeAllAnimations];</code>即可，其中具体的 view 为正在做动画的 view。</p>
-<p>这样做还有另外一个好处，再也不需要烦人的滞后感了，屏幕对焦始终跟手，同时直接终止动画，里面的 completion 都会照常调用，不存在副作用，很好地解决了这个问题。</p>
-<h2 id="新引入问题"><a href="#新引入问题" class="headerlink" title="新引入问题"></a>新引入问题</h2><p>最近遇到了一个新引入的问题，发现对焦框无法隐藏，经过调查，问题出在这里：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (finished) &#123;</span><br><span class="line">    [<span class="keyword">self</span> hideFocus];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果是直接使用<code> removeAllAnimations</code>接口停止动画的话，此处的<code> finished</code>参数有可能返回 NO，导致这段代码产生问题，所以这里如果中止动画，则需要重新进行判定。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li>学会了 <code>removeAllAnimations</code>接口用法</li>
-</ul>
-<p>尽管这个是很基础的系统 API 调用，但是我之前一直都不知道，在此记录下来，希望能给予其他人些许帮助。</p>
-]]></content>
-      <categories>
-        <category>iOS</category>
-      </categories>
-      <tags>
-        <tag>Animation</tag>
-        <tag>UIView</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>如何实现 UITabbarController 的 State Preservation?</title>
     <url>/2016/01/19/Objective-C/UITabbarController-State-Preservation/</url>
     <content><![CDATA[<blockquote>
@@ -206,6 +86,136 @@
       </tags>
   </entry>
   <entry>
+    <title>常用汇编指令总结</title>
+    <url>/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/">原文链接</a></p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="浮点数相关"><a href="#浮点数相关" class="headerlink" title="浮点数相关"></a>浮点数相关</h2><h3 id="mm-unpacklo-ps"><a href="#mm-unpacklo-ps" class="headerlink" title="_mm_unpacklo_ps"></a><code>_mm_unpacklo_ps</code></h3><blockquote>
+<p>Selects and interleaves the lower two SP FP values from a and b.</p>
+</blockquote>
+<p>将两个128位浮点数的低64位分别取出，返回新的128位浮点数</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">INTERLEAVE_DWORDS</span>(src1[<span class="number">127</span>:<span class="number">0</span>], src2[<span class="number">127</span>:<span class="number">0</span>])&#123;</span><br><span class="line">	dst[<span class="number">31</span>:<span class="number">0</span>] := src1[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">63</span>:<span class="number">32</span>] := src2[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">95</span>:<span class="number">64</span>] := src1[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	dst[<span class="number">127</span>:<span class="number">96</span>] := src2[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	RETURN dst[<span class="number">127</span>:<span class="number">0</span>]</span><br><span class="line">&#125;	</span><br><span class="line"></span><br><span class="line">dst[<span class="number">127</span>:<span class="number">0</span>] := <span class="built_in">INTERLEAVE_DWORDS</span>(a[<span class="number">127</span>:<span class="number">0</span>], b[<span class="number">127</span>:<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+
+<p>输入如果为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,a1,a2,a3</span><br><span class="line">b0,b1,b2,b3</span><br></pre></td></tr></table></figure>
+
+<p>则输出结果为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,b0,a1,b1</span><br></pre></td></tr></table></figure>
+
+<h3 id="mm-mul-ps"><a href="#mm-mul-ps" class="headerlink" title="_mm_mul_ps"></a><code>_mm_mul_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">FOR j := <span class="number">0</span> to <span class="number">3</span></span><br><span class="line">	i := j*<span class="number">32</span></span><br><span class="line">	dst[i+<span class="number">31</span>:i] := a[i+<span class="number">31</span>:i] * b[i+<span class="number">31</span>:i]</span><br><span class="line">ENDFOR</span><br></pre></td></tr></table></figure>
+
+<p>分别将两个128位浮点数的每个float相乘，结果仍然是128位浮点数<br>也就是:</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] * b[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">63</span>:<span class="number">32</span>] * b[<span class="number">63</span>:<span class="number">32</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] * b[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">127</span>:<span class="number">96</span>] * b[<span class="number">127</span>:<span class="number">96</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="mm-moveldup-ps"><a href="#mm-moveldup-ps" class="headerlink" title="_mm_moveldup_ps"></a><code>_mm_moveldup_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">95</span>:<span class="number">64</span>]</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Source data: 0.100000 0.200000 0.300000 0.400000<br>Calling _mm_moveldup_ps to load the values.<br>Result: 0.100000 0.100000 0.300000 0.300000</p>
+</blockquote>
+<p>将128bit浮点数的第一个及第三个float分别复制到第二个及第四个float中</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide">https://software.intel.com/sites/landingpage/IntrinsicsGuide</a></li>
+<li><a href="https://software.intel.com/en-us/node/524266">https://software.intel.com/en-us/node/524266</a></li>
+<li><a href="https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx">https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx</a></li>
+<li><a href="https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx">https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Assembly</category>
+      </categories>
+      <tags>
+        <tag>Cheatsheet</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>AVCaptureSession部分用法</title>
+    <url>/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/">原文链接</a></p>
+</blockquote>
+<h2 id="AVCaptureSession阻塞主线程问题"><a href="#AVCaptureSession阻塞主线程问题" class="headerlink" title="AVCaptureSession阻塞主线程问题"></a>AVCaptureSession阻塞主线程问题</h2><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>仔细看了文档之后，发现问题出在<code> stopRunning</code>这里，</p>
+<span id="more"></span>
+<p>苹果文档描述如下：</p>
+<blockquote>
+<p>Clients invoke -stopRunning to stop the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    stopped.</p>
+</blockquote>
+<p>重点是这个函数在 session 完全停止下来之前会始终阻塞线程， 同样的，在<code> startRunning</code>中：</p>
+<blockquote>
+<p>Clients invoke -startRunning to start the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    started up or failed.  A failure to start running is reported through the AVCaptureSessionRuntimeErrorNotification<br>    mechanism.</p>
+</blockquote>
+<p>因此这里必须放在后台线程中处理，否则，就会导致界面不响应，iOS8之后应该在这里做了优化，即使放在主线程做也没有很卡顿的现象，但 iOS7中，尤其是测试设备为4s，界面卡死问题很严重。</p>
+<p>开启和关闭相机部分代码改为：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 开启相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		[[<span class="keyword">self</span>.avCameraManager session] startRunning];</span><br><span class="line">	&#125;);</span><br><span class="line">	</span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="keyword">void</span>) &#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 关闭相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		<span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。</p>
+<h2 id="相机前后台切换问题"><a href="#相机前后台切换问题" class="headerlink" title="相机前后台切换问题"></a>相机前后台切换问题</h2><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(startRunningSession) withObject:<span class="literal">nil</span> afterDelay:<span class="number">0.5</span>];</span><br></pre></td></tr></table></figure>
+
+<p>当时我很奇怪，这里为什么要加延时呢？进入到前台时不是应该直接开启相机吗？于是我直接把这里改成了：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">[<span class="keyword">self</span> startRunningSession];</span><br></pre></td></tr></table></figure>
+
+<p>没过多久，问题出现了，多次切换前后台之后发现，相机始终黑屏，这时，进入后台再回来，问题解决了，仔细加了 log 之后发现，出现黑屏的时候，确实也正确调用了启动 session，但是并没有收到系统相机启动成功的消息，反而收到了两次相机关闭的通知。</p>
+<p>那么之前代码中加了0.5秒延时的原因也就清楚了，是为了等待系统关闭相机之后，再调用开启相机，以免相机启动失败，但这种方式真的合理吗？其实并没有解决本质问题，如果0.5秒钟的时间并没有完全关闭系统相机呢？这里仍然会出现黑屏问题。</p>
+<p>于是继续查看系统文档，发现系统的 sampleCode AVCam-iOS中并没有专门用于前后台处理的逻辑，原来这里并不需要我们自己手动管理相机，系统会自动根据程序状态来判断是否需要关闭或者开启相机，如果按 home 进入<code>UIApplicationStateBackground</code> 状态，那么系统自动关闭相机并在进入<code>UIApplicationStateActive</code>状态时开启相机；如果是进入<code>UIApplicationStateInactive</code>状态，例如，双击 home 调出任务管理器，这时，相机并没有被关闭，仍然能够看到 preview 画面。</p>
+<p>我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作</li>
+<li>前后台切换时，无需手动管理 CaptureSession</li>
+</ul>
+]]></content>
+      <categories>
+        <category>iOS</category>
+      </categories>
+      <tags>
+        <tag>AVCaptureSession</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>NSView subview blocking drag/drop event</title>
+    <url>/2016/01/26/Objective-C/subview-blocking-drag-event/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2016/01/26/Objective-C/subview-blocking-drag-event/">原文链接</a></p>
+</blockquote>
+<p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p>
+<ol>
+<li>从 NSView 继承得到一个子类</li>
+<li>覆盖处理拖拽事件相关方法</li>
+<li>注册拖拽事件</li>
+</ol>
+<span id="more"></span>
+
+<p>开始的时候一切都很正常,直到某次发现拖拽到屏幕边缘响应较为灵敏,而<strong>拖拽到屏幕中间则不响应事件</strong>,APP页面大致是这样的:</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png"></p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。</p>
+<p>那么如何验证呢？其实也很简单，在自定义的NSView 中重载<code>draggingEnded：</code>方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 <code>NSView</code> 中添加的<code>NSImageView</code>作为 subview 会阻止拖拽事件的传递，原因是<code> NSImageView</code>本身可以处理拖拽事件，于是截获了本该自定义<code>NSView</code>处理的消息。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：<a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></p>
+<p>提供的解决方案有以下几种：</p>
+<ol>
+<li>不使用 <code>NSImageView</code>，而是采用自定义<code> NSView</code>的方式，然后重写<code>drawRect：</code>方法进行图片渲染。这个办法十分笨拙，并且不太方便。</li>
+<li>调用<code>unregisterDraggedTypes </code>方法，这样<code> NSImageView</code>就不会监听拖拽事件了，完美解决。</li>
+</ol>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></li>
+<li><a href="http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation">http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Mac</category>
+      </categories>
+      <tags>
+        <tag>Cocoa</tag>
+        <tag>NSView</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何实现ARC中weak功能？</title>
     <url>/2016/03/09/Objective-C/%E5%A6%82%E4%BD%95%E6%A8%A1%E6%8B%9Fruntime%E4%B8%ADweak%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%9F/</url>
     <content><![CDATA[<blockquote>
@@ -265,125 +275,6 @@
         <tag>Runtime</tag>
         <tag>Objective-C</tag>
         <tag>ARC</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>常用汇编指令总结</title>
-    <url>/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/">原文链接</a></p>
-</blockquote>
-<span id="more"></span>
-
-<h2 id="浮点数相关"><a href="#浮点数相关" class="headerlink" title="浮点数相关"></a>浮点数相关</h2><h3 id="mm-unpacklo-ps"><a href="#mm-unpacklo-ps" class="headerlink" title="_mm_unpacklo_ps"></a><code>_mm_unpacklo_ps</code></h3><blockquote>
-<p>Selects and interleaves the lower two SP FP values from a and b.</p>
-</blockquote>
-<p>将两个128位浮点数的低64位分别取出，返回新的128位浮点数</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">INTERLEAVE_DWORDS</span>(src1[<span class="number">127</span>:<span class="number">0</span>], src2[<span class="number">127</span>:<span class="number">0</span>])&#123;</span><br><span class="line">	dst[<span class="number">31</span>:<span class="number">0</span>] := src1[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">63</span>:<span class="number">32</span>] := src2[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">95</span>:<span class="number">64</span>] := src1[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	dst[<span class="number">127</span>:<span class="number">96</span>] := src2[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	RETURN dst[<span class="number">127</span>:<span class="number">0</span>]</span><br><span class="line">&#125;	</span><br><span class="line"></span><br><span class="line">dst[<span class="number">127</span>:<span class="number">0</span>] := <span class="built_in">INTERLEAVE_DWORDS</span>(a[<span class="number">127</span>:<span class="number">0</span>], b[<span class="number">127</span>:<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
-
-<p>输入如果为：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,a1,a2,a3</span><br><span class="line">b0,b1,b2,b3</span><br></pre></td></tr></table></figure>
-
-<p>则输出结果为：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,b0,a1,b1</span><br></pre></td></tr></table></figure>
-
-<h3 id="mm-mul-ps"><a href="#mm-mul-ps" class="headerlink" title="_mm_mul_ps"></a><code>_mm_mul_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">FOR j := <span class="number">0</span> to <span class="number">3</span></span><br><span class="line">	i := j*<span class="number">32</span></span><br><span class="line">	dst[i+<span class="number">31</span>:i] := a[i+<span class="number">31</span>:i] * b[i+<span class="number">31</span>:i]</span><br><span class="line">ENDFOR</span><br></pre></td></tr></table></figure>
-
-<p>分别将两个128位浮点数的每个float相乘，结果仍然是128位浮点数<br>也就是:</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] * b[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">63</span>:<span class="number">32</span>] * b[<span class="number">63</span>:<span class="number">32</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] * b[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">127</span>:<span class="number">96</span>] * b[<span class="number">127</span>:<span class="number">96</span>]</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="mm-moveldup-ps"><a href="#mm-moveldup-ps" class="headerlink" title="_mm_moveldup_ps"></a><code>_mm_moveldup_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">95</span>:<span class="number">64</span>]</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>Source data: 0.100000 0.200000 0.300000 0.400000<br>Calling _mm_moveldup_ps to load the values.<br>Result: 0.100000 0.100000 0.300000 0.300000</p>
-</blockquote>
-<p>将128bit浮点数的第一个及第三个float分别复制到第二个及第四个float中</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
-<li><a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide">https://software.intel.com/sites/landingpage/IntrinsicsGuide</a></li>
-<li><a href="https://software.intel.com/en-us/node/524266">https://software.intel.com/en-us/node/524266</a></li>
-<li><a href="https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx">https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx</a></li>
-<li><a href="https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx">https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Assembly</category>
-      </categories>
-      <tags>
-        <tag>Cheatsheet</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Python模板引擎Jinja2使用简介</title>
-    <url>/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://samwei12.com/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/">原文链接</a></p>
-</blockquote>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>最近在项目开发中，需要针对 Jenkins 项目进行配置，Jenkins 的 job 配置采用的是 xml，在维护配置模板的过程中就遇到了问题，因为逐步发现配置灵活性超出了字符串的范畴，本文旨在简单介绍 Python 下模板引擎模块 Jinja2 的使用。</p>
-<h2 id="什么是-Jinja2？"><a href="#什么是-Jinja2？" class="headerlink" title="什么是 Jinja2？"></a>什么是 Jinja2？</h2><blockquote>
-<p>Jinja2 是一个 Python 的功能齐全的模板引擎。它有完整的 unicode 支持，一个可选的集成沙箱执行环境，被广泛使用，以 BSD 许可证授权。</p>
-</blockquote>
-<p>以上是官方说明，简单来说，它提供了替换功能（变量替换）和一些强大的特性（控制流、继承等），可以快速生成数据文件，使得业务与数据分离开来，满足一些灵活多变的配置需求。</p>
-<span id="more"></span>
-
-<h2 id="为什么要使用-Jinja2？"><a href="#为什么要使用-Jinja2？" class="headerlink" title="为什么要使用 Jinja2？"></a>为什么要使用 Jinja2？</h2><p>拿 Jenkins 配置来说，如果要实现不同平台、不同项目的配置，有以下几种方案：</p>
-<ol>
-<li>直接进行字符串替换，使用 Python 字符串语法即可</li>
-<li>使用 XML 解析和生成模块，比较简便的是 ElementTree</li>
-<li>使用模板引擎，例如 Jinja2</li>
-</ol>
-<p>起初，我选用的是方案一，特点是简单粗暴，不需要额外的配置，例如，两个项目的 git 仓库配置可以采用如下代码实现：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 略去不相关代码</span></span><br><span class="line">template = <span class="string">b&quot;&quot;&quot;&lt;configVersion&gt;2&lt;/configVersion&gt;</span></span><br><span class="line"><span class="string">        &lt;userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">                &lt;url&gt;%(git_url)s&lt;/url&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">        &lt;/userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">        &lt;branches&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">                &lt;name&gt;%(git_branch)s&lt;/name&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">        &lt;/branches&gt;&quot;&quot;&quot;</span></span><br><span class="line">xml = template % &#123;<span class="string">&#x27;git_url&#x27;</span>:self.__git_url, <span class="string">&#x27;git_branch&#x27;</span>:self.__git_branch&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样，只需要外部传入地址及分支，即可获得不同的项目配置 xml，但缺点也很明显如果两个配置节点数目不相同或者里面的字段差别很大，那么就需要使用 <code>template2</code>、<code>template3</code>、<code>template4</code>等等，因此此方案仅适合配置需求较为简单，字段不是很复杂的场景。</p>
-<p>紧接着，开始调研快速生成不同 xml 数据的方案，找到了 <a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python%EF%BC%8C">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python，</a> 这里提到了两种方案，也就是上述的2、3。</p>
-<p>方案2的特点也很明显，可以完整控制 xml 中每个字段和属性，灵活性确实够了，能够满足我们的需求，但是有点大炮打蚊子的感觉，而且频繁的读写 xml 也比较消耗性能，业务逻辑也会随着配置的灵活性和多样性急遽膨胀，比如 Jenkins 项目配置，仓库地址、分支信息、ssh 信息、tag 字段、打包脚本等等，如果使用 xml 解析的话，针对这些节点都必须创建对应的业务逻辑，不是很推荐。</p>
-<p>那么我们的选择也比较简单了，Jinja 可以快速的替换生成我们业务需要的各种各样的数据，而且接入成本低，业务逻辑不会变化太大，下面简单介绍下本次项目中的使用。</p>
-<h2 id="Jinja2的简单使用教程"><a href="#Jinja2的简单使用教程" class="headerlink" title="Jinja2的简单使用教程"></a>Jinja2的简单使用教程</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>这个比较简单，看下文档即可，执行命令</p>
-<p><code>pip install jinja2</code></p>
-<h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>Jinja2中有一个名为<code>Environment</code>的对象，用于存储配置、全局变量，并且用于从文件系统中加载模板。即使你通过<code>Template</code>用字符串创建一个模板，Jinja2 也会自动为你创建一个环境。推荐使用这种方式进行模板配置而不是使用字符串，大多数程序使用一个环境即可。</p>
-<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><ol>
-<li>创建一个环境：</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, PackageLoader, select_autoescape</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化 jinja 环境</span></span><br><span class="line">self.__env = Environment(</span><br><span class="line">	loader=PackageLoader(<span class="string">&#x27;模块名称&#x27;</span>, <span class="string">&#x27;模板文件夹&#x27;</span>),</span><br><span class="line">	autoescape=select_autoescape([<span class="string">&#x27;html&#x27;</span>, <span class="string">&#x27;xml&#x27;</span>])</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li><p>加载一个模板：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__job_template = self.__env.get_template(<span class="string">&#x27;job_template.xml&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
-<li><p>接下来就是传递一些业务参数了，</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__config = self.__job_template.render(</span><br><span class="line">            git_url=self.__git_remote_url,</span><br><span class="line">            git_branch=self.__git_branch,</span><br><span class="line">            git_tag=self.__git_tag</span><br><span class="line">        )</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>以上都还是比较简单的 API 调用，核心使用部分在与如何在模板中通过 Jinja 支持的语法灵活的进行数据配置。</p>
-<h4 id="基本变量替换"><a href="#基本变量替换" class="headerlink" title="基本变量替换"></a>基本变量替换</h4><p>最基础的功能就是进行变量替换了，语法为<code>&#123;&#123;变量名&#125;&#125;</code>， 例如将 url 传递到 xml 中，模板中写法为(省略了不相关内容):</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">userRemoteConfigs</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>&#123;&#123;git_url&#125;&#125;<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">userRemoteConfigs</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>然后在代码中向上面一样调用 <code>template.render(git_url=&#39;xxx&#39;)</code>即可</p>
-<h4 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h4><p>Jinja 支持基本的<code>if</code>、<code>for</code>、宏等语法，这也是它最强大的地方，目前项目中我只用到了判断就够了。用法如下：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">&#123;% if push_tag %&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">targetRepoName</span>&gt;</span>origin<span class="tag">&lt;/<span class="name">targetRepoName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagName</span>&gt;</span>&#123;&#123;git_tag&#125;&#125;<span class="tag">&lt;/<span class="name">tagName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagMessage</span>&gt;</span><span class="tag">&lt;/<span class="name">tagMessage</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">createTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">createTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">updateTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">updateTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上面这段 xml 的逻辑就是如果传入了 <code>push_tag</code>变量且为<code>True</code>则在 Jenkins 配置中增加推送 git tag 节点，否则不做任何处理。</p>
-<p>除此之外，Jinja2 还支持循环，</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&lt;dl&gt;</span><br><span class="line">&#123;% <span class="keyword">for</span> key, value <span class="keyword">in</span> my_dict.iteritems() %&#125;</span><br><span class="line">    &lt;dt&gt;&#123;&#123; key|e &#125;&#125;&lt;/dt&gt;</span><br><span class="line">    &lt;dd&gt;&#123;&#123; value|e &#125;&#125;&lt;/dd&gt;</span><br><span class="line">&#123;% endfor %&#125;</span><br><span class="line">&lt;/dl&gt;</span><br></pre></td></tr></table></figure>
-
-<p>详细说明可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#for">http://docs.jinkan.org/docs/jinja2/templates.html#for</a></p>
-<h4 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h4><p>这部分由于目前项目配置还比较简单，暂时没用到，可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#id23">http://docs.jinkan.org/docs/jinja2/templates.html#id23</a></p>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>对于简单的项目来说，上面提到的一些基本替换加控制流基本都能满足使用了， 稍微复杂一点的程序可以考虑使用继承和扩展。</p>
-<p>总的来说，Jinja2 既强大又简便，完美符合项目中一些HTML、XML 的业务配置需求，目前项目中本身有的三四个 xml 文件用了 Jinja2 之后缩减成一个，同时改动工作量大约只花了几个小时，真的很方便。</p>
-<blockquote>
-<p>参考资料：</p>
-<ul>
-<li><a href="http://jinja.pocoo.org/docs/2.10/">http://jinja.pocoo.org/docs/2.10/</a></li>
-<li><a href="http://docs.jinkan.org/docs/jinja2/index.html">http://docs.jinkan.org/docs/jinja2/index.html</a></li>
-<li><a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python</a></li>
-</ul>
-</blockquote>
-]]></content>
-      <categories>
-        <category>Python</category>
-      </categories>
-      <tags>
-        <tag>Jinja2</tag>
       </tags>
   </entry>
   <entry>
@@ -461,6 +352,115 @@
       </categories>
       <tags>
         <tag>Cocoapods</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何取消 UIView 动画？</title>
+    <url>/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/">原文链接</a></p>
+</blockquote>
+<p>最近项目中有一个需求是需要手动点击相机对焦，这里由于相机对焦部分需要一个类似于系统对焦框一样的缩放动画，同时动画时长为0.3秒，因此这里就有一个很普遍的需求，如果用户在0.3秒内继续点击对焦会怎么样？</p>
+<p>动画部分代码很简单，如下：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformMakeScale</span>(<span class="number">2.0</span>f, <span class="number">2.0</span>f);</span><br><span class="line">    [<span class="built_in">UIView</span> animateWithDuration:<span class="number">0.3</span>f delay:<span class="number">0.0</span>f options:<span class="built_in">UIViewAnimationOptionCurveLinear</span></span><br><span class="line">                     animations:^&#123;</span><br><span class="line">                         <span class="keyword">self</span>.transform = <span class="built_in">CGAffineTransformIdentity</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                     completion:^(<span class="built_in">BOOL</span> finished)&#123;</span><br><span class="line">						 <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">							 [<span class="keyword">self</span> hideFocus];</span><br><span class="line">						 &#125;</span><br><span class="line">                     &#125;];</span><br></pre></td></tr></table></figure>
+
+<p>对焦框在0.3秒内进行两倍缩小到正常尺寸的一个动画，之后隐藏。</p>
+<span id="more"></span>
+
+<h2 id="旧代码分析"><a href="#旧代码分析" class="headerlink" title="旧代码分析"></a>旧代码分析</h2><p>以前的代码在这部分的处理大致是这样的，</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)touchesBegan:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:_touches];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">UITouch</span> *touch = [_touches anyObject];</span><br><span class="line">    <span class="built_in">CGPoint</span> touchPoint = [touch locationInView:<span class="keyword">self</span>.view];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    [<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(touchFocus:) withObject: touches afterDelay:<span class="number">0.3</span>f];</span><br><span class="line">    </span><br><span class="line">- (<span class="keyword">void</span>)touchFocus:(<span class="built_in">NSSet</span> *)touches &#123;</span><br><span class="line">    [<span class="built_in">NSObject</span> cancelPreviousPerformRequestsWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(touchFocus:) object:touches];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 以下为具体对焦框显示部分</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看出，代码逻辑大致为，截获屏幕点击事件，之后加入一个0.3秒的延时方法，如果用户0.3秒内再次点击对焦，则取消上一次的对焦事件；否则，执行对焦框动画。</p>
+<p>这个逻辑看似解决了用户快速点击对焦的问题，实际上如果用户真正快速点击屏幕时，会出现一个很奇怪的现象，就是对焦框始终存在，并且不会变换位置，等到停止点击屏幕后，对焦框才会响应最新的触控位置进行动画，另一个问题就是对焦始终存在迟滞感，因为点击屏幕后需要等待0.3秒才能看到动画。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>那么有什么更好的办法呢？系统难道没有提供终止动画的接口嘛？当然不是，其实只需要在用户再次点击屏幕时候调用<code>[_focusView.layer removeAllAnimations];</code>即可，其中具体的 view 为正在做动画的 view。</p>
+<p>这样做还有另外一个好处，再也不需要烦人的滞后感了，屏幕对焦始终跟手，同时直接终止动画，里面的 completion 都会照常调用，不存在副作用，很好地解决了这个问题。</p>
+<h2 id="新引入问题"><a href="#新引入问题" class="headerlink" title="新引入问题"></a>新引入问题</h2><p>最近遇到了一个新引入的问题，发现对焦框无法隐藏，经过调查，问题出在这里：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (finished) &#123;</span><br><span class="line">    [<span class="keyword">self</span> hideFocus];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果是直接使用<code> removeAllAnimations</code>接口停止动画的话，此处的<code> finished</code>参数有可能返回 NO，导致这段代码产生问题，所以这里如果中止动画，则需要重新进行判定。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>学会了 <code>removeAllAnimations</code>接口用法</li>
+</ul>
+<p>尽管这个是很基础的系统 API 调用，但是我之前一直都不知道，在此记录下来，希望能给予其他人些许帮助。</p>
+]]></content>
+      <categories>
+        <category>iOS</category>
+      </categories>
+      <tags>
+        <tag>Animation</tag>
+        <tag>UIView</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python模板引擎Jinja2使用简介</title>
+    <url>/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://samwei12.com/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/">原文链接</a></p>
+</blockquote>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>最近在项目开发中，需要针对 Jenkins 项目进行配置，Jenkins 的 job 配置采用的是 xml，在维护配置模板的过程中就遇到了问题，因为逐步发现配置灵活性超出了字符串的范畴，本文旨在简单介绍 Python 下模板引擎模块 Jinja2 的使用。</p>
+<h2 id="什么是-Jinja2？"><a href="#什么是-Jinja2？" class="headerlink" title="什么是 Jinja2？"></a>什么是 Jinja2？</h2><blockquote>
+<p>Jinja2 是一个 Python 的功能齐全的模板引擎。它有完整的 unicode 支持，一个可选的集成沙箱执行环境，被广泛使用，以 BSD 许可证授权。</p>
+</blockquote>
+<p>以上是官方说明，简单来说，它提供了替换功能（变量替换）和一些强大的特性（控制流、继承等），可以快速生成数据文件，使得业务与数据分离开来，满足一些灵活多变的配置需求。</p>
+<span id="more"></span>
+
+<h2 id="为什么要使用-Jinja2？"><a href="#为什么要使用-Jinja2？" class="headerlink" title="为什么要使用 Jinja2？"></a>为什么要使用 Jinja2？</h2><p>拿 Jenkins 配置来说，如果要实现不同平台、不同项目的配置，有以下几种方案：</p>
+<ol>
+<li>直接进行字符串替换，使用 Python 字符串语法即可</li>
+<li>使用 XML 解析和生成模块，比较简便的是 ElementTree</li>
+<li>使用模板引擎，例如 Jinja2</li>
+</ol>
+<p>起初，我选用的是方案一，特点是简单粗暴，不需要额外的配置，例如，两个项目的 git 仓库配置可以采用如下代码实现：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 略去不相关代码</span></span><br><span class="line">template = <span class="string">b&quot;&quot;&quot;&lt;configVersion&gt;2&lt;/configVersion&gt;</span></span><br><span class="line"><span class="string">        &lt;userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">                &lt;url&gt;%(git_url)s&lt;/url&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">        &lt;/userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">        &lt;branches&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">                &lt;name&gt;%(git_branch)s&lt;/name&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">        &lt;/branches&gt;&quot;&quot;&quot;</span></span><br><span class="line">xml = template % &#123;<span class="string">&#x27;git_url&#x27;</span>:self.__git_url, <span class="string">&#x27;git_branch&#x27;</span>:self.__git_branch&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样，只需要外部传入地址及分支，即可获得不同的项目配置 xml，但缺点也很明显如果两个配置节点数目不相同或者里面的字段差别很大，那么就需要使用 <code>template2</code>、<code>template3</code>、<code>template4</code>等等，因此此方案仅适合配置需求较为简单，字段不是很复杂的场景。</p>
+<p>紧接着，开始调研快速生成不同 xml 数据的方案，找到了 <a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python%EF%BC%8C">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python，</a> 这里提到了两种方案，也就是上述的2、3。</p>
+<p>方案2的特点也很明显，可以完整控制 xml 中每个字段和属性，灵活性确实够了，能够满足我们的需求，但是有点大炮打蚊子的感觉，而且频繁的读写 xml 也比较消耗性能，业务逻辑也会随着配置的灵活性和多样性急遽膨胀，比如 Jenkins 项目配置，仓库地址、分支信息、ssh 信息、tag 字段、打包脚本等等，如果使用 xml 解析的话，针对这些节点都必须创建对应的业务逻辑，不是很推荐。</p>
+<p>那么我们的选择也比较简单了，Jinja 可以快速的替换生成我们业务需要的各种各样的数据，而且接入成本低，业务逻辑不会变化太大，下面简单介绍下本次项目中的使用。</p>
+<h2 id="Jinja2的简单使用教程"><a href="#Jinja2的简单使用教程" class="headerlink" title="Jinja2的简单使用教程"></a>Jinja2的简单使用教程</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>这个比较简单，看下文档即可，执行命令</p>
+<p><code>pip install jinja2</code></p>
+<h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>Jinja2中有一个名为<code>Environment</code>的对象，用于存储配置、全局变量，并且用于从文件系统中加载模板。即使你通过<code>Template</code>用字符串创建一个模板，Jinja2 也会自动为你创建一个环境。推荐使用这种方式进行模板配置而不是使用字符串，大多数程序使用一个环境即可。</p>
+<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><ol>
+<li>创建一个环境：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, PackageLoader, select_autoescape</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化 jinja 环境</span></span><br><span class="line">self.__env = Environment(</span><br><span class="line">	loader=PackageLoader(<span class="string">&#x27;模块名称&#x27;</span>, <span class="string">&#x27;模板文件夹&#x27;</span>),</span><br><span class="line">	autoescape=select_autoescape([<span class="string">&#x27;html&#x27;</span>, <span class="string">&#x27;xml&#x27;</span>])</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>加载一个模板：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__job_template = self.__env.get_template(<span class="string">&#x27;job_template.xml&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
+<li><p>接下来就是传递一些业务参数了，</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__config = self.__job_template.render(</span><br><span class="line">            git_url=self.__git_remote_url,</span><br><span class="line">            git_branch=self.__git_branch,</span><br><span class="line">            git_tag=self.__git_tag</span><br><span class="line">        )</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>以上都还是比较简单的 API 调用，核心使用部分在与如何在模板中通过 Jinja 支持的语法灵活的进行数据配置。</p>
+<h4 id="基本变量替换"><a href="#基本变量替换" class="headerlink" title="基本变量替换"></a>基本变量替换</h4><p>最基础的功能就是进行变量替换了，语法为<code>&#123;&#123;变量名&#125;&#125;</code>， 例如将 url 传递到 xml 中，模板中写法为(省略了不相关内容):</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">userRemoteConfigs</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>&#123;&#123;git_url&#125;&#125;<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">userRemoteConfigs</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后在代码中向上面一样调用 <code>template.render(git_url=&#39;xxx&#39;)</code>即可</p>
+<h4 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h4><p>Jinja 支持基本的<code>if</code>、<code>for</code>、宏等语法，这也是它最强大的地方，目前项目中我只用到了判断就够了。用法如下：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">&#123;% if push_tag %&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">targetRepoName</span>&gt;</span>origin<span class="tag">&lt;/<span class="name">targetRepoName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagName</span>&gt;</span>&#123;&#123;git_tag&#125;&#125;<span class="tag">&lt;/<span class="name">tagName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagMessage</span>&gt;</span><span class="tag">&lt;/<span class="name">tagMessage</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">createTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">createTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">updateTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">updateTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这段 xml 的逻辑就是如果传入了 <code>push_tag</code>变量且为<code>True</code>则在 Jenkins 配置中增加推送 git tag 节点，否则不做任何处理。</p>
+<p>除此之外，Jinja2 还支持循环，</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&lt;dl&gt;</span><br><span class="line">&#123;% <span class="keyword">for</span> key, value <span class="keyword">in</span> my_dict.iteritems() %&#125;</span><br><span class="line">    &lt;dt&gt;&#123;&#123; key|e &#125;&#125;&lt;/dt&gt;</span><br><span class="line">    &lt;dd&gt;&#123;&#123; value|e &#125;&#125;&lt;/dd&gt;</span><br><span class="line">&#123;% endfor %&#125;</span><br><span class="line">&lt;/dl&gt;</span><br></pre></td></tr></table></figure>
+
+<p>详细说明可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#for">http://docs.jinkan.org/docs/jinja2/templates.html#for</a></p>
+<h4 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h4><p>这部分由于目前项目配置还比较简单，暂时没用到，可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#id23">http://docs.jinkan.org/docs/jinja2/templates.html#id23</a></p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>对于简单的项目来说，上面提到的一些基本替换加控制流基本都能满足使用了， 稍微复杂一点的程序可以考虑使用继承和扩展。</p>
+<p>总的来说，Jinja2 既强大又简便，完美符合项目中一些HTML、XML 的业务配置需求，目前项目中本身有的三四个 xml 文件用了 Jinja2 之后缩减成一个，同时改动工作量大约只花了几个小时，真的很方便。</p>
+<blockquote>
+<p>参考资料：</p>
+<ul>
+<li><a href="http://jinja.pocoo.org/docs/2.10/">http://jinja.pocoo.org/docs/2.10/</a></li>
+<li><a href="http://docs.jinkan.org/docs/jinja2/index.html">http://docs.jinkan.org/docs/jinja2/index.html</a></li>
+<li><a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python</a></li>
+</ul>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>Jinja2</tag>
       </tags>
   </entry>
   <entry>
