@@ -58,14 +58,14 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</loc>
+    <loc>http://blog.samwei12.cn/2020/03/04/Ruby/Cocoapods%E6%8F%92%E4%BB%B6%E6%9C%BA%E5%88%B6%E6%B5%85%E6%9E%90/</loc>
     
     <lastmod>2021-05-08</lastmod>
     
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/2020/03/04/Ruby/Cocoapods%E6%8F%92%E4%BB%B6%E6%9C%BA%E5%88%B6%E6%B5%85%E6%9E%90/</loc>
+    <loc>http://blog.samwei12.cn/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</loc>
     
     <lastmod>2021-05-08</lastmod>
     
@@ -100,14 +100,14 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/</loc>
+    <loc>http://blog.samwei12.cn/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/</loc>
     
     <lastmod>2021-05-08</lastmod>
     
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/</loc>
+    <loc>http://blog.samwei12.cn/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/</loc>
     
     <lastmod>2021-05-08</lastmod>
     
@@ -156,20 +156,6 @@
     <priority>1.0</priority>
   </url>
 
-  
-  <url>
-    <loc>http://blog.samwei12.cn/tags/Logseq/</loc>
-    <lastmod>2021-05-08</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/tags/GTD/</loc>
-    <lastmod>2021-05-08</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Cheatsheet/</loc>
@@ -242,14 +228,14 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/tags/Jinja2/</loc>
+    <loc>http://blog.samwei12.cn/tags/Cocoapods/</loc>
     <lastmod>2021-05-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/tags/Cocoapods/</loc>
+    <loc>http://blog.samwei12.cn/tags/Jinja2/</loc>
     <lastmod>2021-05-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -291,6 +277,20 @@
   </url>
   
   <url>
+    <loc>http://blog.samwei12.cn/tags/Logseq/</loc>
+    <lastmod>2021-05-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/tags/GTD/</loc>
+    <lastmod>2021-05-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://blog.samwei12.cn/tags/Xmarks/</loc>
     <lastmod>2021-05-08</lastmod>
     <changefreq>daily</changefreq>
@@ -312,14 +312,14 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/tags/iCloud/</loc>
+    <loc>http://blog.samwei12.cn/tags/MWeb/</loc>
     <lastmod>2021-05-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/tags/MWeb/</loc>
+    <loc>http://blog.samwei12.cn/tags/iCloud/</loc>
     <lastmod>2021-05-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -340,13 +340,6 @@
   </url>
   
 
-  
-  <url>
-    <loc>http://blog.samwei12.cn/categories/Utilities/</loc>
-    <lastmod>2021-05-08</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
   
   <url>
     <loc>http://blog.samwei12.cn/categories/iOS/</loc>
@@ -377,13 +370,6 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/categories/Python/</loc>
-    <lastmod>2021-05-08</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://blog.samwei12.cn/categories/Ruby/</loc>
     <lastmod>2021-05-08</lastmod>
     <changefreq>daily</changefreq>
@@ -391,7 +377,21 @@
   </url>
   
   <url>
+    <loc>http://blog.samwei12.cn/categories/Python/</loc>
+    <lastmod>2021-05-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://blog.samwei12.cn/categories/Thinking/</loc>
+    <lastmod>2021-05-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/categories/Utilities/</loc>
     <lastmod>2021-05-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>

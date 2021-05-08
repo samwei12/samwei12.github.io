@@ -315,78 +315,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Python模板引擎Jinja2使用简介</title>
-    <url>/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/">原文链接</a></p>
-</blockquote>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>最近在项目开发中，需要针对 Jenkins 项目进行配置，Jenkins 的 job 配置采用的是 xml，在维护配置模板的过程中就遇到了问题，因为逐步发现配置灵活性超出了字符串的范畴，本文旨在简单介绍 Python 下模板引擎模块 Jinja2 的使用。</p>
-<h2 id="什么是-Jinja2？"><a href="#什么是-Jinja2？" class="headerlink" title="什么是 Jinja2？"></a>什么是 Jinja2？</h2><blockquote>
-<p>Jinja2 是一个 Python 的功能齐全的模板引擎。它有完整的 unicode 支持，一个可选的集成沙箱执行环境，被广泛使用，以 BSD 许可证授权。</p>
-</blockquote>
-<p>以上是官方说明，简单来说，它提供了替换功能（变量替换）和一些强大的特性（控制流、继承等），可以快速生成数据文件，使得业务与数据分离开来，满足一些灵活多变的配置需求。</p>
-<span id="more"></span>
-
-<h2 id="为什么要使用-Jinja2？"><a href="#为什么要使用-Jinja2？" class="headerlink" title="为什么要使用 Jinja2？"></a>为什么要使用 Jinja2？</h2><p>拿 Jenkins 配置来说，如果要实现不同平台、不同项目的配置，有以下几种方案：</p>
-<ol>
-<li>直接进行字符串替换，使用 Python 字符串语法即可</li>
-<li>使用 XML 解析和生成模块，比较简便的是 ElementTree</li>
-<li>使用模板引擎，例如 Jinja2</li>
-</ol>
-<p>起初，我选用的是方案一，特点是简单粗暴，不需要额外的配置，例如，两个项目的 git 仓库配置可以采用如下代码实现：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 略去不相关代码</span></span><br><span class="line">template = <span class="string">b&quot;&quot;&quot;&lt;configVersion&gt;2&lt;/configVersion&gt;</span></span><br><span class="line"><span class="string">        &lt;userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">                &lt;url&gt;%(git_url)s&lt;/url&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">        &lt;/userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">        &lt;branches&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">                &lt;name&gt;%(git_branch)s&lt;/name&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">        &lt;/branches&gt;&quot;&quot;&quot;</span></span><br><span class="line">xml = template % &#123;<span class="string">&#x27;git_url&#x27;</span>:self.__git_url, <span class="string">&#x27;git_branch&#x27;</span>:self.__git_branch&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样，只需要外部传入地址及分支，即可获得不同的项目配置 xml，但缺点也很明显如果两个配置节点数目不相同或者里面的字段差别很大，那么就需要使用 <code>template2</code>、<code>template3</code>、<code>template4</code>等等，因此此方案仅适合配置需求较为简单，字段不是很复杂的场景。</p>
-<p>紧接着，开始调研快速生成不同 xml 数据的方案，找到了 <a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python%EF%BC%8C">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python，</a> 这里提到了两种方案，也就是上述的2、3。</p>
-<p>方案2的特点也很明显，可以完整控制 xml 中每个字段和属性，灵活性确实够了，能够满足我们的需求，但是有点大炮打蚊子的感觉，而且频繁的读写 xml 也比较消耗性能，业务逻辑也会随着配置的灵活性和多样性急遽膨胀，比如 Jenkins 项目配置，仓库地址、分支信息、ssh 信息、tag 字段、打包脚本等等，如果使用 xml 解析的话，针对这些节点都必须创建对应的业务逻辑，不是很推荐。</p>
-<p>那么我们的选择也比较简单了，Jinja 可以快速的替换生成我们业务需要的各种各样的数据，而且接入成本低，业务逻辑不会变化太大，下面简单介绍下本次项目中的使用。</p>
-<h2 id="Jinja2的简单使用教程"><a href="#Jinja2的简单使用教程" class="headerlink" title="Jinja2的简单使用教程"></a>Jinja2的简单使用教程</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>这个比较简单，看下文档即可，执行命令</p>
-<p><code>pip install jinja2</code></p>
-<h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>Jinja2中有一个名为<code>Environment</code>的对象，用于存储配置、全局变量，并且用于从文件系统中加载模板。即使你通过<code>Template</code>用字符串创建一个模板，Jinja2 也会自动为你创建一个环境。推荐使用这种方式进行模板配置而不是使用字符串，大多数程序使用一个环境即可。</p>
-<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><ol>
-<li>创建一个环境：</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, PackageLoader, select_autoescape</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化 jinja 环境</span></span><br><span class="line">self.__env = Environment(</span><br><span class="line">	loader=PackageLoader(<span class="string">&#x27;模块名称&#x27;</span>, <span class="string">&#x27;模板文件夹&#x27;</span>),</span><br><span class="line">	autoescape=select_autoescape([<span class="string">&#x27;html&#x27;</span>, <span class="string">&#x27;xml&#x27;</span>])</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li><p>加载一个模板：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__job_template = self.__env.get_template(<span class="string">&#x27;job_template.xml&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
-<li><p>接下来就是传递一些业务参数了，</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__config = self.__job_template.render(</span><br><span class="line">            git_url=self.__git_remote_url,</span><br><span class="line">            git_branch=self.__git_branch,</span><br><span class="line">            git_tag=self.__git_tag</span><br><span class="line">        )</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>以上都还是比较简单的 API 调用，核心使用部分在与如何在模板中通过 Jinja 支持的语法灵活的进行数据配置。</p>
-<h4 id="基本变量替换"><a href="#基本变量替换" class="headerlink" title="基本变量替换"></a>基本变量替换</h4><p>最基础的功能就是进行变量替换了，语法为<code>&#123;&#123;变量名&#125;&#125;</code>， 例如将 url 传递到 xml 中，模板中写法为(省略了不相关内容):</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">userRemoteConfigs</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>&#123;&#123;git_url&#125;&#125;<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">userRemoteConfigs</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>然后在代码中向上面一样调用 <code>template.render(git_url=&#39;xxx&#39;)</code>即可</p>
-<h4 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h4><p>Jinja 支持基本的<code>if</code>、<code>for</code>、宏等语法，这也是它最强大的地方，目前项目中我只用到了判断就够了。用法如下：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">&#123;% if push_tag %&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">targetRepoName</span>&gt;</span>origin<span class="tag">&lt;/<span class="name">targetRepoName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagName</span>&gt;</span>&#123;&#123;git_tag&#125;&#125;<span class="tag">&lt;/<span class="name">tagName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagMessage</span>&gt;</span><span class="tag">&lt;/<span class="name">tagMessage</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">createTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">createTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">updateTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">updateTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上面这段 xml 的逻辑就是如果传入了 <code>push_tag</code>变量且为<code>True</code>则在 Jenkins 配置中增加推送 git tag 节点，否则不做任何处理。</p>
-<p>除此之外，Jinja2 还支持循环，</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&lt;dl&gt;</span><br><span class="line">&#123;% <span class="keyword">for</span> key, value <span class="keyword">in</span> my_dict.iteritems() %&#125;</span><br><span class="line">    &lt;dt&gt;&#123;&#123; key|e &#125;&#125;&lt;/dt&gt;</span><br><span class="line">    &lt;dd&gt;&#123;&#123; value|e &#125;&#125;&lt;/dd&gt;</span><br><span class="line">&#123;% endfor %&#125;</span><br><span class="line">&lt;/dl&gt;</span><br></pre></td></tr></table></figure>
-
-<p>详细说明可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#for">http://docs.jinkan.org/docs/jinja2/templates.html#for</a></p>
-<h4 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h4><p>这部分由于目前项目配置还比较简单，暂时没用到，可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#id23">http://docs.jinkan.org/docs/jinja2/templates.html#id23</a></p>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>对于简单的项目来说，上面提到的一些基本替换加控制流基本都能满足使用了， 稍微复杂一点的程序可以考虑使用继承和扩展。</p>
-<p>总的来说，Jinja2 既强大又简便，完美符合项目中一些HTML、XML 的业务配置需求，目前项目中本身有的三四个 xml 文件用了 Jinja2 之后缩减成一个，同时改动工作量大约只花了几个小时，真的很方便。</p>
-<blockquote>
-<p>参考资料：</p>
-<ul>
-<li><a href="http://jinja.pocoo.org/docs/2.10/">http://jinja.pocoo.org/docs/2.10/</a></li>
-<li><a href="http://docs.jinkan.org/docs/jinja2/index.html">http://docs.jinkan.org/docs/jinja2/index.html</a></li>
-<li><a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python</a></li>
-</ul>
-</blockquote>
-]]></content>
-      <categories>
-        <category>Python</category>
-      </categories>
-      <tags>
-        <tag>Jinja2</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Cocoapods插件机制浅析</title>
     <url>/2020/03/04/Ruby/Cocoapods%E6%8F%92%E4%BB%B6%E6%9C%BA%E5%88%B6%E6%B5%85%E6%9E%90/</url>
     <content><![CDATA[<blockquote>
@@ -461,6 +389,78 @@
       </categories>
       <tags>
         <tag>Cocoapods</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python模板引擎Jinja2使用简介</title>
+    <url>/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/">原文链接</a></p>
+</blockquote>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>最近在项目开发中，需要针对 Jenkins 项目进行配置，Jenkins 的 job 配置采用的是 xml，在维护配置模板的过程中就遇到了问题，因为逐步发现配置灵活性超出了字符串的范畴，本文旨在简单介绍 Python 下模板引擎模块 Jinja2 的使用。</p>
+<h2 id="什么是-Jinja2？"><a href="#什么是-Jinja2？" class="headerlink" title="什么是 Jinja2？"></a>什么是 Jinja2？</h2><blockquote>
+<p>Jinja2 是一个 Python 的功能齐全的模板引擎。它有完整的 unicode 支持，一个可选的集成沙箱执行环境，被广泛使用，以 BSD 许可证授权。</p>
+</blockquote>
+<p>以上是官方说明，简单来说，它提供了替换功能（变量替换）和一些强大的特性（控制流、继承等），可以快速生成数据文件，使得业务与数据分离开来，满足一些灵活多变的配置需求。</p>
+<span id="more"></span>
+
+<h2 id="为什么要使用-Jinja2？"><a href="#为什么要使用-Jinja2？" class="headerlink" title="为什么要使用 Jinja2？"></a>为什么要使用 Jinja2？</h2><p>拿 Jenkins 配置来说，如果要实现不同平台、不同项目的配置，有以下几种方案：</p>
+<ol>
+<li>直接进行字符串替换，使用 Python 字符串语法即可</li>
+<li>使用 XML 解析和生成模块，比较简便的是 ElementTree</li>
+<li>使用模板引擎，例如 Jinja2</li>
+</ol>
+<p>起初，我选用的是方案一，特点是简单粗暴，不需要额外的配置，例如，两个项目的 git 仓库配置可以采用如下代码实现：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 略去不相关代码</span></span><br><span class="line">template = <span class="string">b&quot;&quot;&quot;&lt;configVersion&gt;2&lt;/configVersion&gt;</span></span><br><span class="line"><span class="string">        &lt;userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">                &lt;url&gt;%(git_url)s&lt;/url&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">        &lt;/userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">        &lt;branches&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">                &lt;name&gt;%(git_branch)s&lt;/name&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">        &lt;/branches&gt;&quot;&quot;&quot;</span></span><br><span class="line">xml = template % &#123;<span class="string">&#x27;git_url&#x27;</span>:self.__git_url, <span class="string">&#x27;git_branch&#x27;</span>:self.__git_branch&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样，只需要外部传入地址及分支，即可获得不同的项目配置 xml，但缺点也很明显如果两个配置节点数目不相同或者里面的字段差别很大，那么就需要使用 <code>template2</code>、<code>template3</code>、<code>template4</code>等等，因此此方案仅适合配置需求较为简单，字段不是很复杂的场景。</p>
+<p>紧接着，开始调研快速生成不同 xml 数据的方案，找到了 <a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python%EF%BC%8C">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python，</a> 这里提到了两种方案，也就是上述的2、3。</p>
+<p>方案2的特点也很明显，可以完整控制 xml 中每个字段和属性，灵活性确实够了，能够满足我们的需求，但是有点大炮打蚊子的感觉，而且频繁的读写 xml 也比较消耗性能，业务逻辑也会随着配置的灵活性和多样性急遽膨胀，比如 Jenkins 项目配置，仓库地址、分支信息、ssh 信息、tag 字段、打包脚本等等，如果使用 xml 解析的话，针对这些节点都必须创建对应的业务逻辑，不是很推荐。</p>
+<p>那么我们的选择也比较简单了，Jinja 可以快速的替换生成我们业务需要的各种各样的数据，而且接入成本低，业务逻辑不会变化太大，下面简单介绍下本次项目中的使用。</p>
+<h2 id="Jinja2的简单使用教程"><a href="#Jinja2的简单使用教程" class="headerlink" title="Jinja2的简单使用教程"></a>Jinja2的简单使用教程</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>这个比较简单，看下文档即可，执行命令</p>
+<p><code>pip install jinja2</code></p>
+<h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>Jinja2中有一个名为<code>Environment</code>的对象，用于存储配置、全局变量，并且用于从文件系统中加载模板。即使你通过<code>Template</code>用字符串创建一个模板，Jinja2 也会自动为你创建一个环境。推荐使用这种方式进行模板配置而不是使用字符串，大多数程序使用一个环境即可。</p>
+<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><ol>
+<li>创建一个环境：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, PackageLoader, select_autoescape</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化 jinja 环境</span></span><br><span class="line">self.__env = Environment(</span><br><span class="line">	loader=PackageLoader(<span class="string">&#x27;模块名称&#x27;</span>, <span class="string">&#x27;模板文件夹&#x27;</span>),</span><br><span class="line">	autoescape=select_autoescape([<span class="string">&#x27;html&#x27;</span>, <span class="string">&#x27;xml&#x27;</span>])</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>加载一个模板：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__job_template = self.__env.get_template(<span class="string">&#x27;job_template.xml&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
+<li><p>接下来就是传递一些业务参数了，</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__config = self.__job_template.render(</span><br><span class="line">            git_url=self.__git_remote_url,</span><br><span class="line">            git_branch=self.__git_branch,</span><br><span class="line">            git_tag=self.__git_tag</span><br><span class="line">        )</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>以上都还是比较简单的 API 调用，核心使用部分在与如何在模板中通过 Jinja 支持的语法灵活的进行数据配置。</p>
+<h4 id="基本变量替换"><a href="#基本变量替换" class="headerlink" title="基本变量替换"></a>基本变量替换</h4><p>最基础的功能就是进行变量替换了，语法为<code>&#123;&#123;变量名&#125;&#125;</code>， 例如将 url 传递到 xml 中，模板中写法为(省略了不相关内容):</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">userRemoteConfigs</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>&#123;&#123;git_url&#125;&#125;<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">userRemoteConfigs</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后在代码中向上面一样调用 <code>template.render(git_url=&#39;xxx&#39;)</code>即可</p>
+<h4 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h4><p>Jinja 支持基本的<code>if</code>、<code>for</code>、宏等语法，这也是它最强大的地方，目前项目中我只用到了判断就够了。用法如下：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">&#123;% if push_tag %&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">targetRepoName</span>&gt;</span>origin<span class="tag">&lt;/<span class="name">targetRepoName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagName</span>&gt;</span>&#123;&#123;git_tag&#125;&#125;<span class="tag">&lt;/<span class="name">tagName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagMessage</span>&gt;</span><span class="tag">&lt;/<span class="name">tagMessage</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">createTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">createTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">updateTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">updateTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这段 xml 的逻辑就是如果传入了 <code>push_tag</code>变量且为<code>True</code>则在 Jenkins 配置中增加推送 git tag 节点，否则不做任何处理。</p>
+<p>除此之外，Jinja2 还支持循环，</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&lt;dl&gt;</span><br><span class="line">&#123;% <span class="keyword">for</span> key, value <span class="keyword">in</span> my_dict.iteritems() %&#125;</span><br><span class="line">    &lt;dt&gt;&#123;&#123; key|e &#125;&#125;&lt;/dt&gt;</span><br><span class="line">    &lt;dd&gt;&#123;&#123; value|e &#125;&#125;&lt;/dd&gt;</span><br><span class="line">&#123;% endfor %&#125;</span><br><span class="line">&lt;/dl&gt;</span><br></pre></td></tr></table></figure>
+
+<p>详细说明可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#for">http://docs.jinkan.org/docs/jinja2/templates.html#for</a></p>
+<h4 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h4><p>这部分由于目前项目配置还比较简单，暂时没用到，可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#id23">http://docs.jinkan.org/docs/jinja2/templates.html#id23</a></p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>对于简单的项目来说，上面提到的一些基本替换加控制流基本都能满足使用了， 稍微复杂一点的程序可以考虑使用继承和扩展。</p>
+<p>总的来说，Jinja2 既强大又简便，完美符合项目中一些HTML、XML 的业务配置需求，目前项目中本身有的三四个 xml 文件用了 Jinja2 之后缩减成一个，同时改动工作量大约只花了几个小时，真的很方便。</p>
+<blockquote>
+<p>参考资料：</p>
+<ul>
+<li><a href="http://jinja.pocoo.org/docs/2.10/">http://jinja.pocoo.org/docs/2.10/</a></li>
+<li><a href="http://docs.jinkan.org/docs/jinja2/index.html">http://docs.jinkan.org/docs/jinja2/index.html</a></li>
+<li><a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python</a></li>
+</ul>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>Jinja2</tag>
       </tags>
   </entry>
   <entry>
@@ -948,13 +948,11 @@
   <entry>
     <title>使用Logseq构建GTD系统</title>
     <url>/2021/05/08/Utilities/%E4%BD%BF%E7%94%A8Logseq%E6%9E%84%E5%BB%BAGTD%E7%B3%BB%E7%BB%9F/</url>
-    <content><![CDATA[<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><span id="more"></span>
-
-<h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><blockquote>
+    <content><![CDATA[<blockquote>
 <p>2021-05-08： 1.0版本初步完成，待完善已完成任务回顾</p>
 </blockquote>
 <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在阅读《小强升职记》，感觉里面讲到的时间管理工具和方法十分有用，自己之前虽然也了解一些工具，例如四象限原则、两分钟方法等，但看完这本书之后感觉之前的理解还是太肤浅了。是时候升级一下自己的时间管理系统了。</p>
-<!-- more -->
+<span id="more"></span>
 
 <p>在此之前我的工具大致包括： 稍后读软件、GTD工具（滴答清单）、写作工具（一般是VSCode+Hexo）。最近半年沉迷于使用双链笔记软件，目前在用的是 Logseq，后面专门展开介绍一下。目前在尝试将GTD工具、笔记都整合到 Logseq 里面，主要是受了这篇文章的启发 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>，下面就详细介绍一下我的实践过程。</p>
 <h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><h3 id="Datalog"><a href="#Datalog" class="headerlink" title="Datalog"></a>Datalog</h3><p>首先，需要简单学习一下Datalog语法。Logseq是基于Clojure开发的，它的底层可以简单地理解为是类似于数据库的结构，因此可以天然的支持各种查询，这也是我们能够利用它来实现 GTD 管理的前提。因此这里如果需要掌握如何使用 Logseq 来进行查询的话，最好先学习一下如何使用 Datalog。可以参考 <a href="https://logseq.github.io/#/page/advanced%20queries">官方的查询教程</a> 以及这篇 <a href="http://www.learndatalogtoday.org/">Learn Datalog Today</a>，粗略扫一遍，能够看懂大概意思就可以了。</p>
@@ -1097,6 +1095,24 @@
       </tags>
   </entry>
   <entry>
+    <title>如何在 MWeb 中配置 Hexo 等静态网站</title>
+    <url>/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/">原文链接</a></p>
+</blockquote>
+<blockquote>
+<p>参考链接：<br><a href="https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html">https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html</a><br><a href="https://zhuanlan.zhihu.com/p/30513914">https://zhuanlan.zhihu.com/p/30513914</a></p>
+</blockquote>
+<p>网上搜索到相关资料，如上面的链接，发现最新版本 MWeb （3.1.2）步骤有所出入，添加外部文件夹时候并没有弹出设置页面，需要自己手动在左侧文件夹上右击，点击编辑，</p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>MWeb</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何恢复 iCloud 已删除文件</title>
     <url>/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/</url>
     <content><![CDATA[<blockquote>
@@ -1137,24 +1153,6 @@
       </categories>
       <tags>
         <tag>iCloud</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何在 MWeb 中配置 Hexo 等静态网站</title>
-    <url>/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/">原文链接</a></p>
-</blockquote>
-<blockquote>
-<p>参考链接：<br><a href="https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html">https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html</a><br><a href="https://zhuanlan.zhihu.com/p/30513914">https://zhuanlan.zhihu.com/p/30513914</a></p>
-</blockquote>
-<p>网上搜索到相关资料，如上面的链接，发现最新版本 MWeb （3.1.2）步骤有所出入，添加外部文件夹时候并没有弹出设置页面，需要自己手动在左侧文件夹上右击，点击编辑，</p>
-]]></content>
-      <categories>
-        <category>Utilities</category>
-      </categories>
-      <tags>
-        <tag>MWeb</tag>
       </tags>
   </entry>
   <entry>
