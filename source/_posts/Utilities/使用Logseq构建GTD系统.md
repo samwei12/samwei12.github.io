@@ -9,6 +9,7 @@ date: 2021-05-08 15:07:34
 ---
 
 > 2021-05-08： 1.0版本初步完成，待完善已完成任务回顾
+> 2021-05-10： 1.1版本完成，修改不重要不紧急为将来清单，且新增每周回顾
 
 ## 前言
 
@@ -66,7 +67,9 @@ date: 2021-05-08 15:07:34
 
 具体查询语句如下：可以根据自己的实际使用需求将属性限制移除或者修改时间限制，代码中均已经添加注释。
 
-#### 重要且紧急
+> 2021-05-10 补充： 将设置为Later的事项移动到第四象限，这样就可以定期回顾；同时新增一个每周回顾的query语句，由于目前Logseq还不支持查询当前时间戳，因此用了个笨办法，每次查询的时候手动输入当前时间戳ms进行查询。
+
+#### [[重要且紧急]] ^^(避免太多进入该象限)^^
 
 ```
 #+BEGIN_QUERY
@@ -78,7 +81,7 @@ date: 2021-05-08 15:07:34
             [?b :block/properties ?p]
             [(get ?p "type") ?t]
             [(contains? #{"任务" "行动" "项目"} ?t)] ;; 属性中type字段包含这三种
-            [(not= "DONE" ?marker)]  ;; 不包含已完成任务
+            [(contains? #{"TODO" "DOING" "NOW"} ?marker)] ;; 不包含已完成任务，不包含LATER
             (or
             [?b :block/scheduled ?d]
             [?b :block/deadline ?d])
@@ -88,9 +91,7 @@ date: 2021-05-08 15:07:34
     }
 #+END_QUERY
 ```
-
-#### 重要不紧急
-
+#### [[重要不紧急]] ^^(优先完成此象限)^^
 ```
 #+BEGIN_QUERY
 {    :query [:find (pull ?b [*])
@@ -101,7 +102,7 @@ date: 2021-05-08 15:07:34
             [?b :block/properties ?p]
             [(get ?p "type") ?t]
             [(contains? #{"任务" "行动" "项目"} ?t)] ;; 属性中type字段包含这三种
-            [(not= "DONE" ?marker)]  ;; 不包含已完成任务
+            [(contains? #{"TODO" "DOING" "NOW"} ?marker)] ;; 不包含已完成任务，不包含LATER
             (or
             [?b :block/scheduled ?d]
             [?b :block/deadline ?d])
@@ -111,9 +112,7 @@ date: 2021-05-08 15:07:34
     }
 #+END_QUERY
 ```
-
-#### 紧急不重要
-
+#### [[紧急不重要]] ^^(尽量委派给其他人)^^
 ```
 #+BEGIN_QUERY
 {    :query [:find (pull ?b [*])
@@ -124,7 +123,7 @@ date: 2021-05-08 15:07:34
             [?b :block/priority ?priority]
             [(get ?p "type") ?t]
             [(contains? #{"任务" "行动" "项目"} ?t)] ;; 属性中type字段包含这三种
-            [(!= "DONE" ?marker)]  ;; 不包含已完成任务
+            [(contains? #{"TODO" "DOING" "NOW"} ?marker)] ;; 不包含已完成任务，不包含LATER
             [(!= "A" ?priority)] ;; 优先级在A的才认为是重要
             (or
             [?b :block/scheduled ?d]
@@ -135,28 +134,30 @@ date: 2021-05-08 15:07:34
     }
 #+END_QUERY
 ```
-
-#### 不紧急不重要
-
+#### [[待办清单]] ^^(不紧急不重要，定期回顾确认)^^
 ```
 #+BEGIN_QUERY
-{
-    :query [:find (pull ?b [*])
-            :in $ ?end
+{    :query [:find (pull ?b [*])
+            :where
+            [?b :block/marker ?marker]
+            [(contains? #{"LATER"} ?marker)]
+            ]
+    }
+#+END_QUERY
+```
+
+#### [[本周已完成]] ^^(近七天统计)^^
+```
+#+BEGIN_QUERY
+{   :query [:find (pull ?b [*])
             :where
             [?b :block/marker ?marker]
             [?b :block/properties ?p]
-            [?b :block/priority ?priority]
-            [(get ?p "type") ?t]
-            [(contains? #{"任务" "行动" "项目"} ?t)] ;; 属性中type字段包含这三种
-            [(!= "DONE" ?marker)]  ;; 不包含已完成任务
-            [(!= "A" ?priority)]
-            (or
-            [?b :block/scheduled ?d]
-            [?b :block/deadline ?d])
-            [(> ?d ?end)]
+            [(get ?p "done") ?finishedTime]
+            [(- 1620657776000 604800000) ?weekbefore] ;; 由于目前Logseq不支持直接获取当前时间戳，只能使用trick的方式，每次查询前手动输入当前时间戳ms值,算出一周前的时间戳
+            [(>= ?finishedTime ?weekbefore)] ;; 一周内完成的工作
+            [(= "DONE" ?marker)]
             ]
-    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急
     }
 #+END_QUERY
 ```
@@ -171,10 +172,12 @@ date: 2021-05-08 15:07:34
 
 ![20210508181043](https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508181043.png)
 
-可以算是1.0 版本，目前存在的问题包括：
+> 1.1 版本已经解决
 
-1. 没有地方定期回顾那些没有设置DDL和优先级的任务
-2. 缺少查看已完成任务和行动的地方（做周报时候很有用）
+~~可以算是1.0 版本，目前存在的问题包括：~~
+
+1. ~~没有地方定期回顾那些没有设置DDL和优先级的任务~~
+2. ~~缺少查看已完成任务和行动的地方（做周报时候很有用）~~
 
 Logseq是个很棒的工具，期待尽快稳定下来，后面长期使用，作为笔记+GTD一站式平台~
 
