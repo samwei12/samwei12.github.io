@@ -48,78 +48,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Python模板引擎Jinja2使用简介</title>
-    <url>/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/">原文链接</a></p>
-</blockquote>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>最近在项目开发中，需要针对 Jenkins 项目进行配置，Jenkins 的 job 配置采用的是 xml，在维护配置模板的过程中就遇到了问题，因为逐步发现配置灵活性超出了字符串的范畴，本文旨在简单介绍 Python 下模板引擎模块 Jinja2 的使用。</p>
-<h2 id="什么是-Jinja2？"><a href="#什么是-Jinja2？" class="headerlink" title="什么是 Jinja2？"></a>什么是 Jinja2？</h2><blockquote>
-<p>Jinja2 是一个 Python 的功能齐全的模板引擎。它有完整的 unicode 支持，一个可选的集成沙箱执行环境，被广泛使用，以 BSD 许可证授权。</p>
-</blockquote>
-<p>以上是官方说明，简单来说，它提供了替换功能（变量替换）和一些强大的特性（控制流、继承等），可以快速生成数据文件，使得业务与数据分离开来，满足一些灵活多变的配置需求。</p>
-<span id="more"></span>
-
-<h2 id="为什么要使用-Jinja2？"><a href="#为什么要使用-Jinja2？" class="headerlink" title="为什么要使用 Jinja2？"></a>为什么要使用 Jinja2？</h2><p>拿 Jenkins 配置来说，如果要实现不同平台、不同项目的配置，有以下几种方案：</p>
-<ol>
-<li>直接进行字符串替换，使用 Python 字符串语法即可</li>
-<li>使用 XML 解析和生成模块，比较简便的是 ElementTree</li>
-<li>使用模板引擎，例如 Jinja2</li>
-</ol>
-<p>起初，我选用的是方案一，特点是简单粗暴，不需要额外的配置，例如，两个项目的 git 仓库配置可以采用如下代码实现：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 略去不相关代码</span></span><br><span class="line">template = <span class="string">b&quot;&quot;&quot;&lt;configVersion&gt;2&lt;/configVersion&gt;</span></span><br><span class="line"><span class="string">        &lt;userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">                &lt;url&gt;%(git_url)s&lt;/url&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">        &lt;/userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">        &lt;branches&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">                &lt;name&gt;%(git_branch)s&lt;/name&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">        &lt;/branches&gt;&quot;&quot;&quot;</span></span><br><span class="line">xml = template % &#123;<span class="string">&#x27;git_url&#x27;</span>:self.__git_url, <span class="string">&#x27;git_branch&#x27;</span>:self.__git_branch&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样，只需要外部传入地址及分支，即可获得不同的项目配置 xml，但缺点也很明显如果两个配置节点数目不相同或者里面的字段差别很大，那么就需要使用 <code>template2</code>、<code>template3</code>、<code>template4</code>等等，因此此方案仅适合配置需求较为简单，字段不是很复杂的场景。</p>
-<p>紧接着，开始调研快速生成不同 xml 数据的方案，找到了 <a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python%EF%BC%8C">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python，</a> 这里提到了两种方案，也就是上述的2、3。</p>
-<p>方案2的特点也很明显，可以完整控制 xml 中每个字段和属性，灵活性确实够了，能够满足我们的需求，但是有点大炮打蚊子的感觉，而且频繁的读写 xml 也比较消耗性能，业务逻辑也会随着配置的灵活性和多样性急遽膨胀，比如 Jenkins 项目配置，仓库地址、分支信息、ssh 信息、tag 字段、打包脚本等等，如果使用 xml 解析的话，针对这些节点都必须创建对应的业务逻辑，不是很推荐。</p>
-<p>那么我们的选择也比较简单了，Jinja 可以快速的替换生成我们业务需要的各种各样的数据，而且接入成本低，业务逻辑不会变化太大，下面简单介绍下本次项目中的使用。</p>
-<h2 id="Jinja2的简单使用教程"><a href="#Jinja2的简单使用教程" class="headerlink" title="Jinja2的简单使用教程"></a>Jinja2的简单使用教程</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>这个比较简单，看下文档即可，执行命令</p>
-<p><code>pip install jinja2</code></p>
-<h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>Jinja2中有一个名为<code>Environment</code>的对象，用于存储配置、全局变量，并且用于从文件系统中加载模板。即使你通过<code>Template</code>用字符串创建一个模板，Jinja2 也会自动为你创建一个环境。推荐使用这种方式进行模板配置而不是使用字符串，大多数程序使用一个环境即可。</p>
-<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><ol>
-<li>创建一个环境：</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, PackageLoader, select_autoescape</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化 jinja 环境</span></span><br><span class="line">self.__env = Environment(</span><br><span class="line">	loader=PackageLoader(<span class="string">&#x27;模块名称&#x27;</span>, <span class="string">&#x27;模板文件夹&#x27;</span>),</span><br><span class="line">	autoescape=select_autoescape([<span class="string">&#x27;html&#x27;</span>, <span class="string">&#x27;xml&#x27;</span>])</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li><p>加载一个模板：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__job_template = self.__env.get_template(<span class="string">&#x27;job_template.xml&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
-<li><p>接下来就是传递一些业务参数了，</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__config = self.__job_template.render(</span><br><span class="line">            git_url=self.__git_remote_url,</span><br><span class="line">            git_branch=self.__git_branch,</span><br><span class="line">            git_tag=self.__git_tag</span><br><span class="line">        )</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>以上都还是比较简单的 API 调用，核心使用部分在与如何在模板中通过 Jinja 支持的语法灵活的进行数据配置。</p>
-<h4 id="基本变量替换"><a href="#基本变量替换" class="headerlink" title="基本变量替换"></a>基本变量替换</h4><p>最基础的功能就是进行变量替换了，语法为<code>&#123;&#123;变量名&#125;&#125;</code>， 例如将 url 传递到 xml 中，模板中写法为(省略了不相关内容):</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">userRemoteConfigs</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>&#123;&#123;git_url&#125;&#125;<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">userRemoteConfigs</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>然后在代码中向上面一样调用 <code>template.render(git_url=&#39;xxx&#39;)</code>即可</p>
-<h4 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h4><p>Jinja 支持基本的<code>if</code>、<code>for</code>、宏等语法，这也是它最强大的地方，目前项目中我只用到了判断就够了。用法如下：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">&#123;% if push_tag %&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">targetRepoName</span>&gt;</span>origin<span class="tag">&lt;/<span class="name">targetRepoName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagName</span>&gt;</span>&#123;&#123;git_tag&#125;&#125;<span class="tag">&lt;/<span class="name">tagName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagMessage</span>&gt;</span><span class="tag">&lt;/<span class="name">tagMessage</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">createTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">createTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">updateTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">updateTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上面这段 xml 的逻辑就是如果传入了 <code>push_tag</code>变量且为<code>True</code>则在 Jenkins 配置中增加推送 git tag 节点，否则不做任何处理。</p>
-<p>除此之外，Jinja2 还支持循环，</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&lt;dl&gt;</span><br><span class="line">&#123;% <span class="keyword">for</span> key, value <span class="keyword">in</span> my_dict.iteritems() %&#125;</span><br><span class="line">    &lt;dt&gt;&#123;&#123; key|e &#125;&#125;&lt;/dt&gt;</span><br><span class="line">    &lt;dd&gt;&#123;&#123; value|e &#125;&#125;&lt;/dd&gt;</span><br><span class="line">&#123;% endfor %&#125;</span><br><span class="line">&lt;/dl&gt;</span><br></pre></td></tr></table></figure>
-
-<p>详细说明可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#for">http://docs.jinkan.org/docs/jinja2/templates.html#for</a></p>
-<h4 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h4><p>这部分由于目前项目配置还比较简单，暂时没用到，可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#id23">http://docs.jinkan.org/docs/jinja2/templates.html#id23</a></p>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>对于简单的项目来说，上面提到的一些基本替换加控制流基本都能满足使用了， 稍微复杂一点的程序可以考虑使用继承和扩展。</p>
-<p>总的来说，Jinja2 既强大又简便，完美符合项目中一些HTML、XML 的业务配置需求，目前项目中本身有的三四个 xml 文件用了 Jinja2 之后缩减成一个，同时改动工作量大约只花了几个小时，真的很方便。</p>
-<blockquote>
-<p>参考资料：</p>
-<ul>
-<li><a href="http://jinja.pocoo.org/docs/2.10/">http://jinja.pocoo.org/docs/2.10/</a></li>
-<li><a href="http://docs.jinkan.org/docs/jinja2/index.html">http://docs.jinkan.org/docs/jinja2/index.html</a></li>
-<li><a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python</a></li>
-</ul>
-</blockquote>
-]]></content>
-      <categories>
-        <category>Python</category>
-      </categories>
-      <tags>
-        <tag>Jinja2</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>AVCaptureSession部分用法</title>
     <url>/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/</url>
     <content><![CDATA[<blockquote>
@@ -384,6 +312,78 @@
         <tag>Runtime</tag>
         <tag>Objective-C</tag>
         <tag>ARC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python模板引擎Jinja2使用简介</title>
+    <url>/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/">原文链接</a></p>
+</blockquote>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>最近在项目开发中，需要针对 Jenkins 项目进行配置，Jenkins 的 job 配置采用的是 xml，在维护配置模板的过程中就遇到了问题，因为逐步发现配置灵活性超出了字符串的范畴，本文旨在简单介绍 Python 下模板引擎模块 Jinja2 的使用。</p>
+<h2 id="什么是-Jinja2？"><a href="#什么是-Jinja2？" class="headerlink" title="什么是 Jinja2？"></a>什么是 Jinja2？</h2><blockquote>
+<p>Jinja2 是一个 Python 的功能齐全的模板引擎。它有完整的 unicode 支持，一个可选的集成沙箱执行环境，被广泛使用，以 BSD 许可证授权。</p>
+</blockquote>
+<p>以上是官方说明，简单来说，它提供了替换功能（变量替换）和一些强大的特性（控制流、继承等），可以快速生成数据文件，使得业务与数据分离开来，满足一些灵活多变的配置需求。</p>
+<span id="more"></span>
+
+<h2 id="为什么要使用-Jinja2？"><a href="#为什么要使用-Jinja2？" class="headerlink" title="为什么要使用 Jinja2？"></a>为什么要使用 Jinja2？</h2><p>拿 Jenkins 配置来说，如果要实现不同平台、不同项目的配置，有以下几种方案：</p>
+<ol>
+<li>直接进行字符串替换，使用 Python 字符串语法即可</li>
+<li>使用 XML 解析和生成模块，比较简便的是 ElementTree</li>
+<li>使用模板引擎，例如 Jinja2</li>
+</ol>
+<p>起初，我选用的是方案一，特点是简单粗暴，不需要额外的配置，例如，两个项目的 git 仓库配置可以采用如下代码实现：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 略去不相关代码</span></span><br><span class="line">template = <span class="string">b&quot;&quot;&quot;&lt;configVersion&gt;2&lt;/configVersion&gt;</span></span><br><span class="line"><span class="string">        &lt;userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">                &lt;url&gt;%(git_url)s&lt;/url&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.UserRemoteConfig&gt;</span></span><br><span class="line"><span class="string">        &lt;/userRemoteConfigs&gt;</span></span><br><span class="line"><span class="string">        &lt;branches&gt;</span></span><br><span class="line"><span class="string">            &lt;hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">                &lt;name&gt;%(git_branch)s&lt;/name&gt;</span></span><br><span class="line"><span class="string">            &lt;/hudson.plugins.git.BranchSpec&gt;</span></span><br><span class="line"><span class="string">        &lt;/branches&gt;&quot;&quot;&quot;</span></span><br><span class="line">xml = template % &#123;<span class="string">&#x27;git_url&#x27;</span>:self.__git_url, <span class="string">&#x27;git_branch&#x27;</span>:self.__git_branch&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样，只需要外部传入地址及分支，即可获得不同的项目配置 xml，但缺点也很明显如果两个配置节点数目不相同或者里面的字段差别很大，那么就需要使用 <code>template2</code>、<code>template3</code>、<code>template4</code>等等，因此此方案仅适合配置需求较为简单，字段不是很复杂的场景。</p>
+<p>紧接着，开始调研快速生成不同 xml 数据的方案，找到了 <a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python%EF%BC%8C">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python，</a> 这里提到了两种方案，也就是上述的2、3。</p>
+<p>方案2的特点也很明显，可以完整控制 xml 中每个字段和属性，灵活性确实够了，能够满足我们的需求，但是有点大炮打蚊子的感觉，而且频繁的读写 xml 也比较消耗性能，业务逻辑也会随着配置的灵活性和多样性急遽膨胀，比如 Jenkins 项目配置，仓库地址、分支信息、ssh 信息、tag 字段、打包脚本等等，如果使用 xml 解析的话，针对这些节点都必须创建对应的业务逻辑，不是很推荐。</p>
+<p>那么我们的选择也比较简单了，Jinja 可以快速的替换生成我们业务需要的各种各样的数据，而且接入成本低，业务逻辑不会变化太大，下面简单介绍下本次项目中的使用。</p>
+<h2 id="Jinja2的简单使用教程"><a href="#Jinja2的简单使用教程" class="headerlink" title="Jinja2的简单使用教程"></a>Jinja2的简单使用教程</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>这个比较简单，看下文档即可，执行命令</p>
+<p><code>pip install jinja2</code></p>
+<h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>Jinja2中有一个名为<code>Environment</code>的对象，用于存储配置、全局变量，并且用于从文件系统中加载模板。即使你通过<code>Template</code>用字符串创建一个模板，Jinja2 也会自动为你创建一个环境。推荐使用这种方式进行模板配置而不是使用字符串，大多数程序使用一个环境即可。</p>
+<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><ol>
+<li>创建一个环境：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> jinja2 <span class="keyword">import</span> Environment, PackageLoader, select_autoescape</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化 jinja 环境</span></span><br><span class="line">self.__env = Environment(</span><br><span class="line">	loader=PackageLoader(<span class="string">&#x27;模块名称&#x27;</span>, <span class="string">&#x27;模板文件夹&#x27;</span>),</span><br><span class="line">	autoescape=select_autoescape([<span class="string">&#x27;html&#x27;</span>, <span class="string">&#x27;xml&#x27;</span>])</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>加载一个模板：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__job_template = self.__env.get_template(<span class="string">&#x27;job_template.xml&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
+<li><p>接下来就是传递一些业务参数了，</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.__config = self.__job_template.render(</span><br><span class="line">            git_url=self.__git_remote_url,</span><br><span class="line">            git_branch=self.__git_branch,</span><br><span class="line">            git_tag=self.__git_tag</span><br><span class="line">        )</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>以上都还是比较简单的 API 调用，核心使用部分在与如何在模板中通过 Jinja 支持的语法灵活的进行数据配置。</p>
+<h4 id="基本变量替换"><a href="#基本变量替换" class="headerlink" title="基本变量替换"></a>基本变量替换</h4><p>最基础的功能就是进行变量替换了，语法为<code>&#123;&#123;变量名&#125;&#125;</code>， 例如将 url 传递到 xml 中，模板中写法为(省略了不相关内容):</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">userRemoteConfigs</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url</span>&gt;</span>&#123;&#123;git_url&#125;&#125;<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.UserRemoteConfig</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">userRemoteConfigs</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后在代码中向上面一样调用 <code>template.render(git_url=&#39;xxx&#39;)</code>即可</p>
+<h4 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h4><p>Jinja 支持基本的<code>if</code>、<code>for</code>、宏等语法，这也是它最强大的地方，目前项目中我只用到了判断就够了。用法如下：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">&#123;% if push_tag %&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">targetRepoName</span>&gt;</span>origin<span class="tag">&lt;/<span class="name">targetRepoName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagName</span>&gt;</span>&#123;&#123;git_tag&#125;&#125;<span class="tag">&lt;/<span class="name">tagName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tagMessage</span>&gt;</span><span class="tag">&lt;/<span class="name">tagMessage</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">createTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">createTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">updateTag</span>&gt;</span>true<span class="tag">&lt;/<span class="name">updateTag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">hudson.plugins.git.GitPublisher_-TagToPush</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tagsToPush</span>&gt;</span></span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这段 xml 的逻辑就是如果传入了 <code>push_tag</code>变量且为<code>True</code>则在 Jenkins 配置中增加推送 git tag 节点，否则不做任何处理。</p>
+<p>除此之外，Jinja2 还支持循环，</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">&lt;dl&gt;</span><br><span class="line">&#123;% <span class="keyword">for</span> key, value <span class="keyword">in</span> my_dict.iteritems() %&#125;</span><br><span class="line">    &lt;dt&gt;&#123;&#123; key|e &#125;&#125;&lt;/dt&gt;</span><br><span class="line">    &lt;dd&gt;&#123;&#123; value|e &#125;&#125;&lt;/dd&gt;</span><br><span class="line">&#123;% endfor %&#125;</span><br><span class="line">&lt;/dl&gt;</span><br></pre></td></tr></table></figure>
+
+<p>详细说明可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#for">http://docs.jinkan.org/docs/jinja2/templates.html#for</a></p>
+<h4 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h4><p>这部分由于目前项目配置还比较简单，暂时没用到，可以参考 <a href="http://docs.jinkan.org/docs/jinja2/templates.html#id23">http://docs.jinkan.org/docs/jinja2/templates.html#id23</a></p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>对于简单的项目来说，上面提到的一些基本替换加控制流基本都能满足使用了， 稍微复杂一点的程序可以考虑使用继承和扩展。</p>
+<p>总的来说，Jinja2 既强大又简便，完美符合项目中一些HTML、XML 的业务配置需求，目前项目中本身有的三四个 xml 文件用了 Jinja2 之后缩减成一个，同时改动工作量大约只花了几个小时，真的很方便。</p>
+<blockquote>
+<p>参考资料：</p>
+<ul>
+<li><a href="http://jinja.pocoo.org/docs/2.10/">http://jinja.pocoo.org/docs/2.10/</a></li>
+<li><a href="http://docs.jinkan.org/docs/jinja2/index.html">http://docs.jinkan.org/docs/jinja2/index.html</a></li>
+<li><a href="https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python">https://stackoverflow.com/questions/1055108/fast-and-easy-way-to-template-xml-files-in-python</a></li>
+</ul>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>Jinja2</tag>
       </tags>
   </entry>
   <entry>
@@ -708,169 +708,232 @@
       </tags>
   </entry>
   <entry>
-    <title>使用Logseq构建GTD系统</title>
-    <url>/2021/05/08/Utilities/%E4%BD%BF%E7%94%A8Logseq%E6%9E%84%E5%BB%BAGTD%E7%B3%BB%E7%BB%9F/</url>
-    <content><![CDATA[<blockquote>
-<p>2021-05-08： 1.0版本初步完成，待完善已完成任务回顾<br>2021-05-10： 1.1版本完成，修改不重要不紧急为将来清单，且新增每周回顾</p>
-</blockquote>
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在阅读《小强升职记》，感觉里面讲到的时间管理工具和方法十分有用，自己之前虽然也了解一些工具，例如四象限原则、两分钟方法等，但看完这本书之后感觉之前的理解还是太肤浅了。是时候升级一下自己的时间管理系统了。</p>
+    <title>万字长文---关于PKM收集与整理系统的思考和实践</title>
+    <url>/2021/05/22/Thinking/%E5%85%B3%E4%BA%8EPKM%E6%94%B6%E9%9B%86%E4%B8%8E%E6%95%B4%E7%90%86%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%80%9D%E8%80%83%E5%92%8C%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<p>PKM闭环中有一个很重要的环节就是信息输入，包括各种信息来源，例如微信公众号、博客、知乎、RSS等等，因此也就诞生了一大堆稍后读软件，如何真正有效的获取输入而不是做一只仓鼠是需要思考的。最近看了《小强升职记》很有收获，里面提到最好在每个方面都有一个自己的小系统，“<strong>做事要靠系统而不是靠感觉</strong>”，因此这里简单记录下自己的思考和目前构建起来的信息收集整理系统。</p>
 <span id="more"></span>
 
-<p>在此之前我的工具大致包括： 稍后读软件、GTD工具（滴答清单）、写作工具（一般是VSCode+Hexo）。最近半年沉迷于使用双链笔记软件，目前在用的是 Logseq，后面专门展开介绍一下。目前在尝试将GTD工具、笔记都整合到 Logseq 里面，主要是受了这篇文章的启发 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>，下面就详细介绍一下我的实践过程。</p>
-<h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><h3 id="Datalog"><a href="#Datalog" class="headerlink" title="Datalog"></a>Datalog</h3><p>首先，需要简单学习一下Datalog语法。Logseq是基于Clojure开发的，它的底层可以简单地理解为是类似于数据库的结构，因此可以天然的支持各种查询，这也是我们能够利用它来实现 GTD 管理的前提。因此这里如果需要掌握如何使用 Logseq 来进行查询的话，最好先学习一下如何使用 Datalog。可以参考 <a href="https://logseq.github.io/#/page/advanced%20queries">官方的查询教程</a> 以及这篇 <a href="http://www.learndatalogtoday.org/">Learn Datalog Today</a>，粗略扫一遍，能够看懂大概意思就可以了。</p>
-<h3 id="CSS"><a href="#CSS" class="headerlink" title="CSS"></a>CSS</h3><p>其次，Logseq本身是列表大纲形式，无法直接支持四象限这种样式，因此需要一些 CSS功底，这里我是直接参考了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a> 里面的样式，原始版本在 <a href="https://discuss.logseq.com/t/css-template-eisenhower-matrix/526">[css+template] eisenhower matrix</a>，可以简单看下。</p>
-<h2 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h2><h3 id="块属性"><a href="#块属性" class="headerlink" title="块属性"></a>块属性</h3><p>《小强升职记》里面提到日常待办事项是分为项目、任务、行动三种的，只有行动才是可以立马去执行的，项目和任务都需要进行分解，拆成行动。</p>
-<p>结合Logseq，我目前考虑使用属性来解决，也可以考虑使用标签，不过我认为会对内容有一定的污染，各有利弊吧。</p>
-<p>针对一个新的行动或者任务，添加属性type字段，然后根据具体的类型添加行动、任务、项目字段。</p>
-<p>样例：<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508175442.png" alt="20210508175442"></p>
-<h3 id="四象限查询条件"><a href="#四象限查询条件" class="headerlink" title="四象限查询条件"></a>四象限查询条件</h3><p>注意：<strong>所有的待办都必须要有明确的优先级和截止日期</strong>，这么做有几个原因：<br>    1. 要求自己对每个待办都设置明确的时间点，避免添加到收集箱中一直不处理<br>    2. 添加了优先级之后才好进行四象限统计<br>    3. 目前还没有找到Logseq的query条件中如何同时查找DDL在限定时间内以及无DDL限制的任务，只能查找其中一种case，这个后续解决</p>
-<p>实际使用过程中，可以把一下的查询条件汇总到一个模板中，</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">## #.v-eisenhower-matrix （用于CSS选择器，最好不要改）</span><br><span class="line">:PROPERTIES:</span><br><span class="line">:template: 四象限</span><br><span class="line">:END:</span><br><span class="line">#### [[重要且紧急]]</span><br><span class="line">##### </span><br><span class="line">#+BEGIN_QUERY</span><br><span class="line">...</span><br><span class="line">#+END_QUERY</span><br><span class="line">#### [[重要不紧急]]</span><br><span class="line">#### [[紧急不重要]]</span><br><span class="line">#### [[不重要不紧急]]</span><br></pre></td></tr></table></figure>
-
-<p>具体查询语句如下：可以根据自己的实际使用需求将属性限制移除或者修改时间限制，代码中均已经添加注释。</p>
-<blockquote>
-<p>2021-05-10 补充： 将设置为Later的事项移动到第四象限，这样就可以定期回顾；同时新增一个每周回顾的query语句，由于目前Logseq还不支持查询当前时间戳，因此用了个笨办法，每次查询的时候手动输入当前时间戳ms进行查询。</p>
-</blockquote>
-<h4 id="重要且紧急-避免太多进入该象限"><a href="#重要且紧急-避免太多进入该象限" class="headerlink" title="[[重要且紧急]] ^^(避免太多进入该象限)^^"></a>[[重要且紧急]] ^^(避免太多进入该象限)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;:query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-<h4 id="重要不紧急-优先完成此象限"><a href="#重要不紧急-优先完成此象限" class="headerlink" title="[[重要不紧急]] ^^(优先完成此象限)^^"></a>[[重要不紧急]] ^^(优先完成此象限)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&gt; ?d ?end)]  ;; DDL在5天以上</span><br><span class="line">    ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-<h4 id="紧急不重要-尽量委派给其他人"><a href="#紧急不重要-尽量委派给其他人" class="headerlink" title="[[紧急不重要]] ^^(尽量委派给其他人)^^"></a>[[紧急不重要]] ^^(尽量委派给其他人)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [?b :block/priority ?priority]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            [(!= &quot;A&quot; ?priority)] ;; 优先级在A的才认为是重要</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-<h4 id="待办清单-不紧急不重要，定期回顾确认"><a href="#待办清单-不紧急不重要，定期回顾确认" class="headerlink" title="[[待办清单]] ^^(不紧急不重要，定期回顾确认)^^"></a>[[待办清单]] ^^(不紧急不重要，定期回顾确认)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [(contains? #&#123;&quot;LATER&quot;&#125; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-
-<h4 id="本周已完成-近七天统计"><a href="#本周已完成-近七天统计" class="headerlink" title="[[本周已完成]] ^^(近七天统计)^^"></a>[[本周已完成]] ^^(近七天统计)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;   :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;done&quot;) ?finishedTime]</span><br><span class="line">            [(- 1620657776000 604800000) ?weekbefore] ;; 由于目前Logseq不支持直接获取当前时间戳，只能使用trick的方式，每次查询前手动输入当前时间戳ms值,算出一周前的时间戳</span><br><span class="line">            [(&gt;= ?finishedTime ?weekbefore)] ;; 一周内完成的工作</span><br><span class="line">            [(= &quot;DONE&quot; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-
-<h3 id="CSS优化"><a href="#CSS优化" class="headerlink" title="CSS优化"></a>CSS优化</h3><p>这里直接照抄了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>， 不过它的CSS中内容较多，我单独提取了四象限相关的部分，放在 <a href="https://github.com/samwei12/LogseqMisc/blob/master/%E5%9B%9B%E8%B1%A1%E9%99%90.css">四象限CSS</a> 中，查询模板也都放在这里，便于大家使用。</p>
-<h3 id="最终效果"><a href="#最终效果" class="headerlink" title="最终效果"></a>最终效果</h3><p>目前我的每日笔记大概长这样：</p>
-<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508181043.png" alt="20210508181043"></p>
-<blockquote>
-<p>1.1 版本已经解决</p>
-</blockquote>
-<p><del>可以算是1.0 版本，目前存在的问题包括：</del></p>
+<h2 id="需求场景"><a href="#需求场景" class="headerlink" title="需求场景"></a>需求场景</h2><p>手机在浏览阅读一些比较有价值的文章的时候，无法立马吸收，例如读到一些专业的技术博客、长文等等，此时，就需要将这些内容收藏起来有时间的时候继续深入阅读。</p>
+<h3 id="为什么手机不适合进行深度阅读？"><a href="#为什么手机不适合进行深度阅读？" class="headerlink" title="为什么手机不适合进行深度阅读？"></a>为什么手机不适合进行深度阅读？</h3><ol>
+<li>干扰太多。比如阅读时候弹出微信消息、短信等等，此时跳到微信再回来已经过去了半个小时，更别提现在微信公众号已经占据我信息来源的50%以上，这种打断就显得尤为浪费时间。</li>
+<li>没有大块时间。一般在排队、等车等情况下进行阅读，可能只能判断出这篇文章是否需要进一步学习。</li>
+<li>不适合标注笔记。这个也很好理解，手机毕竟屏幕太小，但很多专业性很强的文章如果不配合笔记甚至实操，是根本无法吸收内化的。</li>
+</ol>
+<p>手机的使用场景决定了它本身只能进行一些文章价值的快速筛选，辨别出这篇文章是否需要进一步深入学习，仅此而已。</p>
+<p>所以我给自己定的一个小目标就是每天的手机使用时间不要超过3小时，微信、知乎中发现的有价值的内容都第一时间收藏到稍后读中，电脑上统一进行整理，手机只作为一个收集器和过滤器，用于快速识别出哪些文章需要进一步研究。</p>
+<h3 id="关于碎片化时间的思考"><a href="#关于碎片化时间的思考" class="headerlink" title="关于碎片化时间的思考"></a>关于碎片化时间的思考</h3><p>关于这点，收到了简悦作者的部分观点启发。</p>
+<p>个人观点：不要有太多碎片化时间，利用碎片化阅读本身就是个伪命题，原因上面也有讲到。</p>
+<p>很多人恨不得自己24小时都在进行阅读，可能是为了造成一种自己很努力错觉，也有可能是因为现在这个时代知识焦虑实在被贩卖的太严重，如果不让自己时刻在学习在阅读就会被淘汰？实际上这样做并不会对个人提升有太大帮助。很多人(包括我)都会利用走路、吃饭时间进行手机阅读，这种只能用来看看新闻，我理解是无法进行自我提升的。</p>
+<p>那有些人说就是会有很多碎片化时间应该如何处理呢？比如通勤时间较长，或者一些工作性质导致会有很多碎片化时间。</p>
+<p>我最近的感受下来，这种小块时间宁可放空，进行思考和回顾。拿我自己来说，之前每次上下班开车的时候总是喜欢听一点书、或者听一些专业相关的教程，例如喜马拉雅、极客时间、得到等，实际上听完一遍，根本没有吸收，最多只能做到，知道有这么本书，大概讲的是个什么东西，但具体到如何讲的一概不知。最近这段时间见尝试放空自己，开车就好好开车，什么也不听，发现经常会有各种灵感从脑袋里面冒出来，比如对工作的回顾、对自己日常的思考等等（同时也会让我更加专注开车，更加安全）。大家也可以尝试一下，定期放空回顾自己说不定会让你走的更快更远，PS：这里也可以学习一下如何进行冥想，我自己也在尝试。</p>
+<h2 id="工具挑选"><a href="#工具挑选" class="headerlink" title="工具挑选"></a>工具挑选</h2><h3 id="工具选择的原则"><a href="#工具选择的原则" class="headerlink" title="工具选择的原则"></a>工具选择的原则</h3><p>知道了需求背景，我们就开始真正开始进行软件挑选了，经过我这么多年的软件使用实践，我发现大多数时候其实我们并不知道自己需要什么软件，外加现在这个时代，开发一个软件成本实在有点低，一旦有个热点，同类型产品几乎是雨后春笋般冒出来（参考最近大火的Roam类双向链接笔记）。如果不建立一个自己的筛选甄别系统，很容易就被各种工具迷花了眼。</p>
+<p>这里我简单列举一下我自己这些年总结的一些选择软件的原则，其中很多在我的<a href="http://blog.samwei12.cn/2020/05/02/Thinking/%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAPKM%E7%B3%BB%E7%BB%9F/">旧文</a>中都有提到，仅供大家参考：</p>
 <ol>
-<li><del>没有地方定期回顾那些没有设置DDL和优先级的任务</del></li>
-<li><del>缺少查看已完成任务和行动的地方（做周报时候很有用）</del></li>
+<li>尽可能不要全部依赖免费工具。 </li>
+<li>格式越简单越好。深入表述一点就是软件的 Lock-in 成本越低越好，目前这个时代，软件更迭速度实在快的惊人，大家可以仔细想一下有哪些软件使用时间超过了5年？或者说3年？所以构建自己的个人系统时，尽可能不要强依赖软件，做到快速迁入迁出最好了。这里不得不提到国产很多软件，真的是没有什么节操，导入功能支持的完美的一笔，导出功能就是个渣渣，就差明说我要抢你们的用户，但你们谁也抢不走我的用户。开发者真的是多没自信才能干出这种事情？</li>
+<li><del>除非是网络实在不可用，否则尽可能选用国外产品</del>。 这一点原文已经提到了，不过说实话，这两年国内产品质量越来越高了，很多软件在使用体验上已经超越了国外软件。如果遇到比较良心比较有节操的开发者，这条原则可以作废了。</li>
+<li>你一定要明确你的需求。这点上面有提到过，如果你不明白你真的需要什么，那也一定要清楚自己不需要什么。只有这样，你才能够从不停地切换软件中挣脱出来，避免成功“工具人”（字面意思，被工具奴役）。</li>
 </ol>
-<p>Logseq是个很棒的工具，期待尽快稳定下来，后面长期使用，作为笔记+GTD一站式平台~</p>
-]]></content>
-      <categories>
-        <category>Utilities</category>
-      </categories>
-      <tags>
-        <tag>Logseq</tag>
-        <tag>GTD</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用 Wekan 搭建个人看板</title>
-    <url>/2020/05/03/Utilities/Wekan/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2020/05/03/Utilities/Wekan/">原文链接</a></p>
-</blockquote>
-<h2 id="看板？"><a href="#看板？" class="headerlink" title="看板？"></a>看板？</h2><p>术语：</p>
-<ul>
-<li>看板：TODO</li>
-<li>列表：同类型的事务放在一起，按照任务进度，通常为：未完成、进行中、已完成</li>
-<li>卡片：最小单位，即任务，</li>
-<li>泳道：不同类型的任务横向对比，例如，团队中不同分组等</li>
-</ul>
-<span id="more"></span>
-
-
-<h2 id="为什么要用看板？"><a href="#为什么要用看板？" class="headerlink" title="为什么要用看板？"></a>为什么要用看板？</h2><p>TODO</p>
-<h2 id="关于-wekan"><a href="#关于-wekan" class="headerlink" title="关于 wekan"></a>关于 wekan</h2><p><a href="https://github.com/wekan/wekan">wekan</a> 是一款开源的看板系统，从功能上来讲模仿看板类软件鼻祖 <a href="https://trello.com/">Trello</a>。整体界面大致如下：</p>
-<p><img src="http://www.scienjus.com/uploads/2016/03/wekan.jpeg"></p>
-<p>采用 wekan 的原因也比较简单， 为了安全性考虑，公司内部文档禁止使用部署在外部服务器上的工具。</p>
-<h2 id="如何搭建-wekan？"><a href="#如何搭建-wekan？" class="headerlink" title="如何搭建 wekan？"></a>如何搭建 wekan？</h2><blockquote>
-<p> 官方教程：<a href="https://github.com/wekan/wekan/wiki/Install-Wekan-Docker-in-production">https://github.com/wekan/wekan/wiki/Install-Wekan-Docker-in-production</a></p>
-</blockquote>
+<h3 id="收集类软件需求分析"><a href="#收集类软件需求分析" class="headerlink" title="收集类软件需求分析"></a>收集类软件需求分析</h3><p>对于我来说稍后读软件方面个人的诉求点包括：</p>
 <ol>
-<li>安装 Docker</li>
-<li>下载 <a href="https://github.com/wekan/wekan-mongodb">https://github.com/wekan/wekan-mongodb</a></li>
-<li>进入 mongodb 文件夹</li>
-<li>修改 yaml 中的 url 信息</li>
-<li>执行 <code>docker-compose up -d</code> 或者 <code>docker-compose up</code></li>
+<li>手机端随时能够快速保存。尤其是微信公众号文章，很多稍后读软件在微信公众号文章上面体验都很差</li>
+<li>能够跨平台使用。多平台的支持很重要，我平时使用网页版很少，喜欢使用客户端，一般是iOS跟Mac使用</li>
+<li>能够持久化保存，网站无法访问也能正常使用。这点相比大家也都明白，网站不能打开的因素实在是太多了</li>
+<li>能够进行标注，并且能导出标注并进行检索关联。阅读过程中对于精华部分进行标注是一个很必要的功能，且需要能够对其进行分类打标，使其成为素材笔记(卡片盒笔记中的术语，字面意思)，并且能够跟现有的知识进行结合。你学到的每个知识点，只有跟现有的知识点进行关联，才有可能真的内化吸收变为你自己的知识，一个个的孤岛知识点是没有任何意义的。</li>
 </ol>
-<h2 id="wekan-简易说明"><a href="#wekan-简易说明" class="headerlink" title="wekan 简易说明"></a>wekan 简易说明</h2><h3 id="初步接触"><a href="#初步接触" class="headerlink" title="初步接触"></a>初步接触</h3><p>目前是在 Mac 服务器上搭建了 wekan，暂时没有域名，大家先使用 IP 地址登录， <a href="http://30.3.131.128/">http://30.3.131.128</a>，之后就是注册账号： –统一约定使用中文花名，邮箱使用公司邮箱–，</p>
-<p><img src="http://gw.alicdn.com/mt/TB1Qu_nd8mWBuNkSndVXXcsApXa-1566-950.png"></p>
-<p>之后进入看板首页，这里可以管理个人名下所有项目，新增看板也在这里，下面以工程组为例，简单介绍下如何使用看板。</p>
-<p>首先，创建一个看板，<img src="http://gw.alicdn.com/mt/TB1UY6MmgmTBuNjy1XbXXaMrVXa-303-210.png"></p>
-<p>接下来可以看到看板的整体页面，</p>
-<p><img src="http://gw.alicdn.com/mt/TB1ThO.d3KTBuNkSne1XXaJoXXa-1917-956.png"></p>
+<h3 id="我用过的那些收集类产品测评"><a href="#我用过的那些收集类产品测评" class="headerlink" title="我用过的那些收集类产品测评"></a>我用过的那些收集类产品测评</h3><p>搞明白为什么需要一个信息收集系统跟它需要具备哪些能力之后，我们就可以开始进行一些工具的筛选和鉴别了。目前笔记软件和稍后读软件实在是太多了，很容易就挑花了眼，我这里只简单介绍一下我自己深度使用过的一些软件和工具，当然我自己在使用过程中也并不是一下子就想清楚需要哪些能力再开始进行挑选的，也是逐步使用过程中发现哪些适合自己哪些不适合自己，因此现在把使用过程中的一些经验简单说一下，希望能减少大家的时间成本，同时由于每个人情况不同，需求也不一样，这方面主观因素比较强，最好是梳理出你自己的需求点，建立最适合你的小系统。</p>
+<p>这里我把目前用过的工具简单分为两类，一类是笔记类，一类是收藏类，他们的定位有所区别。笔记类，偏向剪藏、管理、检索、写作；收集类，偏向快速收集、标注、阅读。</p>
+<h4 id="笔记类"><a href="#笔记类" class="headerlink" title="笔记类"></a>笔记类</h4><h5 id="印象笔记"><a href="#印象笔记" class="headerlink" title="印象笔记"></a>印象笔记</h5><p>老牌仓鼠专用笔记，只收藏不老牌仓鼠专用笔记，只收藏不处理。我从11年左右就开始在用印象笔记，当时还没有国内版，同步速度比较一般，不过真的是稳，最强大的就是剪藏功能，能够完整保存网页内容，选区可以调整，不过一般来说自动识别完全够用；其次是搜索功能，甚至能利用OCR，搜索图片内容。</p>
+<p>优点：</p>
 <ul>
-<li>左上角为工程属性，例如是否私有，是否提示通知</li>
-<li>左侧整体面板为看板主体内容</li>
-<li>右侧为属性栏，包括系统日志、项目成员、标签设置等</li>
-<li>右上角为工具栏，包括搜索、过滤、列表/泳道切换、多选、看板菜单等</li>
+<li>剪藏功能简直逆天，仓鼠党必备</li>
+<li>搜索功能很强大</li>
+<li>稳定性很强</li>
 </ul>
-<h3 id="需求看板"><a href="#需求看板" class="headerlink" title="需求看板"></a>需求看板</h3><p>接下来需要做的事情就是建立列表和泳道，这里我们约定，需求跟任务划分为两个看板，例如，所有工程618的需求放到一个看板中，包括待定需求、进行中的需求、已完成需求，不需要写明需求详细工期，仅列出本期都有哪些需求即可；所有的需求细分出来的任务单独放一个看板中，需要细化到每人每天的工作。需求看板示例：</p>
-<p><img src="http://gw.alicdn.com/mt/TB18GyQmDJYBeNjy1zeXXahzVXa-1919-943.png"></p>
-<p>这里我们约定划分这么几个列表：</p>
+<p>缺点：</p>
 <ul>
-<li>待梳理需求：需要进一步评估是否需要做或者如何做</li>
-<li>长期规划：一般是3个月以上，可以视项目情况而定，移除该列表也可以</li>
-<li>中期规划：一般是1-3个月</li>
-<li>本月：当前月需要完成的需求</li>
-<li>已交付：该版本已完成需求</li>
-<li>后续可以看情况自定义部分列表，例如已延期</li>
-<li>不同泳道即不同模块，整体大图的话就可以按照算法、2D、3D 这样划分，小组内部可以根据功能划分，例如 CPU、GPU 等</li>
+<li>大公司通病，迭代速度过于缓慢，一个Markdown支持好几年都没上，很长一段时间只能用 马克飞象 等替代；最近一两年有所好转，从推出超级笔记开始，功能迭代速度明显变快，前几天甚至出了双向链接，不过有点为时已晚的感觉，毕竟现在笔记市场已经不是几年前了</li>
+<li>在现在双链笔记横行的时代，印象笔记之前的笔记模式已经过于落伍，缺失了收藏到输出中间最重要的一个组织整理功能，也就无法使知识内化，逐步沦为一个收藏仓库，永远也不会打开。当然不排除有些人用印象笔记也用的很棒，但那需要个人比较强的组织管理知识的能力，一般人达不到</li>
+<li>剪藏过慢，这可能跟实现方式有关，印象笔记需要等完整网页内容转换保存下来之后再提示成功，一般的微信文章大约需要3-5秒，有点接受不了。完全可以改为后台通过链接下载创建笔记，用户只需要粘贴链接即可离开，不需要在界面停留等待。</li>
+<li><strong>微信公众号支持不佳</strong>，现在很多软件都是通过提供服务号来实现微信文章收藏，我只想问问他们实际使用过这个功能吗？槽点实在太多，实际收藏场景通常在用户浏览公众号文章列表时候发现这篇文章不错，想要收藏一下，此时需要：右上角拷贝链接，退出公众号，打开服务号，粘贴链接，返回公众号继续浏览下一篇文章。不得不说这实在是个迷幻操作，这中间的打断次数多的我都不想继续使用了。当然有一些办法可以简单规避这个问题，例如使用iOS捷径，但实际体验过之后槽点也真的够多。首先，使用捷径创建笔记时候需要进行授权，这个没啥可说的，但骚就骚在这里有个严重bug，即使授权完成，在桌面的快捷方式中点击收藏，一样会频繁提示授权失败，最终解决方案，<strong>重启手机</strong>；其次，官方那个捷径有点蛋疼，每次收藏完笔记，会自动打开该链接，也就是跳到印象笔记手机端该笔记中，这是为了手机端打开次数和时长KPI？解决方案，删除捷径中这些多余步骤；最后就是收藏速度了，经常有的文章我收藏一下，要等待大概10-15秒，不确定是不是文章里面有大量图片之类的，可以参考上一点，这里还有个恶心的点就是捷径本身都是同步的，也就是说这15秒时间内，你只能在桌面傻等着，一旦有了其他点击事件，就会取消掉本次操作，每天浪费大量时间。</li>
+<li>公司网络屏蔽，无法使用，这个是我个人原因</li>
 </ul>
-<p>右侧面板中需要添加其他成员，这样其他人才能访问</p>
-<h3 id="任务看板"><a href="#任务看板" class="headerlink" title="任务看板"></a>任务看板</h3><p>之后我们就需要根据刚才整理出来的需求进一步分配工时，列表可以参考下图：</p>
-<p><img src="http://gw.alicdn.com/mt/TB1_ZzUd4uTBuNkHFNRXXc9qpXa-1633-949.png"></p>
+<h5 id="为知笔记"><a href="#为知笔记" class="headerlink" title="为知笔记"></a>为知笔记</h5><p>大概在15、16年左右，由于是在受不了印象笔记对于Markdown的支持力度，同时不愿意进行太多付费，转而开始使用为知笔记，但不得不说，使用体验比起印象笔记简直是天上地下，服务响应不及时、开发进度缓慢、客户端经常卡死等问题一点点再消耗我的耐心，终于还是舍弃了它。</p>
+<p>编写本文的时候我还专门去下载了为知笔记，发现网上能够搜索到的资料基本都是16、17年的了，为知笔记的官网中，Linux跟Mac客户端在20年之后更是完全没有更新过，不得不说还是挺可惜的， 其实它本来很有机会超越印象笔记的。</p>
+<h5 id="Onenote"><a href="#Onenote" class="headerlink" title="Onenote"></a>Onenote</h5><p>微软出品，必属精品。大部分情况下这句话没啥毛病，很多人对Onenote十分狂热，我简单试用过一段时间，实在有点不太习惯，放弃了。</p>
+<p>优点：</p>
 <ul>
-<li>需求列表：即本月需要完成的需求描述</li>
-<li>Task-todo：待完成任务</li>
-<li>Task-doing：进行中的任务</li>
-<li>Task-done：已完成任务</li>
-<li>需求-testing：测试中的需求</li>
-<li>需求-bug：测试中发现的 bug 列表</li>
-<li>需求-done：需求完成</li>
+<li>继承了微软产品的一贯作风，操作上手门槛极低，任何灵感都可以随时记录</li>
 </ul>
-<h3 id="任务详情"><a href="#任务详情" class="headerlink" title="任务详情"></a>任务详情</h3><p><img src="http://gw.alicdn.com/mt/TB1x8O1mDJYBeNjy1zeXXahzVXa-807-885.png"></p>
-<p>主要分为描述、成员、标签、耗时、评论等。</p>
-<h3 id="标签使用"><a href="#标签使用" class="headerlink" title="标签使用"></a>标签使用</h3><p><img src="http://gw.alicdn.com/mt/TB1BCoRmbGYBuNjy0FoXXciBFXa-299-283.png"></p>
-<p>按照需求优先级划分标签</p>
-<h2 id="项目约定"><a href="#项目约定" class="headerlink" title="项目约定"></a>项目约定</h2><ol>
-<li>账号统一使用中文花名</li>
-<li>邮箱使用公司邮箱</li>
-<li>所有项目均设置为私有</li>
-<li>每个组分为两个看板，分别为需求看板及任务看板</li>
-<li>标签按照需求优先级划分</li>
-</ol>
+<p>缺点：</p>
+<ul>
+<li>同步极不稳定，懂得都懂。貌似现在好一些了，近期没有使用过。</li>
+<li>排版实在有点迷，习惯了 Markdown 的简洁，我有点受不了，更不提对于程序员来说，没有代码高亮支持极其难受</li>
+</ul>
+<h5 id="有道云笔记"><a href="#有道云笔记" class="headerlink" title="有道云笔记"></a>有道云笔记</h5><p>待补充，这个软件已经好几年没用过了，最新情况已经不太清楚</p>
+<h5 id="Bear"><a href="#Bear" class="headerlink" title="Bear"></a>Bear</h5><p>在iOS跟Mac上发家的一款新兴笔记软件，最近也开启了双链功能支持，我简单使用过。现在已经改名叫做熊掌记了，国内化做的不错。</p>
+<p>优点：</p>
+<ul>
+<li>界面简洁易用</li>
+<li>支持文档互链</li>
+<li>对Markdown支持的较好，可以当做一个轻度任务管理软件使用，配合子弹笔记可以玩出花</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>只支持苹果系</li>
+<li>不支持买断，订阅制，这点其实不完全算是缺点，个人不是很喜欢吧</li>
+<li>记录个人灵感还是蛮舒服的，但是无法当做文章收集软件来使用</li>
+</ul>
+<h5 id="VNote"><a href="#VNote" class="headerlink" title="VNote"></a>VNote</h5><p>不想补充了</p>
+<h4 id="收集类"><a href="#收集类" class="headerlink" title="收集类"></a>收集类</h4><p>对于大多数场景，这类软件才是真正能够用于收藏的，笔记类软件能够当收藏使用说实话是被印象笔记一手带起来的风气。</p>
+<h5 id="Instapaper"><a href="#Instapaper" class="headerlink" title="Instapaper"></a>Instapaper</h5><p>国外老牌稍后读软件，与Pocket齐名，以排版优雅、界面简洁著称</p>
+<p>优点：</p>
+<ul>
+<li>阅读格式精心调校过，比较适合长时间阅读，但说实话手机上我不太想深度阅读</li>
+<li>阅读界面清爽，没有广告</li>
+<li>免费版就可以永久保存</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>不支持标签</li>
+<li>微信公众号的文章支持不友好，无法直接微信内收藏， 可以通过iOS捷径等手段使用，不过体感比印象笔记还是好多了。不过有个很要命的问题，微信公众号的文章，解析时候经常会提示未授权，PC 端无法查看图片，只能点击打开原文</li>
+</ul>
+<h5 id="Pocket"><a href="#Pocket" class="headerlink" title="Pocket"></a>Pocket</h5><p>同上，国外老牌稍后读软件，感觉相比Instapaper对国内的优化更好一点，但社交元素有点多，我只想安安静静的阅读个文章，不想有这么多干扰</p>
+<p>优点：</p>
+<ul>
+<li>国内优化相对好一点</li>
+<li>支持微信文章保存</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>免费版不支持永久保存</li>
+<li>干扰元素太多，很多用户比较排斥</li>
+</ul>
+<h5 id="Pinboard"><a href="#Pinboard" class="headerlink" title="Pinboard"></a>Pinboard</h5><p>国外的一款比较有名的网页收集类软件，收费理念比较特殊，随着使用人数增加，费用逐步提高，我知道的比较早，但购买的比较晚，当时购买的时候已经到了一年40刀，说实话我觉得有点太贵了。好在支持退款，用了几天之后毫不犹豫的退款了，不是很适合我。</p>
+<p>优点</p>
+<ul>
+<li>可以持久化保存网页快照</li>
+</ul>
+<p>缺点</p>
+<ul>
+<li>界面比较丑，阅读体验不是很好</li>
+<li>老外的软件，更新迭代很慢，英文不好可能有点吃力</li>
+<li>稍微有点贵， 40 刀一年</li>
+</ul>
+<h5 id="Pinbox"><a href="#Pinbox" class="headerlink" title="Pinbox"></a>Pinbox</h5><p>国产类似 Pinboard 的软件，做的很蛮不错，且针对国人习惯加了很多新功能，例如支持直接保存文字、图片等。价格也比较公道，但移动端体验实在有点糟糕。产品定位是一个纯网页保存类软件，基本类似于浏览器的收藏夹， 不过支持标签、检索等，对稍后读的支持力度其实一般，或者说没有，不支持阅读模式、标注等。</p>
+<p>优点：</p>
+<ul>
+<li>界面好看</li>
+<li>同步速度很快，比较稳定</li>
+<li>价格实惠，会员一年 69￥，免费版支持300个书签</li>
+<li>支持图片和文字收藏</li>
+<li>支持导出html，还算方便</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>移动端版本可用性太差</li>
+<li>排序功能较差</li>
+<li>不支持网页快照</li>
+<li>无法跟微信公众号打通，必须要复制链接，然后切换到 Pinbox 中新增</li>
+<li>不支持阅读模式跟标注，基本上无法作为深入阅读软件使用</li>
+</ul>
+<h5 id="Raindrop-io"><a href="#Raindrop-io" class="headerlink" title="Raindrop.io"></a>Raindrop.io</h5><p>国外一款书签收集软件，之前有段时间蛮喜欢的，界面比较清爽，后来因为网络因素改为使用收趣云了。</p>
+<p>优点</p>
+<ul>
+<li>免费版可以无限制创建文件夹和收藏</li>
+</ul>
+<p>缺点</p>
+<ul>
+<li>国内同步速度太慢，偶尔网络会抽风，经常想收藏一下文章，5秒钟过去了，还在转圈</li>
+</ul>
+<h5 id="Cubox"><a href="#Cubox" class="headerlink" title="Cubox"></a>Cubox</h5><p>国产软件，基于 Linnk 重构升级而来，可以说是目前用下来最符合快速收藏文章诉求的软件了。跟作者有过简短的几次邮件对话，交流下来比较省心，回复很快，也很能接受用户意见，促使我毫不犹豫的购买会员。 会员价格一年78￥，可以说很良心了。</p>
+<p>优点：</p>
+<ul>
+<li>免费版即可文章模式支持永久保存，支持200个收藏。</li>
+<li>网络同步速度贼快，国产软件必备技能</li>
+<li>支持的导入方式很多，国产软件必备技能</li>
+<li>导出很方便，对标Instapaper、Pocket，说明产品设计的比较合理，且有一定信心，比那些生怕用户跑了的产品好多了(对，说的就是你，收趣)。毕竟留住用户靠的不是想办法把转出门槛提高，而是产品质量</li>
+<li>可以直接在微信中分享到指定账号进行收藏，不需要切换软件或者打断公众号浏览</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>标注功能还比较弱，免费版支持3个标注，但导出很差</li>
+<li>不支持快速收集想法，只支持网页收藏</li>
+</ul>
+<h5 id="滴答清单"><a href="#滴答清单" class="headerlink" title="滴答清单"></a>滴答清单</h5><p>国产软件里面很优秀的GTD工具，甚至个人觉得没有之一。用来收集灵感十分方便，配合桌面小插件，基本可以做到手机上3s内记录想法。同时各平台支持都很到位， 价格定位也很良心，平时轻度使用完全可以不购买会员。</p>
+<ul>
+<li><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210522185811.png" alt="20210522185811"></li>
+</ul>
+<p>以下是会员专有功能</p>
+<ul>
+<li>支持摘要汇总，用来查看本周完成了哪些事项，写周报时候很方便</li>
+<li>支持日历视图，可以在日历中安排每天的工作，查看本周哪些天会比较忙等</li>
+<li>支持智能清单，需要会员，可以自定义一些例如重要且紧急、重要不紧急等清单，定期处理</li>
+</ul>
+<p>优点：</p>
+<ul>
+<li>支持自然语言识别，可以快速输入例如明天上午8点做某事的事项</li>
+<li>列表和事项没有限制，免费版完全足够日常使用</li>
+<li>内置习惯养成，虽然功能比较弱，聊胜于无，适合轻度用户</li>
+<li>支持番茄钟，配合番茄工作法还是蛮有用的</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>如果用来当做稍后读软件的链接收藏，稍微有点不太合适，链接不会去重，但这个说实话不是它的问题，毕竟软件定位也不是这个</li>
+<li>苹果用户需要注意下，这里有个坑就是苹果本身交易抽成30%，也就是说你在Mac和iOS上面购买会比原价贵30%，官网直接购买会员只有 139￥可以说非常良心了；直接在iOS上面购买你会发现是 168￥，而且还是到期自动订阅！！！，我之前就没注意被坑了两年。</li>
+<li>没了，在我心里已经是一款十分完美的GTD软件了。</li>
+</ul>
+<h5 id="简悦"><a href="#简悦" class="headerlink" title="简悦"></a>简悦</h5><p>起先是靠做网页上面的阅读模式起家，支持油猴插件，作者对于深度阅读有比较深入的思考，有过对话，对我挺有启发的。最近2.0版本之后，迭代速度飞速提高，更是紧跟潮流，在双链笔记结合上花了大量心思，包括各种标注导出、文章导出、稍后读上都较之前版本有很大提升，重点是，大版本买断只需要18￥，真的非常划算了，建议大家入手一个。</p>
+<p>优点：</p>
+<ul>
+<li>阅读模式很棒，支持超多网站，最重要的是可以自己进行圈选和隐藏</li>
+<li>标注功能非常强大，可以说是我目前用过的最强大的了，没有之一，包括高亮、备注、打标签等，而且支持各种导出</li>
+<li>用户隐私方面做得很好，通过各种同步盘本地文件等形式保存信息，简悦自身并不保存相关信息</li>
+<li>平台支持和导出功能可以说是非常强了，支持超多网盘导出、超多格式导出(md、pdf、epub等等)</li>
+<li>新版本的稍后读功能很强大，这跟作者的理念是分不开的，基本上不会变成一个仓库，而是各种鼓励你进行阅读。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>功能实在有点太庞杂臃肿，我身为一个程序员，而且是很喜欢研究各种软件的，说实话尝试新软件能力还算比较强了，但是实际使用下来，各种冗长的配置(真的不止几十项)，配合上部分含糊不清的文档，真的有点难以上手，我前后大概花了至少一个下午左右的时间，才算勉强会使用了，使用门槛可以说非常高了(基本的阅读模式不包含在内，上手还是比较方便的)，后面有机会单独写一篇我自己的简悦的使用心得。</li>
+<li>对用户动手能力要求很高，里面会员支持的各种功能，基本上没有编程基础或者很强动手能力基本可以说是没啥卵用。比如说各种token申请、API使用、自定义模板等等。</li>
+<li>移动端支持很差，iOS上很难用， 可能也跟iOS本身的封闭有关系，需要使用很多trick手段。跟作者沟通下来之后表示并不是想要做一个快速收藏然后当做仓库的软件，就是想要提高使用门槛，鼓励用户真正的自己进行深度阅读。这个我可以理解，但说实话，这样逼迫我不得不再配合一个其他收藏软件一起使用了，单独使用简悦，全平台打通能力真的不行。</li>
+</ul>
+<h5 id="收趣云"><a href="#收趣云" class="headerlink" title="收趣云"></a><del>收趣云</del></h5><p>国产稍后读软件，大概16年左右还是火了一阵子的，毕竟国内软件大多针对国人使用习惯做过优化，再加上网络同步速度远快于国外软件。但缺点也很明显，一般Lock-in都比较高，想办法让你从其他各种软件导入进来，导入方式支持的很到位；但想要导出？没门，各种加门槛，要么要求付费，要么干脆不支持。后来由于找不到太好的赢利点，且会员收费策略做的不好，现在已经很少有人用了。</p>
+<p>优点：</p>
+<ul>
+<li>国内网站，速度较快</li>
+<li>对国内微信公众号等支持较好 ，可以跟微信打通，直接在微信发送到指定账号即可收藏，很方便</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>广告太多，还添加了大量社交元素</li>
+<li>不支持自由导出，需要会员付费</li>
+<li>已经很久没维护了</li>
+</ul>
+<h5 id="Linnk"><a href="#Linnk" class="headerlink" title="Linnk"></a><del>Linnk</del></h5><p>已经升级成为Cubox，不再赘述。</p>
+<h2 id="个人实践"><a href="#个人实践" class="headerlink" title="个人实践"></a>个人实践</h2><p>经过以上各个软件的简要分析，相信大家也看出来我的一些偏向了。目前个人的PKM流程大概如下，算是个人PKM2.0版本(<a href="http://blog.samwei12.cn/2020/05/02/Thinking/%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAPKM%E7%B3%BB%E7%BB%9F/">PKM1.0版本</a>，有关2.0版本输出部分后面有机会再介绍一下)：</p>
+<ul>
+<li><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210522210816.jpg" alt="20210522210816"></li>
+</ul>
+<h3 id="输入"><a href="#输入" class="headerlink" title="输入"></a>输入</h3><p>如果是外部输入，例如通过微信公众号、知乎等发现的一些有价值的文章，快速通过 Cubox 保存，不要在手机上花费太多时间。</p>
+<p>如果是日常的一些灵感和任务相关，随手记在滴答清单的收集箱中。</p>
+<h3 id="组织整理"><a href="#组织整理" class="headerlink" title="组织整理"></a>组织整理</h3><p>单纯的收集是没有意义的，不能满足于当一只仓鼠，在整个知识内化过程中，有一个很重要的步骤就是组织整理，这个跟GTD的理念也是相同的。我会设定一个闹钟，例如每天晚上或者每周末抽出一定的时间来清空收集箱。</p>
+<p>对于Cubox中收藏的文章，花费1-2分钟快速明确是否跟当下的关注点和Areas重叠(这里涉及到PARA工作法，有机会再单独整理一篇），如果是需要近期关注的，那么进入简悦稍后读或者直接开始进行阅读，完成阅读后，把笔记备注和标注导出为素材笔记(卡片盒笔记中的概念，也可以理解为PARA工作法中的Resources)，存入Logseq中</p>
+<p>对于滴答清单中的待办项，根据四象限法则进行排序整理，如果不是当前需要立马完成的事情，纳入到将来清单中， 定期回顾即可(这里可以参考小强升职记中的概念)。</p>
+<p>在这个环节中，双向链接笔记是一个很重要的工具，我对它的定位是一个信息输入输出的枢纽。所有的灵感、外部输入都在简单筛选之后进入到素材笔记中进行打标签、分类、链接，同时需要输出某个特定主题的时候，可以通过双向链接快速查找到相关的笔记内容，整理归纳到博客或者其他外部输出中。</p>
+<p>最近这一两年，双向链接笔记已经火的不行了，但目前真正国内稳定可用的软件屈指可数，目前我个人在使用的是Logseq这款，关于双向链接笔记的使用选择方面，完全可以单独再整理一篇了，先挖坑，后面一定补上 :)</p>
+<h3 id="输出"><a href="#输出" class="headerlink" title="输出"></a>输出</h3><p>将信息快速内化为知识的一个有效手段就是传授给他人，这其中输出博客是一个很好的方案。现在搭建维护个人博客的成本极低，同时又有很多类似于飞书、语雀这样的平台用来进行输出，唯一限制你的可能就只有你的懒惰了(说的就是我自己)。</p>
+<p>我目前采用的方案是Hexo，这方面可以参考 <a href="http://blog.samwei12.cn/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/?highlight=%E5%8D%9A%E5%AE%A2">如何使用 Hexo 搭建个人博客</a> ，这里不再赘述，值得一提的一款软件是MWeb，这是一款博客写作发布软件，目前支持很多平台，包括语雀、少数派、Wordpress 等等，值得一提的是，它还支持使用 Metablog API，这样就可以同时在多个博客平台进行发布。</p>
+<p>关于我个人的PKM实践，大体方案就介绍到这里，希望对大家有所帮助，关于PKM的更多信息可以参考我的<a href="http://blog.samwei12.cn/2020/05/02/Thinking/%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAPKM%E7%B3%BB%E7%BB%9F/">旧文</a>，虽然很多工具软件已经过时或者需要更新了，但整体的思路是没有大变的。这里的一个很重要的原则就是不要太过热衷于折腾工具，都是小术而已，只有真正了解了道，才能做到各种工具都能随心所欲的驾驭，最终的目的是为了学习知识，而不是学习工具。</p>
 ]]></content>
       <categories>
-        <category>Utilities</category>
+        <category>Thinking</category>
       </categories>
       <tags>
-        <tag>Wekan</tag>
-        <tag>看板</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>跨平台书签同步:Xmarks</title>
-    <url>/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/">原文链接</a></p>
-</blockquote>
-<h2 id="Xmarks简介"><a href="#Xmarks简介" class="headerlink" title="Xmarks简介"></a>Xmarks简介</h2><p><a href="https://www.xmarks.com/">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
-<p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>
-<span id="more"></span>
-
-<h2 id="多浏览器支持"><a href="#多浏览器支持" class="headerlink" title="多浏览器支持"></a>多浏览器支持</h2><p> Xmarks 目前支持 Firefox、Chrome、IE、Safari 这几种常见浏览器，完全可以满足大部分用户需求。</p>
-<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_001.png"></p>
-<p>仅需要在官网上下载相对应的浏览器插件，登录 Xmarks 账号即可开始使用，十分便捷。</p>
-<h2 id="支持恢复已删除书签"><a href="#支持恢复已删除书签" class="headerlink" title="支持恢复已删除书签"></a>支持恢复已删除书签</h2><p> Xmarks 会对用户每次的同步操作进行备份，同时可以很方便的进行查看和导出还原等操作。这个功能在多台设备间同步出错的时候十分实用</p>
-<p> <img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_002.png"></p>
-<p>同时还允许查找重复书签，十分人性化的功能，有时候经常一个页面添加到不同的书签文件夹里面，时间长了自己都忘记了，很适合我这种强迫症患者。</p>
-<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><p>Xmarks 有一个最大的缺点是与浏览器自带同步机制产生冲突，例如，Chrome 自带书签同步，同时 Xmarks 默认安装后是会隔一段时间或者每当书签发生变动时候进行自动同步，这时候问题就来了，即使没有任何书签变动，由于 Chrome 自己的同步机制，Xmarks 经常会产生另一份重复的书签，这时Xmarks 又会自动同步到服务器端，一不小心发现每个浏览器下面的书签文件夹都是好几份，只能使用直接下载覆盖，发现还是无法解决，最后使用杀手锏，恢复到之前正常的一个书签备份。</p>
-<p>被这个问题折磨了几次之后终于发现原来问题是出在浏览器自带的同步书签功能上面，最后我的解决办法是在 Chrome 的同步设置里面去除书签同步，反正每次重装 Chrome 时候，会自动同步 Xmarks 插件，这时进行下载覆盖本地书签即可。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说，对于多浏览器（尤其是包括 Safari 浏览器）的用户来说，Xmarks 是一个十分好用的同步工具。</p>
-<p>享受它的便捷性的同时，它带来的问题就是，无法使用浏览器自带的同步功能了，对于 Chrome 和 Firefox 来说，这个问题还不是很明显，但是对于 Mac 和 iPhone 用户来说，这相当于抛弃了 iCloud 自带的书签同步功能，手机上的书签就需要自己手动同步了。可以根据自己的需求来取舍。</p>
-]]></content>
-      <categories>
-        <category>Utilities</category>
-      </categories>
-      <tags>
-        <tag>Xmarks</tag>
+        <tag>PKM</tag>
+        <tag>稍后读</tag>
+        <tag>测评</tag>
+        <tag>思考成长</tag>
       </tags>
   </entry>
   <entry>
@@ -1026,6 +1089,172 @@
       </tags>
   </entry>
   <entry>
+    <title>使用 Wekan 搭建个人看板</title>
+    <url>/2020/05/03/Utilities/Wekan/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2020/05/03/Utilities/Wekan/">原文链接</a></p>
+</blockquote>
+<h2 id="看板？"><a href="#看板？" class="headerlink" title="看板？"></a>看板？</h2><p>术语：</p>
+<ul>
+<li>看板：TODO</li>
+<li>列表：同类型的事务放在一起，按照任务进度，通常为：未完成、进行中、已完成</li>
+<li>卡片：最小单位，即任务，</li>
+<li>泳道：不同类型的任务横向对比，例如，团队中不同分组等</li>
+</ul>
+<span id="more"></span>
+
+
+<h2 id="为什么要用看板？"><a href="#为什么要用看板？" class="headerlink" title="为什么要用看板？"></a>为什么要用看板？</h2><p>TODO</p>
+<h2 id="关于-wekan"><a href="#关于-wekan" class="headerlink" title="关于 wekan"></a>关于 wekan</h2><p><a href="https://github.com/wekan/wekan">wekan</a> 是一款开源的看板系统，从功能上来讲模仿看板类软件鼻祖 <a href="https://trello.com/">Trello</a>。整体界面大致如下：</p>
+<p><img src="http://www.scienjus.com/uploads/2016/03/wekan.jpeg"></p>
+<p>采用 wekan 的原因也比较简单， 为了安全性考虑，公司内部文档禁止使用部署在外部服务器上的工具。</p>
+<h2 id="如何搭建-wekan？"><a href="#如何搭建-wekan？" class="headerlink" title="如何搭建 wekan？"></a>如何搭建 wekan？</h2><blockquote>
+<p> 官方教程：<a href="https://github.com/wekan/wekan/wiki/Install-Wekan-Docker-in-production">https://github.com/wekan/wekan/wiki/Install-Wekan-Docker-in-production</a></p>
+</blockquote>
+<ol>
+<li>安装 Docker</li>
+<li>下载 <a href="https://github.com/wekan/wekan-mongodb">https://github.com/wekan/wekan-mongodb</a></li>
+<li>进入 mongodb 文件夹</li>
+<li>修改 yaml 中的 url 信息</li>
+<li>执行 <code>docker-compose up -d</code> 或者 <code>docker-compose up</code></li>
+</ol>
+<h2 id="wekan-简易说明"><a href="#wekan-简易说明" class="headerlink" title="wekan 简易说明"></a>wekan 简易说明</h2><h3 id="初步接触"><a href="#初步接触" class="headerlink" title="初步接触"></a>初步接触</h3><p>目前是在 Mac 服务器上搭建了 wekan，暂时没有域名，大家先使用 IP 地址登录， <a href="http://30.3.131.128/">http://30.3.131.128</a>，之后就是注册账号： –统一约定使用中文花名，邮箱使用公司邮箱–，</p>
+<p><img src="http://gw.alicdn.com/mt/TB1Qu_nd8mWBuNkSndVXXcsApXa-1566-950.png"></p>
+<p>之后进入看板首页，这里可以管理个人名下所有项目，新增看板也在这里，下面以工程组为例，简单介绍下如何使用看板。</p>
+<p>首先，创建一个看板，<img src="http://gw.alicdn.com/mt/TB1UY6MmgmTBuNjy1XbXXaMrVXa-303-210.png"></p>
+<p>接下来可以看到看板的整体页面，</p>
+<p><img src="http://gw.alicdn.com/mt/TB1ThO.d3KTBuNkSne1XXaJoXXa-1917-956.png"></p>
+<ul>
+<li>左上角为工程属性，例如是否私有，是否提示通知</li>
+<li>左侧整体面板为看板主体内容</li>
+<li>右侧为属性栏，包括系统日志、项目成员、标签设置等</li>
+<li>右上角为工具栏，包括搜索、过滤、列表/泳道切换、多选、看板菜单等</li>
+</ul>
+<h3 id="需求看板"><a href="#需求看板" class="headerlink" title="需求看板"></a>需求看板</h3><p>接下来需要做的事情就是建立列表和泳道，这里我们约定，需求跟任务划分为两个看板，例如，所有工程618的需求放到一个看板中，包括待定需求、进行中的需求、已完成需求，不需要写明需求详细工期，仅列出本期都有哪些需求即可；所有的需求细分出来的任务单独放一个看板中，需要细化到每人每天的工作。需求看板示例：</p>
+<p><img src="http://gw.alicdn.com/mt/TB18GyQmDJYBeNjy1zeXXahzVXa-1919-943.png"></p>
+<p>这里我们约定划分这么几个列表：</p>
+<ul>
+<li>待梳理需求：需要进一步评估是否需要做或者如何做</li>
+<li>长期规划：一般是3个月以上，可以视项目情况而定，移除该列表也可以</li>
+<li>中期规划：一般是1-3个月</li>
+<li>本月：当前月需要完成的需求</li>
+<li>已交付：该版本已完成需求</li>
+<li>后续可以看情况自定义部分列表，例如已延期</li>
+<li>不同泳道即不同模块，整体大图的话就可以按照算法、2D、3D 这样划分，小组内部可以根据功能划分，例如 CPU、GPU 等</li>
+</ul>
+<p>右侧面板中需要添加其他成员，这样其他人才能访问</p>
+<h3 id="任务看板"><a href="#任务看板" class="headerlink" title="任务看板"></a>任务看板</h3><p>之后我们就需要根据刚才整理出来的需求进一步分配工时，列表可以参考下图：</p>
+<p><img src="http://gw.alicdn.com/mt/TB1_ZzUd4uTBuNkHFNRXXc9qpXa-1633-949.png"></p>
+<ul>
+<li>需求列表：即本月需要完成的需求描述</li>
+<li>Task-todo：待完成任务</li>
+<li>Task-doing：进行中的任务</li>
+<li>Task-done：已完成任务</li>
+<li>需求-testing：测试中的需求</li>
+<li>需求-bug：测试中发现的 bug 列表</li>
+<li>需求-done：需求完成</li>
+</ul>
+<h3 id="任务详情"><a href="#任务详情" class="headerlink" title="任务详情"></a>任务详情</h3><p><img src="http://gw.alicdn.com/mt/TB1x8O1mDJYBeNjy1zeXXahzVXa-807-885.png"></p>
+<p>主要分为描述、成员、标签、耗时、评论等。</p>
+<h3 id="标签使用"><a href="#标签使用" class="headerlink" title="标签使用"></a>标签使用</h3><p><img src="http://gw.alicdn.com/mt/TB1BCoRmbGYBuNjy0FoXXciBFXa-299-283.png"></p>
+<p>按照需求优先级划分标签</p>
+<h2 id="项目约定"><a href="#项目约定" class="headerlink" title="项目约定"></a>项目约定</h2><ol>
+<li>账号统一使用中文花名</li>
+<li>邮箱使用公司邮箱</li>
+<li>所有项目均设置为私有</li>
+<li>每个组分为两个看板，分别为需求看板及任务看板</li>
+<li>标签按照需求优先级划分</li>
+</ol>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>Wekan</tag>
+        <tag>看板</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用Logseq构建GTD系统</title>
+    <url>/2021/05/08/Utilities/%E4%BD%BF%E7%94%A8Logseq%E6%9E%84%E5%BB%BAGTD%E7%B3%BB%E7%BB%9F/</url>
+    <content><![CDATA[<blockquote>
+<p>2021-05-08： 1.0版本初步完成，待完善已完成任务回顾<br>2021-05-10： 1.1版本完成，修改不重要不紧急为将来清单，且新增每周回顾</p>
+</blockquote>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在阅读《小强升职记》，感觉里面讲到的时间管理工具和方法十分有用，自己之前虽然也了解一些工具，例如四象限原则、两分钟方法等，但看完这本书之后感觉之前的理解还是太肤浅了。是时候升级一下自己的时间管理系统了。</p>
+<span id="more"></span>
+
+<p>在此之前我的工具大致包括： 稍后读软件、GTD工具（滴答清单）、写作工具（一般是VSCode+Hexo）。最近半年沉迷于使用双链笔记软件，目前在用的是 Logseq，后面专门展开介绍一下。目前在尝试将GTD工具、笔记都整合到 Logseq 里面，主要是受了这篇文章的启发 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>，下面就详细介绍一下我的实践过程。</p>
+<h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><h3 id="Datalog"><a href="#Datalog" class="headerlink" title="Datalog"></a>Datalog</h3><p>首先，需要简单学习一下Datalog语法。Logseq是基于Clojure开发的，它的底层可以简单地理解为是类似于数据库的结构，因此可以天然的支持各种查询，这也是我们能够利用它来实现 GTD 管理的前提。因此这里如果需要掌握如何使用 Logseq 来进行查询的话，最好先学习一下如何使用 Datalog。可以参考 <a href="https://logseq.github.io/#/page/advanced%20queries">官方的查询教程</a> 以及这篇 <a href="http://www.learndatalogtoday.org/">Learn Datalog Today</a>，粗略扫一遍，能够看懂大概意思就可以了。</p>
+<h3 id="CSS"><a href="#CSS" class="headerlink" title="CSS"></a>CSS</h3><p>其次，Logseq本身是列表大纲形式，无法直接支持四象限这种样式，因此需要一些 CSS功底，这里我是直接参考了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a> 里面的样式，原始版本在 <a href="https://discuss.logseq.com/t/css-template-eisenhower-matrix/526">[css+template] eisenhower matrix</a>，可以简单看下。</p>
+<h2 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h2><h3 id="块属性"><a href="#块属性" class="headerlink" title="块属性"></a>块属性</h3><p>《小强升职记》里面提到日常待办事项是分为项目、任务、行动三种的，只有行动才是可以立马去执行的，项目和任务都需要进行分解，拆成行动。</p>
+<p>结合Logseq，我目前考虑使用属性来解决，也可以考虑使用标签，不过我认为会对内容有一定的污染，各有利弊吧。</p>
+<p>针对一个新的行动或者任务，添加属性type字段，然后根据具体的类型添加行动、任务、项目字段。</p>
+<p>样例：<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508175442.png" alt="20210508175442"></p>
+<h3 id="四象限查询条件"><a href="#四象限查询条件" class="headerlink" title="四象限查询条件"></a>四象限查询条件</h3><p>注意：<strong>所有的待办都必须要有明确的优先级和截止日期</strong>，这么做有几个原因：<br>    1. 要求自己对每个待办都设置明确的时间点，避免添加到收集箱中一直不处理<br>    2. 添加了优先级之后才好进行四象限统计<br>    3. 目前还没有找到Logseq的query条件中如何同时查找DDL在限定时间内以及无DDL限制的任务，只能查找其中一种case，这个后续解决</p>
+<p>实际使用过程中，可以把一下的查询条件汇总到一个模板中，</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">## #.v-eisenhower-matrix （用于CSS选择器，最好不要改）</span><br><span class="line">:PROPERTIES:</span><br><span class="line">:template: 四象限</span><br><span class="line">:END:</span><br><span class="line">#### [[重要且紧急]]</span><br><span class="line">##### </span><br><span class="line">#+BEGIN_QUERY</span><br><span class="line">...</span><br><span class="line">#+END_QUERY</span><br><span class="line">#### [[重要不紧急]]</span><br><span class="line">#### [[紧急不重要]]</span><br><span class="line">#### [[不重要不紧急]]</span><br></pre></td></tr></table></figure>
+
+<p>具体查询语句如下：可以根据自己的实际使用需求将属性限制移除或者修改时间限制，代码中均已经添加注释。</p>
+<blockquote>
+<p>2021-05-10 补充： 将设置为Later的事项移动到第四象限，这样就可以定期回顾；同时新增一个每周回顾的query语句，由于目前Logseq还不支持查询当前时间戳，因此用了个笨办法，每次查询的时候手动输入当前时间戳ms进行查询。</p>
+</blockquote>
+<h4 id="重要且紧急-避免太多进入该象限"><a href="#重要且紧急-避免太多进入该象限" class="headerlink" title="[[重要且紧急]] ^^(避免太多进入该象限)^^"></a>[[重要且紧急]] ^^(避免太多进入该象限)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;:query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+<h4 id="重要不紧急-优先完成此象限"><a href="#重要不紧急-优先完成此象限" class="headerlink" title="[[重要不紧急]] ^^(优先完成此象限)^^"></a>[[重要不紧急]] ^^(优先完成此象限)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&gt; ?d ?end)]  ;; DDL在5天以上</span><br><span class="line">    ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+<h4 id="紧急不重要-尽量委派给其他人"><a href="#紧急不重要-尽量委派给其他人" class="headerlink" title="[[紧急不重要]] ^^(尽量委派给其他人)^^"></a>[[紧急不重要]] ^^(尽量委派给其他人)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [?b :block/priority ?priority]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            [(!= &quot;A&quot; ?priority)] ;; 优先级在A的才认为是重要</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+<h4 id="待办清单-不紧急不重要，定期回顾确认"><a href="#待办清单-不紧急不重要，定期回顾确认" class="headerlink" title="[[待办清单]] ^^(不紧急不重要，定期回顾确认)^^"></a>[[待办清单]] ^^(不紧急不重要，定期回顾确认)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [(contains? #&#123;&quot;LATER&quot;&#125; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+
+<h4 id="本周已完成-近七天统计"><a href="#本周已完成-近七天统计" class="headerlink" title="[[本周已完成]] ^^(近七天统计)^^"></a>[[本周已完成]] ^^(近七天统计)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;   :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;done&quot;) ?finishedTime]</span><br><span class="line">            [(- 1620657776000 604800000) ?weekbefore] ;; 由于目前Logseq不支持直接获取当前时间戳，只能使用trick的方式，每次查询前手动输入当前时间戳ms值,算出一周前的时间戳</span><br><span class="line">            [(&gt;= ?finishedTime ?weekbefore)] ;; 一周内完成的工作</span><br><span class="line">            [(= &quot;DONE&quot; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+
+<h3 id="CSS优化"><a href="#CSS优化" class="headerlink" title="CSS优化"></a>CSS优化</h3><p>这里直接照抄了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>， 不过它的CSS中内容较多，我单独提取了四象限相关的部分，放在 <a href="https://github.com/samwei12/LogseqMisc/blob/master/%E5%9B%9B%E8%B1%A1%E9%99%90.css">四象限CSS</a> 中，查询模板也都放在这里，便于大家使用。</p>
+<h3 id="最终效果"><a href="#最终效果" class="headerlink" title="最终效果"></a>最终效果</h3><p>目前我的每日笔记大概长这样：</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508181043.png" alt="20210508181043"></p>
+<blockquote>
+<p>1.1 版本已经解决</p>
+</blockquote>
+<p><del>可以算是1.0 版本，目前存在的问题包括：</del></p>
+<ol>
+<li><del>没有地方定期回顾那些没有设置DDL和优先级的任务</del></li>
+<li><del>缺少查看已完成任务和行动的地方（做周报时候很有用）</del></li>
+</ol>
+<p>Logseq是个很棒的工具，期待尽快稳定下来，后面长期使用，作为笔记+GTD一站式平台~</p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>Logseq</tag>
+        <tag>GTD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>跨平台书签同步:Xmarks</title>
+    <url>/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/">原文链接</a></p>
+</blockquote>
+<h2 id="Xmarks简介"><a href="#Xmarks简介" class="headerlink" title="Xmarks简介"></a>Xmarks简介</h2><p><a href="https://www.xmarks.com/">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
+<p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>
+<span id="more"></span>
+
+<h2 id="多浏览器支持"><a href="#多浏览器支持" class="headerlink" title="多浏览器支持"></a>多浏览器支持</h2><p> Xmarks 目前支持 Firefox、Chrome、IE、Safari 这几种常见浏览器，完全可以满足大部分用户需求。</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_001.png"></p>
+<p>仅需要在官网上下载相对应的浏览器插件，登录 Xmarks 账号即可开始使用，十分便捷。</p>
+<h2 id="支持恢复已删除书签"><a href="#支持恢复已删除书签" class="headerlink" title="支持恢复已删除书签"></a>支持恢复已删除书签</h2><p> Xmarks 会对用户每次的同步操作进行备份，同时可以很方便的进行查看和导出还原等操作。这个功能在多台设备间同步出错的时候十分实用</p>
+<p> <img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_002.png"></p>
+<p>同时还允许查找重复书签，十分人性化的功能，有时候经常一个页面添加到不同的书签文件夹里面，时间长了自己都忘记了，很适合我这种强迫症患者。</p>
+<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><p>Xmarks 有一个最大的缺点是与浏览器自带同步机制产生冲突，例如，Chrome 自带书签同步，同时 Xmarks 默认安装后是会隔一段时间或者每当书签发生变动时候进行自动同步，这时候问题就来了，即使没有任何书签变动，由于 Chrome 自己的同步机制，Xmarks 经常会产生另一份重复的书签，这时Xmarks 又会自动同步到服务器端，一不小心发现每个浏览器下面的书签文件夹都是好几份，只能使用直接下载覆盖，发现还是无法解决，最后使用杀手锏，恢复到之前正常的一个书签备份。</p>
+<p>被这个问题折磨了几次之后终于发现原来问题是出在浏览器自带的同步书签功能上面，最后我的解决办法是在 Chrome 的同步设置里面去除书签同步，反正每次重装 Chrome 时候，会自动同步 Xmarks 插件，这时进行下载覆盖本地书签即可。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说，对于多浏览器（尤其是包括 Safari 浏览器）的用户来说，Xmarks 是一个十分好用的同步工具。</p>
+<p>享受它的便捷性的同时，它带来的问题就是，无法使用浏览器自带的同步功能了，对于 Chrome 和 Firefox 来说，这个问题还不是很明显，但是对于 Mac 和 iPhone 用户来说，这相当于抛弃了 iCloud 自带的书签同步功能，手机上的书签就需要自己手动同步了。可以根据自己的需求来取舍。</p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>Xmarks</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何创建一个 Cocoapods 插件</title>
     <url>/2019/04/22/Ruby/Gem/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6/</url>
     <content><![CDATA[<blockquote>
@@ -1054,49 +1283,6 @@
       </categories>
       <tags>
         <tag>Cocoapods</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何恢复 iCloud 已删除文件</title>
-    <url>/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/">原文链接</a></p>
-</blockquote>
-<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><ul>
-<li>今天在查找之前的 C++ 笔记时,突然发现之前的资料全没了,整个 Cpp 文件夹内就只剩下了三个文件,怎么形容当时的心情呢,应该说是一下就跌倒了谷底,感觉之前的心血全白费了,有种深深的挫败感.</li>
-</ul>
-<span id="more"></span>
-
-<h2 id="思考路径"><a href="#思考路径" class="headerlink" title="思考路径"></a>思考路径</h2><ul>
-<li>这时候,我第一反应是想到了前几天我进行过一次文件夹整理,中间有个操作就是把另一个同名 Cpp 文件夹拷贝到了原本的 Cpp 文件夹中,这里有一个深坑,是把我原本的文件夹整个替换掉了!!!具体原因我等下再讲.</li>
-<li>突然有点六神无主,这时候想到的第一个解决方案是使用 Mac 数据恢复软件,网上迅速搜了一把,找到了 Disk Drill,嗯,无奈发现这个是收费软件,而且并没有能找到我想恢复的内容,因为我是误删了整个文件夹,且已经删除大概一周左右,我其实并想不起来里面具体都有几个文件,每个文件名叫什么,可能这个软件更适合于单个文件恢复吧,而且查找速度略慢,等了大概5-8分钟,结果告诉我没找到相关资料.(后面发现这货出现在我的 Setapp 里面,然而我暂时没有想用它的欲望了.)</li>
-<li>就在这时,我想起来苹果貌似有个文件恢复, 找到 <a href="https://www.icloud.com/#iclouddrive">https://www.icloud.com/#iclouddrive</a> 点击右下角最近删除,这时突然发现,嗯,里面是空的,告诉我最近没有任何文件删除! 此时我的内心有点小绝望,猜测应该是删除文件时间过久,苹果已经放弃他了,</li>
-<li>如果结果是这样,那么也就不会有这篇文章了,再次不甘尝试,换个关键词搜索,嗯,貌似有戏</li>
-<li><img src="https://i.loli.net/2019/04/21/5cbc8868cfb12.png" alt="CleanShot 2019-04-21 at 23.10.58@2x.png"></li>
-</ul>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><ul>
-<li>再次打开 iCloud, 这次进入的是 <a href="https://www.icloud.com/#settings">https://www.icloud.com/#settings</a> 这个页面,此时,果然发现左下角有个高级-&gt;恢复文件,半信半疑的点开</li>
-<li><img src="https://i.loli.net/2019/04/21/5cbc886607019.png" alt="CleanShot 2019-04-21 at 23.11.29@2x.png"></li>
-<li>耐心等待了大约10分钟左右,这次真的有文件列表出来了!!!天知道我此刻心里有多么的激动,这种失而复得的感觉是很棒的.</li>
-</ul>
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><ul>
-<li>这里补充下,为什么当时粘贴时候没注意点了一下 OK,就差点(其实已经酿成了,不过勉强救回来了)酿成悲剧呢?</li>
-<li>原因在于拷贝跟剪切是完全不一样的,当你拷贝一个文件夹,然后粘贴时遇到同名文件夹,会提示:</li>
-<li><img src="https://i.loli.net/2019/04/21/5cbc8a9ac9e8d.png" alt="CleanShot 2019-04-21 at 23.21.32@2x.png"></li>
-<li>看到吧,这里会很明显告诉你要不要进行合并还是选择替换,但是当你使用了剪切之后,会提示什么呢?</li>
-<li><img src="https://i.loli.net/2019/04/21/5cbc8a9ac5216.png" alt="CleanShot 2019-04-21 at 23.21.47@2x.png"></li>
-<li>坑就在这里了, <strong>剪切时候,并不会提示合并,而是直接替换!!!</strong>,我就是在这里没有注意,手一抖,点了一个替换,然后就悲剧了.</li>
-</ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li>所以,iCloud Drive 中的恢复文件,貌似时间是更短一点的,具体多久还没测试,但是看起来我超过3天的文件已经无法看到了,只有当天删除的可以显示,这时候千万不要气馁,找到 iCloud Setting 里面的高级-&gt;恢复文件, 这个时间限制就久很多了,可以恢复不超过<strong>30天</strong>的文件,一般情况下都足够使用了,这里稍微吐槽下,苹果云盘的这个恢复功能远不如国内坚果云做的好,考虑到每个月只要6块钱,我忍了.</li>
-<li>另外,<strong>剪切功能使用的时候一定要小心,注意是没有合并提示的!!!</strong></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Mac</category>
-      </categories>
-      <tags>
-        <tag>iCloud</tag>
       </tags>
   </entry>
   <entry>
@@ -1143,21 +1329,46 @@
       </tags>
   </entry>
   <entry>
-    <title>如何在 MWeb 中配置 Hexo 等静态网站</title>
-    <url>/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/</url>
+    <title>如何恢复 iCloud 已删除文件</title>
+    <url>/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/</url>
     <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/">原文链接</a></p>
+<p><a href="http://blog.samwei12.cn/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/">原文链接</a></p>
 </blockquote>
-<blockquote>
-<p>参考链接：<br><a href="https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html">https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html</a><br><a href="https://zhuanlan.zhihu.com/p/30513914">https://zhuanlan.zhihu.com/p/30513914</a></p>
-</blockquote>
-<p>网上搜索到相关资料，如上面的链接，发现最新版本 MWeb （3.1.2）步骤有所出入，添加外部文件夹时候并没有弹出设置页面，需要自己手动在左侧文件夹上右击，点击编辑，</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><ul>
+<li>今天在查找之前的 C++ 笔记时,突然发现之前的资料全没了,整个 Cpp 文件夹内就只剩下了三个文件,怎么形容当时的心情呢,应该说是一下就跌倒了谷底,感觉之前的心血全白费了,有种深深的挫败感.</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="思考路径"><a href="#思考路径" class="headerlink" title="思考路径"></a>思考路径</h2><ul>
+<li>这时候,我第一反应是想到了前几天我进行过一次文件夹整理,中间有个操作就是把另一个同名 Cpp 文件夹拷贝到了原本的 Cpp 文件夹中,这里有一个深坑,是把我原本的文件夹整个替换掉了!!!具体原因我等下再讲.</li>
+<li>突然有点六神无主,这时候想到的第一个解决方案是使用 Mac 数据恢复软件,网上迅速搜了一把,找到了 Disk Drill,嗯,无奈发现这个是收费软件,而且并没有能找到我想恢复的内容,因为我是误删了整个文件夹,且已经删除大概一周左右,我其实并想不起来里面具体都有几个文件,每个文件名叫什么,可能这个软件更适合于单个文件恢复吧,而且查找速度略慢,等了大概5-8分钟,结果告诉我没找到相关资料.(后面发现这货出现在我的 Setapp 里面,然而我暂时没有想用它的欲望了.)</li>
+<li>就在这时,我想起来苹果貌似有个文件恢复, 找到 <a href="https://www.icloud.com/#iclouddrive">https://www.icloud.com/#iclouddrive</a> 点击右下角最近删除,这时突然发现,嗯,里面是空的,告诉我最近没有任何文件删除! 此时我的内心有点小绝望,猜测应该是删除文件时间过久,苹果已经放弃他了,</li>
+<li>如果结果是这样,那么也就不会有这篇文章了,再次不甘尝试,换个关键词搜索,嗯,貌似有戏</li>
+<li><img src="https://i.loli.net/2019/04/21/5cbc8868cfb12.png" alt="CleanShot 2019-04-21 at 23.10.58@2x.png"></li>
+</ul>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><ul>
+<li>再次打开 iCloud, 这次进入的是 <a href="https://www.icloud.com/#settings">https://www.icloud.com/#settings</a> 这个页面,此时,果然发现左下角有个高级-&gt;恢复文件,半信半疑的点开</li>
+<li><img src="https://i.loli.net/2019/04/21/5cbc886607019.png" alt="CleanShot 2019-04-21 at 23.11.29@2x.png"></li>
+<li>耐心等待了大约10分钟左右,这次真的有文件列表出来了!!!天知道我此刻心里有多么的激动,这种失而复得的感觉是很棒的.</li>
+</ul>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><ul>
+<li>这里补充下,为什么当时粘贴时候没注意点了一下 OK,就差点(其实已经酿成了,不过勉强救回来了)酿成悲剧呢?</li>
+<li>原因在于拷贝跟剪切是完全不一样的,当你拷贝一个文件夹,然后粘贴时遇到同名文件夹,会提示:</li>
+<li><img src="https://i.loli.net/2019/04/21/5cbc8a9ac9e8d.png" alt="CleanShot 2019-04-21 at 23.21.32@2x.png"></li>
+<li>看到吧,这里会很明显告诉你要不要进行合并还是选择替换,但是当你使用了剪切之后,会提示什么呢?</li>
+<li><img src="https://i.loli.net/2019/04/21/5cbc8a9ac5216.png" alt="CleanShot 2019-04-21 at 23.21.47@2x.png"></li>
+<li>坑就在这里了, <strong>剪切时候,并不会提示合并,而是直接替换!!!</strong>,我就是在这里没有注意,手一抖,点了一个替换,然后就悲剧了.</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>所以,iCloud Drive 中的恢复文件,貌似时间是更短一点的,具体多久还没测试,但是看起来我超过3天的文件已经无法看到了,只有当天删除的可以显示,这时候千万不要气馁,找到 iCloud Setting 里面的高级-&gt;恢复文件, 这个时间限制就久很多了,可以恢复不超过<strong>30天</strong>的文件,一般情况下都足够使用了,这里稍微吐槽下,苹果云盘的这个恢复功能远不如国内坚果云做的好,考虑到每个月只要6块钱,我忍了.</li>
+<li>另外,<strong>剪切功能使用的时候一定要小心,注意是没有合并提示的!!!</strong></li>
+</ul>
 ]]></content>
       <categories>
-        <category>Utilities</category>
+        <category>Mac</category>
       </categories>
       <tags>
-        <tag>MWeb</tag>
+        <tag>iCloud</tag>
       </tags>
   </entry>
   <entry>
@@ -1300,6 +1511,24 @@
       <tags>
         <tag>Hexo</tag>
         <tag>Blog</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>如何在 MWeb 中配置 Hexo 等静态网站</title>
+    <url>/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/">原文链接</a></p>
+</blockquote>
+<blockquote>
+<p>参考链接：<br><a href="https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html">https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html</a><br><a href="https://zhuanlan.zhihu.com/p/30513914">https://zhuanlan.zhihu.com/p/30513914</a></p>
+</blockquote>
+<p>网上搜索到相关资料，如上面的链接，发现最新版本 MWeb （3.1.2）步骤有所出入，添加外部文件夹时候并没有弹出设置页面，需要自己手动在左侧文件夹上右击，点击编辑，</p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>MWeb</tag>
       </tags>
   </entry>
 </search>
