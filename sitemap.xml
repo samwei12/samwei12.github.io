@@ -114,14 +114,14 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</loc>
+    <loc>http://blog.samwei12.cn/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/</loc>
     
     <lastmod>2021-05-08</lastmod>
     
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/</loc>
+    <loc>http://blog.samwei12.cn/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</loc>
     
     <lastmod>2021-05-08</lastmod>
     
@@ -347,6 +347,13 @@
   </url>
   
   <url>
+    <loc>http://blog.samwei12.cn/tags/MWeb/</loc>
+    <lastmod>2021-05-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://blog.samwei12.cn/tags/Hexo/</loc>
     <lastmod>2021-05-22</lastmod>
     <changefreq>daily</changefreq>
@@ -355,13 +362,6 @@
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Blog/</loc>
-    <lastmod>2021-05-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/tags/MWeb/</loc>
     <lastmod>2021-05-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>

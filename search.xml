@@ -710,7 +710,10 @@
   <entry>
     <title>万字长文---关于PKM收集与整理系统的思考和实践</title>
     <url>/2021/05/22/Thinking/%E5%85%B3%E4%BA%8EPKM%E6%94%B6%E9%9B%86%E4%B8%8E%E6%95%B4%E7%90%86%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%80%9D%E8%80%83%E5%92%8C%E5%AE%9E%E8%B7%B5/</url>
-    <content><![CDATA[<p>PKM闭环中有一个很重要的环节就是信息输入，包括各种信息来源，例如微信公众号、博客、知乎、RSS等等，因此也就诞生了一大堆稍后读软件，如何真正有效的获取输入而不是做一只仓鼠是需要思考的。最近看了《小强升职记》很有收获，里面提到最好在每个方面都有一个自己的小系统，“<strong>做事要靠系统而不是靠感觉</strong>”，因此这里简单记录下自己的思考和目前构建起来的信息收集整理系统。</p>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2021/05/22/Thinking/%E5%85%B3%E4%BA%8EPKM%E6%94%B6%E9%9B%86%E4%B8%8E%E6%95%B4%E7%90%86%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%80%9D%E8%80%83%E5%92%8C%E5%AE%9E%E8%B7%B5/">原文链接</a></p>
+</blockquote>
+<p>PKM闭环中有一个很重要的环节就是信息输入，包括各种信息来源，例如微信公众号、博客、知乎、RSS等等，因此也就诞生了一大堆稍后读软件，如何真正有效的获取输入而不是做一只仓鼠是需要思考的。最近看了《小强升职记》很有收获，里面提到最好在每个方面都有一个自己的小系统，“<strong>做事要靠系统而不是靠感觉</strong>”，因此这里简单记录下自己的思考和目前构建起来的信息收集整理系统。</p>
 <span id="more"></span>
 
 <h2 id="需求场景"><a href="#需求场景" class="headerlink" title="需求场景"></a>需求场景</h2><p>手机在浏览阅读一些比较有价值的文章的时候，无法立马吸收，例如读到一些专业的技术博客、长文等等，此时，就需要将这些内容收藏起来有时间的时候继续深入阅读。</p>
@@ -1372,6 +1375,24 @@
       </tags>
   </entry>
   <entry>
+    <title>如何在 MWeb 中配置 Hexo 等静态网站</title>
+    <url>/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/">原文链接</a></p>
+</blockquote>
+<blockquote>
+<p>参考链接：<br><a href="https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html">https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html</a><br><a href="https://zhuanlan.zhihu.com/p/30513914">https://zhuanlan.zhihu.com/p/30513914</a></p>
+</blockquote>
+<p>网上搜索到相关资料，如上面的链接，发现最新版本 MWeb （3.1.2）步骤有所出入，添加外部文件夹时候并没有弹出设置页面，需要自己手动在左侧文件夹上右击，点击编辑，</p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>MWeb</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何使用 Hexo 搭建个人博客</title>
     <url>/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
     <content><![CDATA[<blockquote>
@@ -1511,24 +1532,6 @@
       <tags>
         <tag>Hexo</tag>
         <tag>Blog</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>如何在 MWeb 中配置 Hexo 等静态网站</title>
-    <url>/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2018/07/07/Utilities/Writing/MWeb+Hexo%E9%85%8D%E7%BD%AE/">原文链接</a></p>
-</blockquote>
-<blockquote>
-<p>参考链接：<br><a href="https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html">https://zh.mweb.im/mweb-1.4-add-floder-octpress-support.html</a><br><a href="https://zhuanlan.zhihu.com/p/30513914">https://zhuanlan.zhihu.com/p/30513914</a></p>
-</blockquote>
-<p>网上搜索到相关资料，如上面的链接，发现最新版本 MWeb （3.1.2）步骤有所出入，添加外部文件夹时候并没有弹出设置页面，需要自己手动在左侧文件夹上右击，点击编辑，</p>
-]]></content>
-      <categories>
-        <category>Utilities</category>
-      </categories>
-      <tags>
-        <tag>MWeb</tag>
       </tags>
   </entry>
 </search>
