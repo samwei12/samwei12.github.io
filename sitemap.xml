@@ -2,9 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://blog.samwei12.cn/2021/05/23/Reading/%E5%B0%8F%E5%BC%BA%E5%8D%87%E8%81%8C%E8%AE%B0-%E7%AC%94%E8%AE%B0%E5%92%8C%E5%85%B3%E4%BA%8E%E6%97%B6%E9%97%B4%E7%AE%A1%E7%90%86%E7%9A%84%E6%80%9D%E8%80%83%E5%AE%9E%E8%B7%B5/</loc>
+    
+    <lastmod>2021-06-03</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://blog.samwei12.cn/2021/05/22/Thinking/%E5%85%B3%E4%BA%8EPKM%E6%94%B6%E9%9B%86%E4%B8%8E%E6%95%B4%E7%90%86%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%80%9D%E8%80%83%E5%92%8C%E5%AE%9E%E8%B7%B5/</loc>
     
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-05-23</lastmod>
     
   </url>
   
@@ -86,14 +93,14 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/2020/05/02/Thinking/%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAPKM%E7%B3%BB%E7%BB%9F/</loc>
+    <loc>http://blog.samwei12.cn/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/</loc>
     
     <lastmod>2021-05-08</lastmod>
     
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/</loc>
+    <loc>http://blog.samwei12.cn/2020/05/02/Thinking/%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAPKM%E7%B3%BB%E7%BB%9F/</loc>
     
     <lastmod>2021-05-08</lastmod>
     
@@ -142,14 +149,14 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/about/index.html</loc>
+    <loc>http://blog.samwei12.cn/categories/index.html</loc>
     
     <lastmod>2021-05-08</lastmod>
     
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/categories/index.html</loc>
+    <loc>http://blog.samwei12.cn/about/index.html</loc>
     
     <lastmod>2021-05-08</lastmod>
     
@@ -158,211 +165,225 @@
 
   <url>
     <loc>http://blog.samwei12.cn/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   
   <url>
+    <loc>http://blog.samwei12.cn/tags/%E8%AF%BB%E5%90%8E%E6%84%9F/</loc>
+    <lastmod>2021-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://blog.samwei12.cn/tags/Cheatsheet/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/AVCaptureSession/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/UITabbarController/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Cocoa/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/NSView/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Animation/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/UIView/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Runtime/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Objective-C/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/ARC/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Jinja2/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Cocoapods/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/tags/%E6%97%B6%E9%97%B4%E7%AE%A1%E7%90%86/</loc>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/JDBC/</loc>
-    <lastmod>2021-05-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/tags/PKM/</loc>
-    <lastmod>2021-05-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/tags/%E7%A8%8D%E5%90%8E%E8%AF%BB/</loc>
-    <lastmod>2021-05-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/tags/%E6%B5%8B%E8%AF%84/</loc>
-    <lastmod>2021-05-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/tags/%E6%80%9D%E8%80%83%E6%88%90%E9%95%BF/</loc>
-    <lastmod>2021-05-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/tags/DIKW/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Wekan/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/%E7%9C%8B%E6%9D%BF/</loc>
-    <lastmod>2021-05-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/tags/Logseq/</loc>
-    <lastmod>2021-05-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/tags/GTD/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Xmarks/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/tags/Logseq/</loc>
+    <lastmod>2021-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/tags/GTD/</loc>
+    <lastmod>2021-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/tags/PKM/</loc>
+    <lastmod>2021-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/tags/%E7%A8%8D%E5%90%8E%E8%AF%BB/</loc>
+    <lastmod>2021-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/tags/%E6%B5%8B%E8%AF%84/</loc>
+    <lastmod>2021-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/tags/%E6%80%9D%E8%80%83%E6%88%90%E9%95%BF/</loc>
+    <lastmod>2021-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/tags/DIKW/</loc>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/%E5%9B%BE%E5%BA%8A/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/%E4%B8%83%E7%89%9B%E4%BA%91/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/iCloud/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/MWeb/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Hexo/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Blog/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -371,56 +392,63 @@
   
   <url>
     <loc>http://blog.samwei12.cn/categories/iOS/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/categories/Reading/</loc>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/categories/Server/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/categories/Assembly/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/categories/Mac/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/categories/Python/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/categories/Ruby/</loc>
-    <lastmod>2021-05-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/categories/Thinking/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://blog.samwei12.cn/categories/Utilities/</loc>
-    <lastmod>2021-05-22</lastmod>
+    <lastmod>2021-06-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/categories/Thinking/</loc>
+    <lastmod>2021-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
