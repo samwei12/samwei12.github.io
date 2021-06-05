@@ -179,43 +179,6 @@
       </tags>
   </entry>
   <entry>
-    <title>NSView subview blocking drag/drop event</title>
-    <url>/2016/01/26/Objective-C/subview-blocking-drag-event/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2016/01/26/Objective-C/subview-blocking-drag-event/">原文链接</a></p>
-</blockquote>
-<p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p>
-<ol>
-<li>从 NSView 继承得到一个子类</li>
-<li>覆盖处理拖拽事件相关方法</li>
-<li>注册拖拽事件</li>
-</ol>
-<span id="more"></span>
-
-<p>开始的时候一切都很正常,直到某次发现拖拽到屏幕边缘响应较为灵敏,而<strong>拖拽到屏幕中间则不响应事件</strong>,APP页面大致是这样的:</p>
-<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png"></p>
-<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。</p>
-<p>那么如何验证呢？其实也很简单，在自定义的NSView 中重载<code>draggingEnded：</code>方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 <code>NSView</code> 中添加的<code>NSImageView</code>作为 subview 会阻止拖拽事件的传递，原因是<code> NSImageView</code>本身可以处理拖拽事件，于是截获了本该自定义<code>NSView</code>处理的消息。</p>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：<a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></p>
-<p>提供的解决方案有以下几种：</p>
-<ol>
-<li>不使用 <code>NSImageView</code>，而是采用自定义<code> NSView</code>的方式，然后重写<code>drawRect：</code>方法进行图片渲染。这个办法十分笨拙，并且不太方便。</li>
-<li>调用<code>unregisterDraggedTypes </code>方法，这样<code> NSImageView</code>就不会监听拖拽事件了，完美解决。</li>
-</ol>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
-<li><a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></li>
-<li><a href="http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation">http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Mac</category>
-      </categories>
-      <tags>
-        <tag>Cocoa</tag>
-        <tag>NSView</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>如何取消 UIView 动画？</title>
     <url>/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/</url>
     <content><![CDATA[<blockquote>
@@ -315,6 +278,43 @@
       </tags>
   </entry>
   <entry>
+    <title>NSView subview blocking drag/drop event</title>
+    <url>/2016/01/26/Objective-C/subview-blocking-drag-event/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2016/01/26/Objective-C/subview-blocking-drag-event/">原文链接</a></p>
+</blockquote>
+<p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p>
+<ol>
+<li>从 NSView 继承得到一个子类</li>
+<li>覆盖处理拖拽事件相关方法</li>
+<li>注册拖拽事件</li>
+</ol>
+<span id="more"></span>
+
+<p>开始的时候一切都很正常,直到某次发现拖拽到屏幕边缘响应较为灵敏,而<strong>拖拽到屏幕中间则不响应事件</strong>,APP页面大致是这样的:</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png"></p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。</p>
+<p>那么如何验证呢？其实也很简单，在自定义的NSView 中重载<code>draggingEnded：</code>方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 <code>NSView</code> 中添加的<code>NSImageView</code>作为 subview 会阻止拖拽事件的传递，原因是<code> NSImageView</code>本身可以处理拖拽事件，于是截获了本该自定义<code>NSView</code>处理的消息。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：<a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></p>
+<p>提供的解决方案有以下几种：</p>
+<ol>
+<li>不使用 <code>NSImageView</code>，而是采用自定义<code> NSView</code>的方式，然后重写<code>drawRect：</code>方法进行图片渲染。这个办法十分笨拙，并且不太方便。</li>
+<li>调用<code>unregisterDraggedTypes </code>方法，这样<code> NSImageView</code>就不会监听拖拽事件了，完美解决。</li>
+</ol>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></li>
+<li><a href="http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation">http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Mac</category>
+      </categories>
+      <tags>
+        <tag>Cocoa</tag>
+        <tag>NSView</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Python模板引擎Jinja2使用简介</title>
     <url>/2018/07/07/Python/Python%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8EJinja2%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/</url>
     <content><![CDATA[<blockquote>
@@ -384,83 +384,6 @@
       </categories>
       <tags>
         <tag>Jinja2</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Cocoapods插件机制浅析</title>
-    <url>/2020/03/04/Ruby/Cocoapods%E6%8F%92%E4%BB%B6%E6%9C%BA%E5%88%B6%E6%B5%85%E6%9E%90/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2020/03/04/Ruby/Cocoapods%E6%8F%92%E4%BB%B6%E6%9C%BA%E5%88%B6%E6%B5%85%E6%9E%90/">原文链接</a></p>
-</blockquote>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>虽然做iOS开发的过程中使用过 **<a href="https://cocoapods.org/">Cocoapods</a>**， 但是对里面的细节了解其实不算太多，直到这两年做织女项目时，通过对Cocoapods进行Qt支持改造才开始深入了解部分细节，这个过程中，网上没有找到太多相关资料，本文就简单介绍下我对Cocoapods提供的插件机制的一个简单了解，希望能给大家带来一些帮助。</p>
-<h3 id="Ruby-Open-Classes"><a href="#Ruby-Open-Classes" class="headerlink" title="Ruby Open Classes"></a>Ruby Open Classes</h3><p>在此之前，我们简单看下 <code>Ruby Open Classes</code> ，这部分是为未接触过Ruby的同学准备的，熟悉的同学可以直接略过。</p>
-<p>在Ruby中，类永远是开放的，你总是可以将新的方法加入到已有的类中，除了你自己的代码中，还可以用在标准库和内置类中，这个特性被称为<code>Ruby Open Classes</code>。下面我们通过一个示例简单看下。</p>
-<span id="more"></span>
-
-<p>首先，我们自定义一个类<code>Human</code>，放在<code>human.rb</code>文件中:</p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Human</span></span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">greeting</span> </span></span><br><span class="line">        puts <span class="string">&quot;hello everybody&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hungry</span> </span></span><br><span class="line">        puts <span class="string">&quot;I am hungry&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-<p>接着，我们新增一个<code>main.rb</code>：</p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">require_relative <span class="string">&#x27;human&#x27;</span></span><br><span class="line"></span><br><span class="line">john = Human.new</span><br><span class="line"></span><br><span class="line">john.greeting </span><br><span class="line"><span class="comment"># hello everybody</span></span><br><span class="line"></span><br><span class="line">john.hungry</span><br><span class="line"><span class="comment"># I am hungry</span></span><br></pre></td></tr></table></figure>
-<p>之后，我们在<code>main.rb</code>中重新定义<code>hungry</code>方法，</p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Human</span></span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hungry</span> </span></span><br><span class="line">        puts <span class="string">&quot;I could eat a horse&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">john.hungry</span><br><span class="line"><span class="comment"># I could eat a horse</span></span><br></pre></td></tr></table></figure>
-<p>可以看到，这里在我们新增<code>hungry</code>方法之后，所有的<code>Human</code>类的实例均调用我们的新实现了，即使是已经创建好的实例，这里故意放到两个文件中是想说明这个特性是可以跨文件甚至跨模块的，对Ruby内置方法的替换也是可以的（谨慎使用）</p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">puts <span class="string">&quot;hello&quot;</span>.size</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">String</span> </span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">size</span></span></span><br><span class="line">        puts <span class="string">&quot;goodbye&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5</span></span><br><span class="line"><span class="comment"># goodbye</span></span><br><span class="line">puts <span class="string">&quot;hello&quot;</span>.size</span><br></pre></td></tr></table></figure>
-
-<p>这个特性是十分强大的，让我们可以很容易的对三方模块进行扩展，也是<code>Cocoapods</code>的插件体系所依赖的基础。</p>
-<h2 id="流程分析"><a href="#流程分析" class="headerlink" title="流程分析"></a>流程分析</h2><p><code>Cocoapods</code>的插件体系整体流程还是比较清晰的，下面我们就来逐步看下。</p>
-<h3 id="CLAide"><a href="#CLAide" class="headerlink" title="CLAide"></a>CLAide</h3><p>首先，<code>Cocoapods</code> 提供了一个便捷的命令行工具库 <a href="https://github.com/CocoaPods/CLAide">CLAide</a>，这个库包含很多功能，例如，一套命令基类，一套插件加载机制等。</p>
-<h3 id="Command基类"><a href="#Command基类" class="headerlink" title="Command基类"></a>Command基类</h3><p>Command基类在<code>lib/claide/command.rb</code>中，这里提供了大量基础功能，包括 <code>run</code> 、 <code>options</code>、 <code>help</code>等等。</p>
-<p>首先，当我们每次执行 <code>pod xxx</code> 命令时候，会执行 <code>bin</code>目录下的可执行文件<code>pod</code>。</p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="keyword">require</span> <span class="string">&#x27;cocoapods&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> profile_filename = ENV[<span class="string">&#x27;PROFILE&#x27;</span>]</span><br><span class="line">    <span class="comment"># 忽略不相关内容... </span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    Pod::Command.run(ARGV)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-
-<p>这里实际上是 <code>Pod</code> 模块从<code>CLAide</code>继承了子类<code>Command &lt; CLAide::Command</code>，我们执行Pod命令时候，就会调用</p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">def <span class="keyword">self</span>.run(argv)</span><br><span class="line">    help! <span class="string">&#x27;You cannot run CocoaPods as root.&#x27;</span> <span class="keyword">if</span> Process.uid == <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    verify_minimum_git_version!</span><br><span class="line">    verify_xcode_license_approved!</span><br><span class="line"></span><br><span class="line">    <span class="keyword">super</span>(argv)</span><br><span class="line"><span class="keyword">ensure</span></span><br><span class="line">    UI.print_warnings</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-
-<p>实际上只是扩展了一些检测git版本、xcode证书等，真正核心部分还是调用的<code>CLAide</code>的实现：</p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">def <span class="keyword">self</span>.run(argv = [])</span><br><span class="line">    plugin_prefixes.each <span class="keyword">do</span> <span class="params">|plugin_prefix|</span></span><br><span class="line">        PluginManager.load_plugins(plugin_prefix)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    argv = ARGV.coerce(argv)</span><br><span class="line">    command = parse(argv)</span><br><span class="line">    ANSI.disabled = !command.ansi_output?</span><br><span class="line">    <span class="keyword">unless</span> command.handle_root_options(argv)</span><br><span class="line">        command.validate!</span><br><span class="line">        command.run</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">rescue</span> Object =&gt; exception</span><br><span class="line">    handle_exception(command, exception)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-
-<p>可以看到这里真正执行命令之前会遍历所有的插件前缀，并进行插件加载，回过头来再查看 <code>cocoapods/command.rb</code> 会发现，这里指定了约定的插件前缀</p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="keyword">self</span>.plugin_prefixes = <span class="string">%w(claide cocoapods)</span></span><br></pre></td></tr></table></figure>
-<p>可以看到这里的插件分为两种，我们目前只关心文件名为<code>cocoapods</code>前缀的插件。</p>
-<h3 id="PluginManager"><a href="#PluginManager" class="headerlink" title="PluginManager"></a>PluginManager</h3><p>我们深入<code>PluginManager</code>的具体实现看下，</p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">def <span class="keyword">self</span>.load_plugins(plugin_prefix)</span><br><span class="line">    loaded_plugins[plugin_prefix] <span class="params">||</span>=</span><br><span class="line">    plugin_gems_for_prefix(plugin_prefix).map <span class="keyword">do</span> <span class="params">|spec, paths|</span></span><br><span class="line">        spec <span class="keyword">if</span> safe_activate_and_require(spec, paths)</span><br><span class="line">    <span class="keyword">end</span>.compact</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">def <span class="keyword">self</span>.plugin_gems_for_prefix(prefix)</span><br><span class="line">    glob = <span class="string">&quot;<span class="subst">#&#123;prefix&#125;</span>_plugin<span class="subst">#&#123;Gem.suffix_pattern&#125;</span>&quot;</span></span><br><span class="line">    Gem::Specification.latest_specs(<span class="literal">true</span>).map <span class="keyword">do</span> <span class="params">|spec|</span></span><br><span class="line">        matches = spec.matches_for_glob(glob)</span><br><span class="line">        [spec, matches] <span class="keyword">unless</span> matches.empty?</span><br><span class="line">    <span class="keyword">end</span>.compact</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">def <span class="keyword">self</span>.safe_activate_and_require(spec, paths)</span><br><span class="line">    spec.activate</span><br><span class="line">    paths.each &#123; <span class="params">|path|</span> <span class="keyword">require</span>(path) &#125;</span><br><span class="line">    <span class="literal">true</span></span><br><span class="line">    <span class="comment"># 不相关代码略去</span></span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-
-<p>为了减小篇幅，这里只贴了核心相关代码，整体的流程大致是：</p>
-<ol>
-<li>调用<code>PluginManager.load_plugins</code>并传入插件前缀</li>
-<li><code>PluginManager.plugin_gems_for_prefix</code>对插件名进行处理，取出我们需要加载的文件，例如<code>cocoapods</code>前缀在这里会转换为所有包含<code>cocoapods_plugin.rb</code>的gem spec 信息及文件信息，例如<code>~/cocoapods-qt/lib/cocoapods_plugin.rb</code></li>
-<li>调用<code>PluginManager.safe_activate_and_require</code> 进行对应的 gem spec 检验并对每个文件进行加载</li>
-</ol>
-<p>至此，基本的插件加载流程大致梳理清楚了。</p>
-<h2 id="实操"><a href="#实操" class="headerlink" title="实操"></a>实操</h2><p>下面我们看下如何自己扩展一个插件，关于这部分，Cocoapods其实也基本已经帮我们做了很多事情了，主要是 <a href="https://github.com/CocoaPods/cocoapods-plugins">cocoapods-plugins</a>， 它提供了一个插件创建的完整生命周期，包括新增、发布、检索等。</p>
-<h3 id="Cocoapods-plugins"><a href="#Cocoapods-plugins" class="headerlink" title="Cocoapods-plugins"></a>Cocoapods-plugins</h3><p>执行 <code>pod plugins create cocoapods-test</code> 之后，发现自动帮我们创建了一个gem工程，其中的 lib 文件夹下果然存在了一个 <code>cocoapods_plugin.rb</code> 文件，整体的目录结构如下：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">├── Gemfile</span><br><span class="line">├── LICENSE.txt</span><br><span class="line">├── README.md</span><br><span class="line">├── Rakefile</span><br><span class="line">├── cocoapods-test.gemspec</span><br><span class="line">├── lib</span><br><span class="line">│   ├── cocoapods-test</span><br><span class="line">│   │   ├── <span class="built_in">command</span></span><br><span class="line">│   │   │   └── test.rb</span><br><span class="line">│   │   ├── command.rb</span><br><span class="line">│   │   └── gem_version.rb</span><br><span class="line">│   ├── cocoapods-test.rb</span><br><span class="line">│   └── **cocoapods_plugin.rb**</span><br><span class="line">└── spec</span><br><span class="line">    ├── <span class="built_in">command</span></span><br><span class="line">    │   └── test_spec.rb</span><br><span class="line">    └── spec_helper.rb</span><br></pre></td></tr></table></figure>
-
-<p>这里最核心的就是<code>cocoapods_plugin.rb</code> ，我们前面分析过，执行pod命令时候会主动加载所有<code>cocoapods_plugin.rb</code>文件，那么只要我们将需要扩展的类加到这里面，执行命令时候就会生效。</p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> &lt; Command</span></span><br><span class="line">    <span class="keyword">self</span>.summary = <span class="string">&#x27;Short description of cocoapods-test.&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span>.description = <span class="string">&lt;&lt;-DESC</span></span><br><span class="line"><span class="string">        Longer description of cocoapods-test.</span></span><br><span class="line"><span class="string">    DESC</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span>.arguments = <span class="string">&#x27;NAME&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(argv)</span></span></span><br><span class="line">        <span class="variable">@name</span> = argv.shift_argument</span><br><span class="line">        <span class="keyword">super</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">validate!</span></span></span><br><span class="line">        <span class="keyword">super</span></span><br><span class="line">        help! <span class="string">&#x27;A Pod name is required.&#x27;</span> <span class="keyword">unless</span> <span class="variable">@name</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span></span></span><br><span class="line">        UI.puts <span class="string">&quot;Add your implementation for the cocoapods-test plugin in <span class="subst">#&#123;<span class="keyword">__FILE__</span>&#125;</span>&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
-
-<p>可以看到这里其实只是新增了一个 <code>Test</code> 命令，并加了一些描述信息。为了让我们的扩展能生效，我们可以通过几种方式，</p>
-<ol>
-<li>本地gem源码依赖</li>
-<li>安装gem产物</li>
-</ol>
-<p>为了更贴近实际生产发布流程，这里我们采用第二种方式。</p>
-<p>首先，我们编译生成gem产物，</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gem build cocoapods-test.gemspec</span><br></pre></td></tr></table></figure>
-
-<p>其次，本地安装</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gem install ~/CocoapodsQt/cocoapods-test/cocoapods-test-0.0.1.gem  --<span class="built_in">local</span></span><br></pre></td></tr></table></figure>
-
-<p>此时，我们再执行 pod 命令</p>
-<p><img src="https://img.alicdn.com/tfs/TB1I3Ova8Cw3KVjSZR0XXbcUpXa-2116-1076.jpg"></p>
-<p>可以看到我们扩展的命令已经生效，接下来就可以开始愉快的coding了。</p>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>至此，我们对Cocoapods的整体插件流程应该有了一个比较清晰的认识了，希望能给大家带来一些帮助。</p>
-]]></content>
-      <categories>
-        <category>Ruby</category>
-      </categories>
-      <tags>
-        <tag>Cocoapods</tag>
       </tags>
   </entry>
   <entry>
@@ -792,6 +715,83 @@
       </tags>
   </entry>
   <entry>
+    <title>Cocoapods插件机制浅析</title>
+    <url>/2020/03/04/Ruby/Cocoapods%E6%8F%92%E4%BB%B6%E6%9C%BA%E5%88%B6%E6%B5%85%E6%9E%90/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2020/03/04/Ruby/Cocoapods%E6%8F%92%E4%BB%B6%E6%9C%BA%E5%88%B6%E6%B5%85%E6%9E%90/">原文链接</a></p>
+</blockquote>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>虽然做iOS开发的过程中使用过 **<a href="https://cocoapods.org/">Cocoapods</a>**， 但是对里面的细节了解其实不算太多，直到这两年做织女项目时，通过对Cocoapods进行Qt支持改造才开始深入了解部分细节，这个过程中，网上没有找到太多相关资料，本文就简单介绍下我对Cocoapods提供的插件机制的一个简单了解，希望能给大家带来一些帮助。</p>
+<h3 id="Ruby-Open-Classes"><a href="#Ruby-Open-Classes" class="headerlink" title="Ruby Open Classes"></a>Ruby Open Classes</h3><p>在此之前，我们简单看下 <code>Ruby Open Classes</code> ，这部分是为未接触过Ruby的同学准备的，熟悉的同学可以直接略过。</p>
+<p>在Ruby中，类永远是开放的，你总是可以将新的方法加入到已有的类中，除了你自己的代码中，还可以用在标准库和内置类中，这个特性被称为<code>Ruby Open Classes</code>。下面我们通过一个示例简单看下。</p>
+<span id="more"></span>
+
+<p>首先，我们自定义一个类<code>Human</code>，放在<code>human.rb</code>文件中:</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Human</span></span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">greeting</span> </span></span><br><span class="line">        puts <span class="string">&quot;hello everybody&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hungry</span> </span></span><br><span class="line">        puts <span class="string">&quot;I am hungry&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>接着，我们新增一个<code>main.rb</code>：</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">require_relative <span class="string">&#x27;human&#x27;</span></span><br><span class="line"></span><br><span class="line">john = Human.new</span><br><span class="line"></span><br><span class="line">john.greeting </span><br><span class="line"><span class="comment"># hello everybody</span></span><br><span class="line"></span><br><span class="line">john.hungry</span><br><span class="line"><span class="comment"># I am hungry</span></span><br></pre></td></tr></table></figure>
+<p>之后，我们在<code>main.rb</code>中重新定义<code>hungry</code>方法，</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Human</span></span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">hungry</span> </span></span><br><span class="line">        puts <span class="string">&quot;I could eat a horse&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">john.hungry</span><br><span class="line"><span class="comment"># I could eat a horse</span></span><br></pre></td></tr></table></figure>
+<p>可以看到，这里在我们新增<code>hungry</code>方法之后，所有的<code>Human</code>类的实例均调用我们的新实现了，即使是已经创建好的实例，这里故意放到两个文件中是想说明这个特性是可以跨文件甚至跨模块的，对Ruby内置方法的替换也是可以的（谨慎使用）</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">puts <span class="string">&quot;hello&quot;</span>.size</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">String</span> </span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">size</span></span></span><br><span class="line">        puts <span class="string">&quot;goodbye&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5</span></span><br><span class="line"><span class="comment"># goodbye</span></span><br><span class="line">puts <span class="string">&quot;hello&quot;</span>.size</span><br></pre></td></tr></table></figure>
+
+<p>这个特性是十分强大的，让我们可以很容易的对三方模块进行扩展，也是<code>Cocoapods</code>的插件体系所依赖的基础。</p>
+<h2 id="流程分析"><a href="#流程分析" class="headerlink" title="流程分析"></a>流程分析</h2><p><code>Cocoapods</code>的插件体系整体流程还是比较清晰的，下面我们就来逐步看下。</p>
+<h3 id="CLAide"><a href="#CLAide" class="headerlink" title="CLAide"></a>CLAide</h3><p>首先，<code>Cocoapods</code> 提供了一个便捷的命令行工具库 <a href="https://github.com/CocoaPods/CLAide">CLAide</a>，这个库包含很多功能，例如，一套命令基类，一套插件加载机制等。</p>
+<h3 id="Command基类"><a href="#Command基类" class="headerlink" title="Command基类"></a>Command基类</h3><p>Command基类在<code>lib/claide/command.rb</code>中，这里提供了大量基础功能，包括 <code>run</code> 、 <code>options</code>、 <code>help</code>等等。</p>
+<p>首先，当我们每次执行 <code>pod xxx</code> 命令时候，会执行 <code>bin</code>目录下的可执行文件<code>pod</code>。</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="keyword">require</span> <span class="string">&#x27;cocoapods&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> profile_filename = ENV[<span class="string">&#x27;PROFILE&#x27;</span>]</span><br><span class="line">    <span class="comment"># 忽略不相关内容... </span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    Pod::Command.run(ARGV)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>这里实际上是 <code>Pod</code> 模块从<code>CLAide</code>继承了子类<code>Command &lt; CLAide::Command</code>，我们执行Pod命令时候，就会调用</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">def <span class="keyword">self</span>.run(argv)</span><br><span class="line">    help! <span class="string">&#x27;You cannot run CocoaPods as root.&#x27;</span> <span class="keyword">if</span> Process.uid == <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    verify_minimum_git_version!</span><br><span class="line">    verify_xcode_license_approved!</span><br><span class="line"></span><br><span class="line">    <span class="keyword">super</span>(argv)</span><br><span class="line"><span class="keyword">ensure</span></span><br><span class="line">    UI.print_warnings</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>实际上只是扩展了一些检测git版本、xcode证书等，真正核心部分还是调用的<code>CLAide</code>的实现：</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">def <span class="keyword">self</span>.run(argv = [])</span><br><span class="line">    plugin_prefixes.each <span class="keyword">do</span> <span class="params">|plugin_prefix|</span></span><br><span class="line">        PluginManager.load_plugins(plugin_prefix)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    argv = ARGV.coerce(argv)</span><br><span class="line">    command = parse(argv)</span><br><span class="line">    ANSI.disabled = !command.ansi_output?</span><br><span class="line">    <span class="keyword">unless</span> command.handle_root_options(argv)</span><br><span class="line">        command.validate!</span><br><span class="line">        command.run</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">rescue</span> Object =&gt; exception</span><br><span class="line">    handle_exception(command, exception)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到这里真正执行命令之前会遍历所有的插件前缀，并进行插件加载，回过头来再查看 <code>cocoapods/command.rb</code> 会发现，这里指定了约定的插件前缀</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="keyword">self</span>.plugin_prefixes = <span class="string">%w(claide cocoapods)</span></span><br></pre></td></tr></table></figure>
+<p>可以看到这里的插件分为两种，我们目前只关心文件名为<code>cocoapods</code>前缀的插件。</p>
+<h3 id="PluginManager"><a href="#PluginManager" class="headerlink" title="PluginManager"></a>PluginManager</h3><p>我们深入<code>PluginManager</code>的具体实现看下，</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">def <span class="keyword">self</span>.load_plugins(plugin_prefix)</span><br><span class="line">    loaded_plugins[plugin_prefix] <span class="params">||</span>=</span><br><span class="line">    plugin_gems_for_prefix(plugin_prefix).map <span class="keyword">do</span> <span class="params">|spec, paths|</span></span><br><span class="line">        spec <span class="keyword">if</span> safe_activate_and_require(spec, paths)</span><br><span class="line">    <span class="keyword">end</span>.compact</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">def <span class="keyword">self</span>.plugin_gems_for_prefix(prefix)</span><br><span class="line">    glob = <span class="string">&quot;<span class="subst">#&#123;prefix&#125;</span>_plugin<span class="subst">#&#123;Gem.suffix_pattern&#125;</span>&quot;</span></span><br><span class="line">    Gem::Specification.latest_specs(<span class="literal">true</span>).map <span class="keyword">do</span> <span class="params">|spec|</span></span><br><span class="line">        matches = spec.matches_for_glob(glob)</span><br><span class="line">        [spec, matches] <span class="keyword">unless</span> matches.empty?</span><br><span class="line">    <span class="keyword">end</span>.compact</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">def <span class="keyword">self</span>.safe_activate_and_require(spec, paths)</span><br><span class="line">    spec.activate</span><br><span class="line">    paths.each &#123; <span class="params">|path|</span> <span class="keyword">require</span>(path) &#125;</span><br><span class="line">    <span class="literal">true</span></span><br><span class="line">    <span class="comment"># 不相关代码略去</span></span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>为了减小篇幅，这里只贴了核心相关代码，整体的流程大致是：</p>
+<ol>
+<li>调用<code>PluginManager.load_plugins</code>并传入插件前缀</li>
+<li><code>PluginManager.plugin_gems_for_prefix</code>对插件名进行处理，取出我们需要加载的文件，例如<code>cocoapods</code>前缀在这里会转换为所有包含<code>cocoapods_plugin.rb</code>的gem spec 信息及文件信息，例如<code>~/cocoapods-qt/lib/cocoapods_plugin.rb</code></li>
+<li>调用<code>PluginManager.safe_activate_and_require</code> 进行对应的 gem spec 检验并对每个文件进行加载</li>
+</ol>
+<p>至此，基本的插件加载流程大致梳理清楚了。</p>
+<h2 id="实操"><a href="#实操" class="headerlink" title="实操"></a>实操</h2><p>下面我们看下如何自己扩展一个插件，关于这部分，Cocoapods其实也基本已经帮我们做了很多事情了，主要是 <a href="https://github.com/CocoaPods/cocoapods-plugins">cocoapods-plugins</a>， 它提供了一个插件创建的完整生命周期，包括新增、发布、检索等。</p>
+<h3 id="Cocoapods-plugins"><a href="#Cocoapods-plugins" class="headerlink" title="Cocoapods-plugins"></a>Cocoapods-plugins</h3><p>执行 <code>pod plugins create cocoapods-test</code> 之后，发现自动帮我们创建了一个gem工程，其中的 lib 文件夹下果然存在了一个 <code>cocoapods_plugin.rb</code> 文件，整体的目录结构如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">├── Gemfile</span><br><span class="line">├── LICENSE.txt</span><br><span class="line">├── README.md</span><br><span class="line">├── Rakefile</span><br><span class="line">├── cocoapods-test.gemspec</span><br><span class="line">├── lib</span><br><span class="line">│   ├── cocoapods-test</span><br><span class="line">│   │   ├── <span class="built_in">command</span></span><br><span class="line">│   │   │   └── test.rb</span><br><span class="line">│   │   ├── command.rb</span><br><span class="line">│   │   └── gem_version.rb</span><br><span class="line">│   ├── cocoapods-test.rb</span><br><span class="line">│   └── **cocoapods_plugin.rb**</span><br><span class="line">└── spec</span><br><span class="line">    ├── <span class="built_in">command</span></span><br><span class="line">    │   └── test_spec.rb</span><br><span class="line">    └── spec_helper.rb</span><br></pre></td></tr></table></figure>
+
+<p>这里最核心的就是<code>cocoapods_plugin.rb</code> ，我们前面分析过，执行pod命令时候会主动加载所有<code>cocoapods_plugin.rb</code>文件，那么只要我们将需要扩展的类加到这里面，执行命令时候就会生效。</p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> &lt; Command</span></span><br><span class="line">    <span class="keyword">self</span>.summary = <span class="string">&#x27;Short description of cocoapods-test.&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span>.description = <span class="string">&lt;&lt;-DESC</span></span><br><span class="line"><span class="string">        Longer description of cocoapods-test.</span></span><br><span class="line"><span class="string">    DESC</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span>.arguments = <span class="string">&#x27;NAME&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(argv)</span></span></span><br><span class="line">        <span class="variable">@name</span> = argv.shift_argument</span><br><span class="line">        <span class="keyword">super</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">validate!</span></span></span><br><span class="line">        <span class="keyword">super</span></span><br><span class="line">        help! <span class="string">&#x27;A Pod name is required.&#x27;</span> <span class="keyword">unless</span> <span class="variable">@name</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span></span></span><br><span class="line">        UI.puts <span class="string">&quot;Add your implementation for the cocoapods-test plugin in <span class="subst">#&#123;<span class="keyword">__FILE__</span>&#125;</span>&quot;</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到这里其实只是新增了一个 <code>Test</code> 命令，并加了一些描述信息。为了让我们的扩展能生效，我们可以通过几种方式，</p>
+<ol>
+<li>本地gem源码依赖</li>
+<li>安装gem产物</li>
+</ol>
+<p>为了更贴近实际生产发布流程，这里我们采用第二种方式。</p>
+<p>首先，我们编译生成gem产物，</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gem build cocoapods-test.gemspec</span><br></pre></td></tr></table></figure>
+
+<p>其次，本地安装</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gem install ~/CocoapodsQt/cocoapods-test/cocoapods-test-0.0.1.gem  --<span class="built_in">local</span></span><br></pre></td></tr></table></figure>
+
+<p>此时，我们再执行 pod 命令</p>
+<p><img src="https://img.alicdn.com/tfs/TB1I3Ova8Cw3KVjSZR0XXbcUpXa-2116-1076.jpg"></p>
+<p>可以看到我们扩展的命令已经生效，接下来就可以开始愉快的coding了。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>至此，我们对Cocoapods的整体插件流程应该有了一个比较清晰的认识了，希望能给大家带来一些帮助。</p>
+]]></content>
+      <categories>
+        <category>Ruby</category>
+      </categories>
+      <tags>
+        <tag>Cocoapods</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>JDBC学习一---JDBC入门</title>
     <url>/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/</url>
     <content><![CDATA[<blockquote>
@@ -1033,172 +1033,6 @@
       </categories>
       <tags>
         <tag>JDBC</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用 Wekan 搭建个人看板</title>
-    <url>/2020/05/03/Utilities/Wekan/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2020/05/03/Utilities/Wekan/">原文链接</a></p>
-</blockquote>
-<h2 id="看板？"><a href="#看板？" class="headerlink" title="看板？"></a>看板？</h2><p>术语：</p>
-<ul>
-<li>看板：TODO</li>
-<li>列表：同类型的事务放在一起，按照任务进度，通常为：未完成、进行中、已完成</li>
-<li>卡片：最小单位，即任务，</li>
-<li>泳道：不同类型的任务横向对比，例如，团队中不同分组等</li>
-</ul>
-<span id="more"></span>
-
-
-<h2 id="为什么要用看板？"><a href="#为什么要用看板？" class="headerlink" title="为什么要用看板？"></a>为什么要用看板？</h2><p>TODO</p>
-<h2 id="关于-wekan"><a href="#关于-wekan" class="headerlink" title="关于 wekan"></a>关于 wekan</h2><p><a href="https://github.com/wekan/wekan">wekan</a> 是一款开源的看板系统，从功能上来讲模仿看板类软件鼻祖 <a href="https://trello.com/">Trello</a>。整体界面大致如下：</p>
-<p><img src="http://www.scienjus.com/uploads/2016/03/wekan.jpeg"></p>
-<p>采用 wekan 的原因也比较简单， 为了安全性考虑，公司内部文档禁止使用部署在外部服务器上的工具。</p>
-<h2 id="如何搭建-wekan？"><a href="#如何搭建-wekan？" class="headerlink" title="如何搭建 wekan？"></a>如何搭建 wekan？</h2><blockquote>
-<p> 官方教程：<a href="https://github.com/wekan/wekan/wiki/Install-Wekan-Docker-in-production">https://github.com/wekan/wekan/wiki/Install-Wekan-Docker-in-production</a></p>
-</blockquote>
-<ol>
-<li>安装 Docker</li>
-<li>下载 <a href="https://github.com/wekan/wekan-mongodb">https://github.com/wekan/wekan-mongodb</a></li>
-<li>进入 mongodb 文件夹</li>
-<li>修改 yaml 中的 url 信息</li>
-<li>执行 <code>docker-compose up -d</code> 或者 <code>docker-compose up</code></li>
-</ol>
-<h2 id="wekan-简易说明"><a href="#wekan-简易说明" class="headerlink" title="wekan 简易说明"></a>wekan 简易说明</h2><h3 id="初步接触"><a href="#初步接触" class="headerlink" title="初步接触"></a>初步接触</h3><p>目前是在 Mac 服务器上搭建了 wekan，暂时没有域名，大家先使用 IP 地址登录， <a href="http://30.3.131.128/">http://30.3.131.128</a>，之后就是注册账号： –统一约定使用中文花名，邮箱使用公司邮箱–，</p>
-<p><img src="http://gw.alicdn.com/mt/TB1Qu_nd8mWBuNkSndVXXcsApXa-1566-950.png"></p>
-<p>之后进入看板首页，这里可以管理个人名下所有项目，新增看板也在这里，下面以工程组为例，简单介绍下如何使用看板。</p>
-<p>首先，创建一个看板，<img src="http://gw.alicdn.com/mt/TB1UY6MmgmTBuNjy1XbXXaMrVXa-303-210.png"></p>
-<p>接下来可以看到看板的整体页面，</p>
-<p><img src="http://gw.alicdn.com/mt/TB1ThO.d3KTBuNkSne1XXaJoXXa-1917-956.png"></p>
-<ul>
-<li>左上角为工程属性，例如是否私有，是否提示通知</li>
-<li>左侧整体面板为看板主体内容</li>
-<li>右侧为属性栏，包括系统日志、项目成员、标签设置等</li>
-<li>右上角为工具栏，包括搜索、过滤、列表/泳道切换、多选、看板菜单等</li>
-</ul>
-<h3 id="需求看板"><a href="#需求看板" class="headerlink" title="需求看板"></a>需求看板</h3><p>接下来需要做的事情就是建立列表和泳道，这里我们约定，需求跟任务划分为两个看板，例如，所有工程618的需求放到一个看板中，包括待定需求、进行中的需求、已完成需求，不需要写明需求详细工期，仅列出本期都有哪些需求即可；所有的需求细分出来的任务单独放一个看板中，需要细化到每人每天的工作。需求看板示例：</p>
-<p><img src="http://gw.alicdn.com/mt/TB18GyQmDJYBeNjy1zeXXahzVXa-1919-943.png"></p>
-<p>这里我们约定划分这么几个列表：</p>
-<ul>
-<li>待梳理需求：需要进一步评估是否需要做或者如何做</li>
-<li>长期规划：一般是3个月以上，可以视项目情况而定，移除该列表也可以</li>
-<li>中期规划：一般是1-3个月</li>
-<li>本月：当前月需要完成的需求</li>
-<li>已交付：该版本已完成需求</li>
-<li>后续可以看情况自定义部分列表，例如已延期</li>
-<li>不同泳道即不同模块，整体大图的话就可以按照算法、2D、3D 这样划分，小组内部可以根据功能划分，例如 CPU、GPU 等</li>
-</ul>
-<p>右侧面板中需要添加其他成员，这样其他人才能访问</p>
-<h3 id="任务看板"><a href="#任务看板" class="headerlink" title="任务看板"></a>任务看板</h3><p>之后我们就需要根据刚才整理出来的需求进一步分配工时，列表可以参考下图：</p>
-<p><img src="http://gw.alicdn.com/mt/TB1_ZzUd4uTBuNkHFNRXXc9qpXa-1633-949.png"></p>
-<ul>
-<li>需求列表：即本月需要完成的需求描述</li>
-<li>Task-todo：待完成任务</li>
-<li>Task-doing：进行中的任务</li>
-<li>Task-done：已完成任务</li>
-<li>需求-testing：测试中的需求</li>
-<li>需求-bug：测试中发现的 bug 列表</li>
-<li>需求-done：需求完成</li>
-</ul>
-<h3 id="任务详情"><a href="#任务详情" class="headerlink" title="任务详情"></a>任务详情</h3><p><img src="http://gw.alicdn.com/mt/TB1x8O1mDJYBeNjy1zeXXahzVXa-807-885.png"></p>
-<p>主要分为描述、成员、标签、耗时、评论等。</p>
-<h3 id="标签使用"><a href="#标签使用" class="headerlink" title="标签使用"></a>标签使用</h3><p><img src="http://gw.alicdn.com/mt/TB1BCoRmbGYBuNjy0FoXXciBFXa-299-283.png"></p>
-<p>按照需求优先级划分标签</p>
-<h2 id="项目约定"><a href="#项目约定" class="headerlink" title="项目约定"></a>项目约定</h2><ol>
-<li>账号统一使用中文花名</li>
-<li>邮箱使用公司邮箱</li>
-<li>所有项目均设置为私有</li>
-<li>每个组分为两个看板，分别为需求看板及任务看板</li>
-<li>标签按照需求优先级划分</li>
-</ol>
-]]></content>
-      <categories>
-        <category>Utilities</category>
-      </categories>
-      <tags>
-        <tag>Wekan</tag>
-        <tag>看板</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>跨平台书签同步:Xmarks</title>
-    <url>/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/">原文链接</a></p>
-</blockquote>
-<h2 id="Xmarks简介"><a href="#Xmarks简介" class="headerlink" title="Xmarks简介"></a>Xmarks简介</h2><p><a href="https://www.xmarks.com/">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
-<p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>
-<span id="more"></span>
-
-<h2 id="多浏览器支持"><a href="#多浏览器支持" class="headerlink" title="多浏览器支持"></a>多浏览器支持</h2><p> Xmarks 目前支持 Firefox、Chrome、IE、Safari 这几种常见浏览器，完全可以满足大部分用户需求。</p>
-<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_001.png"></p>
-<p>仅需要在官网上下载相对应的浏览器插件，登录 Xmarks 账号即可开始使用，十分便捷。</p>
-<h2 id="支持恢复已删除书签"><a href="#支持恢复已删除书签" class="headerlink" title="支持恢复已删除书签"></a>支持恢复已删除书签</h2><p> Xmarks 会对用户每次的同步操作进行备份，同时可以很方便的进行查看和导出还原等操作。这个功能在多台设备间同步出错的时候十分实用</p>
-<p> <img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_002.png"></p>
-<p>同时还允许查找重复书签，十分人性化的功能，有时候经常一个页面添加到不同的书签文件夹里面，时间长了自己都忘记了，很适合我这种强迫症患者。</p>
-<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><p>Xmarks 有一个最大的缺点是与浏览器自带同步机制产生冲突，例如，Chrome 自带书签同步，同时 Xmarks 默认安装后是会隔一段时间或者每当书签发生变动时候进行自动同步，这时候问题就来了，即使没有任何书签变动，由于 Chrome 自己的同步机制，Xmarks 经常会产生另一份重复的书签，这时Xmarks 又会自动同步到服务器端，一不小心发现每个浏览器下面的书签文件夹都是好几份，只能使用直接下载覆盖，发现还是无法解决，最后使用杀手锏，恢复到之前正常的一个书签备份。</p>
-<p>被这个问题折磨了几次之后终于发现原来问题是出在浏览器自带的同步书签功能上面，最后我的解决办法是在 Chrome 的同步设置里面去除书签同步，反正每次重装 Chrome 时候，会自动同步 Xmarks 插件，这时进行下载覆盖本地书签即可。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说，对于多浏览器（尤其是包括 Safari 浏览器）的用户来说，Xmarks 是一个十分好用的同步工具。</p>
-<p>享受它的便捷性的同时，它带来的问题就是，无法使用浏览器自带的同步功能了，对于 Chrome 和 Firefox 来说，这个问题还不是很明显，但是对于 Mac 和 iPhone 用户来说，这相当于抛弃了 iCloud 自带的书签同步功能，手机上的书签就需要自己手动同步了。可以根据自己的需求来取舍。</p>
-]]></content>
-      <categories>
-        <category>Utilities</category>
-      </categories>
-      <tags>
-        <tag>Xmarks</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用Logseq构建GTD系统</title>
-    <url>/2021/05/08/Utilities/%E4%BD%BF%E7%94%A8Logseq%E6%9E%84%E5%BB%BAGTD%E7%B3%BB%E7%BB%9F/</url>
-    <content><![CDATA[<blockquote>
-<p>2021-05-08： 1.0版本初步完成，待完善已完成任务回顾<br>2021-05-10： 1.1版本完成，修改不重要不紧急为将来清单，且新增每周回顾</p>
-</blockquote>
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在阅读《小强升职记》，感觉里面讲到的时间管理工具和方法十分有用，自己之前虽然也了解一些工具，例如四象限原则、两分钟方法等，但看完这本书之后感觉之前的理解还是太肤浅了。是时候升级一下自己的时间管理系统了。</p>
-<span id="more"></span>
-
-<p>在此之前我的工具大致包括： 稍后读软件、GTD工具（滴答清单）、写作工具（一般是VSCode+Hexo）。最近半年沉迷于使用双链笔记软件，目前在用的是 Logseq，后面专门展开介绍一下。目前在尝试将GTD工具、笔记都整合到 Logseq 里面，主要是受了这篇文章的启发 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>，下面就详细介绍一下我的实践过程。</p>
-<h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><h3 id="Datalog"><a href="#Datalog" class="headerlink" title="Datalog"></a>Datalog</h3><p>首先，需要简单学习一下Datalog语法。Logseq是基于Clojure开发的，它的底层可以简单地理解为是类似于数据库的结构，因此可以天然的支持各种查询，这也是我们能够利用它来实现 GTD 管理的前提。因此这里如果需要掌握如何使用 Logseq 来进行查询的话，最好先学习一下如何使用 Datalog。可以参考 <a href="https://logseq.github.io/#/page/advanced%20queries">官方的查询教程</a> 以及这篇 <a href="http://www.learndatalogtoday.org/">Learn Datalog Today</a>，粗略扫一遍，能够看懂大概意思就可以了。</p>
-<h3 id="CSS"><a href="#CSS" class="headerlink" title="CSS"></a>CSS</h3><p>其次，Logseq本身是列表大纲形式，无法直接支持四象限这种样式，因此需要一些 CSS功底，这里我是直接参考了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a> 里面的样式，原始版本在 <a href="https://discuss.logseq.com/t/css-template-eisenhower-matrix/526">[css+template] eisenhower matrix</a>，可以简单看下。</p>
-<h2 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h2><h3 id="块属性"><a href="#块属性" class="headerlink" title="块属性"></a>块属性</h3><p>《小强升职记》里面提到日常待办事项是分为项目、任务、行动三种的，只有行动才是可以立马去执行的，项目和任务都需要进行分解，拆成行动。</p>
-<p>结合Logseq，我目前考虑使用属性来解决，也可以考虑使用标签，不过我认为会对内容有一定的污染，各有利弊吧。</p>
-<p>针对一个新的行动或者任务，添加属性type字段，然后根据具体的类型添加行动、任务、项目字段。</p>
-<p>样例：<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508175442.png" alt="20210508175442"></p>
-<h3 id="四象限查询条件"><a href="#四象限查询条件" class="headerlink" title="四象限查询条件"></a>四象限查询条件</h3><p>注意：<strong>所有的待办都必须要有明确的优先级和截止日期</strong>，这么做有几个原因：<br>    1. 要求自己对每个待办都设置明确的时间点，避免添加到收集箱中一直不处理<br>    2. 添加了优先级之后才好进行四象限统计<br>    3. 目前还没有找到Logseq的query条件中如何同时查找DDL在限定时间内以及无DDL限制的任务，只能查找其中一种case，这个后续解决</p>
-<p>实际使用过程中，可以把一下的查询条件汇总到一个模板中，</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">## #.v-eisenhower-matrix （用于CSS选择器，最好不要改）</span><br><span class="line">:PROPERTIES:</span><br><span class="line">:template: 四象限</span><br><span class="line">:END:</span><br><span class="line">#### [[重要且紧急]]</span><br><span class="line">##### </span><br><span class="line">#+BEGIN_QUERY</span><br><span class="line">...</span><br><span class="line">#+END_QUERY</span><br><span class="line">#### [[重要不紧急]]</span><br><span class="line">#### [[紧急不重要]]</span><br><span class="line">#### [[不重要不紧急]]</span><br></pre></td></tr></table></figure>
-
-<p>具体查询语句如下：可以根据自己的实际使用需求将属性限制移除或者修改时间限制，代码中均已经添加注释。</p>
-<blockquote>
-<p>2021-05-10 补充： 将设置为Later的事项移动到第四象限，这样就可以定期回顾；同时新增一个每周回顾的query语句，由于目前Logseq还不支持查询当前时间戳，因此用了个笨办法，每次查询的时候手动输入当前时间戳ms进行查询。</p>
-</blockquote>
-<h4 id="重要且紧急-避免太多进入该象限"><a href="#重要且紧急-避免太多进入该象限" class="headerlink" title="[[重要且紧急]] ^^(避免太多进入该象限)^^"></a>[[重要且紧急]] ^^(避免太多进入该象限)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;:query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-<h4 id="重要不紧急-优先完成此象限"><a href="#重要不紧急-优先完成此象限" class="headerlink" title="[[重要不紧急]] ^^(优先完成此象限)^^"></a>[[重要不紧急]] ^^(优先完成此象限)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&gt; ?d ?end)]  ;; DDL在5天以上</span><br><span class="line">    ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-<h4 id="紧急不重要-尽量委派给其他人"><a href="#紧急不重要-尽量委派给其他人" class="headerlink" title="[[紧急不重要]] ^^(尽量委派给其他人)^^"></a>[[紧急不重要]] ^^(尽量委派给其他人)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [?b :block/priority ?priority]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            [(!= &quot;A&quot; ?priority)] ;; 优先级在A的才认为是重要</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-<h4 id="待办清单-不紧急不重要，定期回顾确认"><a href="#待办清单-不紧急不重要，定期回顾确认" class="headerlink" title="[[待办清单]] ^^(不紧急不重要，定期回顾确认)^^"></a>[[待办清单]] ^^(不紧急不重要，定期回顾确认)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [(contains? #&#123;&quot;LATER&quot;&#125; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-
-<h4 id="本周已完成-近七天统计"><a href="#本周已完成-近七天统计" class="headerlink" title="[[本周已完成]] ^^(近七天统计)^^"></a>[[本周已完成]] ^^(近七天统计)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;   :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;done&quot;) ?finishedTime]</span><br><span class="line">            [(- 1620657776000 604800000) ?weekbefore] ;; 由于目前Logseq不支持直接获取当前时间戳，只能使用trick的方式，每次查询前手动输入当前时间戳ms值,算出一周前的时间戳</span><br><span class="line">            [(&gt;= ?finishedTime ?weekbefore)] ;; 一周内完成的工作</span><br><span class="line">            [(= &quot;DONE&quot; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-
-<h3 id="CSS优化"><a href="#CSS优化" class="headerlink" title="CSS优化"></a>CSS优化</h3><p>这里直接照抄了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>， 不过它的CSS中内容较多，我单独提取了四象限相关的部分，放在 <a href="https://github.com/samwei12/LogseqMisc/blob/master/%E5%9B%9B%E8%B1%A1%E9%99%90.css">四象限CSS</a> 中，查询模板也都放在这里，便于大家使用。</p>
-<h3 id="最终效果"><a href="#最终效果" class="headerlink" title="最终效果"></a>最终效果</h3><p>目前我的每日笔记大概长这样：</p>
-<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508181043.png" alt="20210508181043"></p>
-<blockquote>
-<p>1.1 版本已经解决</p>
-</blockquote>
-<p><del>可以算是1.0 版本，目前存在的问题包括：</del></p>
-<ol>
-<li><del>没有地方定期回顾那些没有设置DDL和优先级的任务</del></li>
-<li><del>缺少查看已完成任务和行动的地方（做周报时候很有用）</del></li>
-</ol>
-<p>Logseq是个很棒的工具，期待尽快稳定下来，后面长期使用，作为笔记+GTD一站式平台~</p>
-]]></content>
-      <categories>
-        <category>Utilities</category>
-      </categories>
-      <tags>
-        <tag>Logseq</tag>
-        <tag>GTD</tag>
       </tags>
   </entry>
   <entry>
@@ -1586,6 +1420,280 @@
       </tags>
   </entry>
   <entry>
+    <title>使用 Wekan 搭建个人看板</title>
+    <url>/2020/05/03/Utilities/Wekan/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2020/05/03/Utilities/Wekan/">原文链接</a></p>
+</blockquote>
+<h2 id="看板？"><a href="#看板？" class="headerlink" title="看板？"></a>看板？</h2><p>术语：</p>
+<ul>
+<li>看板：TODO</li>
+<li>列表：同类型的事务放在一起，按照任务进度，通常为：未完成、进行中、已完成</li>
+<li>卡片：最小单位，即任务，</li>
+<li>泳道：不同类型的任务横向对比，例如，团队中不同分组等</li>
+</ul>
+<span id="more"></span>
+
+
+<h2 id="为什么要用看板？"><a href="#为什么要用看板？" class="headerlink" title="为什么要用看板？"></a>为什么要用看板？</h2><p>TODO</p>
+<h2 id="关于-wekan"><a href="#关于-wekan" class="headerlink" title="关于 wekan"></a>关于 wekan</h2><p><a href="https://github.com/wekan/wekan">wekan</a> 是一款开源的看板系统，从功能上来讲模仿看板类软件鼻祖 <a href="https://trello.com/">Trello</a>。整体界面大致如下：</p>
+<p><img src="http://www.scienjus.com/uploads/2016/03/wekan.jpeg"></p>
+<p>采用 wekan 的原因也比较简单， 为了安全性考虑，公司内部文档禁止使用部署在外部服务器上的工具。</p>
+<h2 id="如何搭建-wekan？"><a href="#如何搭建-wekan？" class="headerlink" title="如何搭建 wekan？"></a>如何搭建 wekan？</h2><blockquote>
+<p> 官方教程：<a href="https://github.com/wekan/wekan/wiki/Install-Wekan-Docker-in-production">https://github.com/wekan/wekan/wiki/Install-Wekan-Docker-in-production</a></p>
+</blockquote>
+<ol>
+<li>安装 Docker</li>
+<li>下载 <a href="https://github.com/wekan/wekan-mongodb">https://github.com/wekan/wekan-mongodb</a></li>
+<li>进入 mongodb 文件夹</li>
+<li>修改 yaml 中的 url 信息</li>
+<li>执行 <code>docker-compose up -d</code> 或者 <code>docker-compose up</code></li>
+</ol>
+<h2 id="wekan-简易说明"><a href="#wekan-简易说明" class="headerlink" title="wekan 简易说明"></a>wekan 简易说明</h2><h3 id="初步接触"><a href="#初步接触" class="headerlink" title="初步接触"></a>初步接触</h3><p>目前是在 Mac 服务器上搭建了 wekan，暂时没有域名，大家先使用 IP 地址登录， <a href="http://30.3.131.128/">http://30.3.131.128</a>，之后就是注册账号： –统一约定使用中文花名，邮箱使用公司邮箱–，</p>
+<p><img src="http://gw.alicdn.com/mt/TB1Qu_nd8mWBuNkSndVXXcsApXa-1566-950.png"></p>
+<p>之后进入看板首页，这里可以管理个人名下所有项目，新增看板也在这里，下面以工程组为例，简单介绍下如何使用看板。</p>
+<p>首先，创建一个看板，<img src="http://gw.alicdn.com/mt/TB1UY6MmgmTBuNjy1XbXXaMrVXa-303-210.png"></p>
+<p>接下来可以看到看板的整体页面，</p>
+<p><img src="http://gw.alicdn.com/mt/TB1ThO.d3KTBuNkSne1XXaJoXXa-1917-956.png"></p>
+<ul>
+<li>左上角为工程属性，例如是否私有，是否提示通知</li>
+<li>左侧整体面板为看板主体内容</li>
+<li>右侧为属性栏，包括系统日志、项目成员、标签设置等</li>
+<li>右上角为工具栏，包括搜索、过滤、列表/泳道切换、多选、看板菜单等</li>
+</ul>
+<h3 id="需求看板"><a href="#需求看板" class="headerlink" title="需求看板"></a>需求看板</h3><p>接下来需要做的事情就是建立列表和泳道，这里我们约定，需求跟任务划分为两个看板，例如，所有工程618的需求放到一个看板中，包括待定需求、进行中的需求、已完成需求，不需要写明需求详细工期，仅列出本期都有哪些需求即可；所有的需求细分出来的任务单独放一个看板中，需要细化到每人每天的工作。需求看板示例：</p>
+<p><img src="http://gw.alicdn.com/mt/TB18GyQmDJYBeNjy1zeXXahzVXa-1919-943.png"></p>
+<p>这里我们约定划分这么几个列表：</p>
+<ul>
+<li>待梳理需求：需要进一步评估是否需要做或者如何做</li>
+<li>长期规划：一般是3个月以上，可以视项目情况而定，移除该列表也可以</li>
+<li>中期规划：一般是1-3个月</li>
+<li>本月：当前月需要完成的需求</li>
+<li>已交付：该版本已完成需求</li>
+<li>后续可以看情况自定义部分列表，例如已延期</li>
+<li>不同泳道即不同模块，整体大图的话就可以按照算法、2D、3D 这样划分，小组内部可以根据功能划分，例如 CPU、GPU 等</li>
+</ul>
+<p>右侧面板中需要添加其他成员，这样其他人才能访问</p>
+<h3 id="任务看板"><a href="#任务看板" class="headerlink" title="任务看板"></a>任务看板</h3><p>之后我们就需要根据刚才整理出来的需求进一步分配工时，列表可以参考下图：</p>
+<p><img src="http://gw.alicdn.com/mt/TB1_ZzUd4uTBuNkHFNRXXc9qpXa-1633-949.png"></p>
+<ul>
+<li>需求列表：即本月需要完成的需求描述</li>
+<li>Task-todo：待完成任务</li>
+<li>Task-doing：进行中的任务</li>
+<li>Task-done：已完成任务</li>
+<li>需求-testing：测试中的需求</li>
+<li>需求-bug：测试中发现的 bug 列表</li>
+<li>需求-done：需求完成</li>
+</ul>
+<h3 id="任务详情"><a href="#任务详情" class="headerlink" title="任务详情"></a>任务详情</h3><p><img src="http://gw.alicdn.com/mt/TB1x8O1mDJYBeNjy1zeXXahzVXa-807-885.png"></p>
+<p>主要分为描述、成员、标签、耗时、评论等。</p>
+<h3 id="标签使用"><a href="#标签使用" class="headerlink" title="标签使用"></a>标签使用</h3><p><img src="http://gw.alicdn.com/mt/TB1BCoRmbGYBuNjy0FoXXciBFXa-299-283.png"></p>
+<p>按照需求优先级划分标签</p>
+<h2 id="项目约定"><a href="#项目约定" class="headerlink" title="项目约定"></a>项目约定</h2><ol>
+<li>账号统一使用中文花名</li>
+<li>邮箱使用公司邮箱</li>
+<li>所有项目均设置为私有</li>
+<li>每个组分为两个看板，分别为需求看板及任务看板</li>
+<li>标签按照需求优先级划分</li>
+</ol>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>Wekan</tag>
+        <tag>看板</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用Logseq构建GTD系统</title>
+    <url>/2021/05/08/Utilities/%E4%BD%BF%E7%94%A8Logseq%E6%9E%84%E5%BB%BAGTD%E7%B3%BB%E7%BB%9F/</url>
+    <content><![CDATA[<blockquote>
+<p>2021-05-08： 1.0版本初步完成，待完善已完成任务回顾<br>2021-05-10： 1.1版本完成，修改不重要不紧急为将来清单，且新增每周回顾</p>
+</blockquote>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在阅读《小强升职记》，感觉里面讲到的时间管理工具和方法十分有用，自己之前虽然也了解一些工具，例如四象限原则、两分钟方法等，但看完这本书之后感觉之前的理解还是太肤浅了。是时候升级一下自己的时间管理系统了。</p>
+<span id="more"></span>
+
+<p>在此之前我的工具大致包括： 稍后读软件、GTD工具（滴答清单）、写作工具（一般是VSCode+Hexo）。最近半年沉迷于使用双链笔记软件，目前在用的是 Logseq，后面专门展开介绍一下。目前在尝试将GTD工具、笔记都整合到 Logseq 里面，主要是受了这篇文章的启发 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>，下面就详细介绍一下我的实践过程。</p>
+<h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><h3 id="Datalog"><a href="#Datalog" class="headerlink" title="Datalog"></a>Datalog</h3><p>首先，需要简单学习一下Datalog语法。Logseq是基于Clojure开发的，它的底层可以简单地理解为是类似于数据库的结构，因此可以天然的支持各种查询，这也是我们能够利用它来实现 GTD 管理的前提。因此这里如果需要掌握如何使用 Logseq 来进行查询的话，最好先学习一下如何使用 Datalog。可以参考 <a href="https://logseq.github.io/#/page/advanced%20queries">官方的查询教程</a> 以及这篇 <a href="http://www.learndatalogtoday.org/">Learn Datalog Today</a>，粗略扫一遍，能够看懂大概意思就可以了。</p>
+<h3 id="CSS"><a href="#CSS" class="headerlink" title="CSS"></a>CSS</h3><p>其次，Logseq本身是列表大纲形式，无法直接支持四象限这种样式，因此需要一些 CSS功底，这里我是直接参考了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a> 里面的样式，原始版本在 <a href="https://discuss.logseq.com/t/css-template-eisenhower-matrix/526">[css+template] eisenhower matrix</a>，可以简单看下。</p>
+<h2 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h2><h3 id="块属性"><a href="#块属性" class="headerlink" title="块属性"></a>块属性</h3><p>《小强升职记》里面提到日常待办事项是分为项目、任务、行动三种的，只有行动才是可以立马去执行的，项目和任务都需要进行分解，拆成行动。</p>
+<p>结合Logseq，我目前考虑使用属性来解决，也可以考虑使用标签，不过我认为会对内容有一定的污染，各有利弊吧。</p>
+<p>针对一个新的行动或者任务，添加属性type字段，然后根据具体的类型添加行动、任务、项目字段。</p>
+<p>样例：<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508175442.png" alt="20210508175442"></p>
+<h3 id="四象限查询条件"><a href="#四象限查询条件" class="headerlink" title="四象限查询条件"></a>四象限查询条件</h3><p>注意：<strong>所有的待办都必须要有明确的优先级和截止日期</strong>，这么做有几个原因：<br>    1. 要求自己对每个待办都设置明确的时间点，避免添加到收集箱中一直不处理<br>    2. 添加了优先级之后才好进行四象限统计<br>    3. 目前还没有找到Logseq的query条件中如何同时查找DDL在限定时间内以及无DDL限制的任务，只能查找其中一种case，这个后续解决</p>
+<p>实际使用过程中，可以把一下的查询条件汇总到一个模板中，</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">## #.v-eisenhower-matrix （用于CSS选择器，最好不要改）</span><br><span class="line">:PROPERTIES:</span><br><span class="line">:template: 四象限</span><br><span class="line">:END:</span><br><span class="line">#### [[重要且紧急]]</span><br><span class="line">##### </span><br><span class="line">#+BEGIN_QUERY</span><br><span class="line">...</span><br><span class="line">#+END_QUERY</span><br><span class="line">#### [[重要不紧急]]</span><br><span class="line">#### [[紧急不重要]]</span><br><span class="line">#### [[不重要不紧急]]</span><br></pre></td></tr></table></figure>
+
+<p>具体查询语句如下：可以根据自己的实际使用需求将属性限制移除或者修改时间限制，代码中均已经添加注释。</p>
+<blockquote>
+<p>2021-05-10 补充： 将设置为Later的事项移动到第四象限，这样就可以定期回顾；同时新增一个每周回顾的query语句，由于目前Logseq还不支持查询当前时间戳，因此用了个笨办法，每次查询的时候手动输入当前时间戳ms进行查询。</p>
+</blockquote>
+<h4 id="重要且紧急-避免太多进入该象限"><a href="#重要且紧急-避免太多进入该象限" class="headerlink" title="[[重要且紧急]] ^^(避免太多进入该象限)^^"></a>[[重要且紧急]] ^^(避免太多进入该象限)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;:query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+<h4 id="重要不紧急-优先完成此象限"><a href="#重要不紧急-优先完成此象限" class="headerlink" title="[[重要不紧急]] ^^(优先完成此象限)^^"></a>[[重要不紧急]] ^^(优先完成此象限)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&gt; ?d ?end)]  ;; DDL在5天以上</span><br><span class="line">    ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+<h4 id="紧急不重要-尽量委派给其他人"><a href="#紧急不重要-尽量委派给其他人" class="headerlink" title="[[紧急不重要]] ^^(尽量委派给其他人)^^"></a>[[紧急不重要]] ^^(尽量委派给其他人)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [?b :block/priority ?priority]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            [(!= &quot;A&quot; ?priority)] ;; 优先级在A的才认为是重要</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+<h4 id="待办清单-不紧急不重要，定期回顾确认"><a href="#待办清单-不紧急不重要，定期回顾确认" class="headerlink" title="[[待办清单]] ^^(不紧急不重要，定期回顾确认)^^"></a>[[待办清单]] ^^(不紧急不重要，定期回顾确认)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [(contains? #&#123;&quot;LATER&quot;&#125; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+
+<h4 id="本周已完成-近七天统计"><a href="#本周已完成-近七天统计" class="headerlink" title="[[本周已完成]] ^^(近七天统计)^^"></a>[[本周已完成]] ^^(近七天统计)^^</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;   :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;done&quot;) ?finishedTime]</span><br><span class="line">            [(- 1620657776000 604800000) ?weekbefore] ;; 由于目前Logseq不支持直接获取当前时间戳，只能使用trick的方式，每次查询前手动输入当前时间戳ms值,算出一周前的时间戳</span><br><span class="line">            [(&gt;= ?finishedTime ?weekbefore)] ;; 一周内完成的工作</span><br><span class="line">            [(= &quot;DONE&quot; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+
+<h3 id="CSS优化"><a href="#CSS优化" class="headerlink" title="CSS优化"></a>CSS优化</h3><p>这里直接照抄了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>， 不过它的CSS中内容较多，我单独提取了四象限相关的部分，放在 <a href="https://github.com/samwei12/LogseqMisc/blob/master/%E5%9B%9B%E8%B1%A1%E9%99%90.css">四象限CSS</a> 中，查询模板也都放在这里，便于大家使用。</p>
+<h3 id="最终效果"><a href="#最终效果" class="headerlink" title="最终效果"></a>最终效果</h3><p>目前我的每日笔记大概长这样：</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508181043.png" alt="20210508181043"></p>
+<blockquote>
+<p>1.1 版本已经解决</p>
+</blockquote>
+<p><del>可以算是1.0 版本，目前存在的问题包括：</del></p>
+<ol>
+<li><del>没有地方定期回顾那些没有设置DDL和优先级的任务</del></li>
+<li><del>缺少查看已完成任务和行动的地方（做周报时候很有用）</del></li>
+</ol>
+<p>Logseq是个很棒的工具，期待尽快稳定下来，后面长期使用，作为笔记+GTD一站式平台~</p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>Logseq</tag>
+        <tag>GTD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>思维导图软件测评</title>
+    <url>/2021/06/05/Utilities/%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%84/</url>
+    <content><![CDATA[<p>最近连续写了两篇万字长文，有点累了，而且我也知道这种长文基本上也不太会有人阅读，周末写点测评放松一下。</p>
+<p>这篇文章主要是介绍一下这几年我自己所用过的几款思维导图软件。</p>
+<span id="more"></span>
+
+<h2 id="使用需求"><a href="#使用需求" class="headerlink" title="使用需求"></a>使用需求</h2><blockquote>
+<p><strong>思维导图</strong>（英语：mind map），又称<strong>脑图</strong>、<strong>心智地图</strong>、<strong>头脑风暴图</strong>、<strong>心智图</strong>、<strong>灵感触发图</strong>、<strong>概念地图</strong>、或<strong>思维地图</strong>，是一种用图像整理信息的图解。它用一个中央关键词或想法以辐射线形连接所有的代表字词、想法、任务或其它关联项目。它可以利用不同的方式去表现人们的想法，如引题式、可见形象化式、建构系统式和分类式。</p>
+</blockquote>
+<p>以上是维基百科对思维导图的定义，我相信很多人应该都是听说过或者用过思维导图的，思维导图比起传统的文字列表来说更加直观，更加接近人在思考时的空间想象，非常适合用于任务拆解、项目规划、头脑风暴、记录笔记等。比如我我自己在编写文章之前，通常会先用思维导图构建一下整体大纲，明确论点、论据等要素。</p>
+<p>在进行软件测评之前，我们还是先梳理一下自己在使用思维导图时候具体有哪些诉求：</p>
+<ol>
+<li>简洁直观，编辑功能强大易用性好</li>
+<li>支持的格式丰富。对我自己来说，比较常用的导出包括 PDF 和 Markdown， PDF 是为了跟同事或者其他人分享，Markdown 则是方便进行文本写作。</li>
+<li>跨平台。这个不是特别强诉求，大部分情况下我是苹果全家桶，偶尔会有 Windows 诉求，不过我考虑到后面可能会换成安卓手机使用，选用软件时候要提前纳入筛选条件。</li>
+</ol>
+<h2 id="iThoughts-最近几年关注不多，信息不是最新"><a href="#iThoughts-最近几年关注不多，信息不是最新" class="headerlink" title="iThoughts 最近几年关注不多，信息不是最新"></a>iThoughts <del>最近几年关注不多，信息不是最新</del></h2><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605103641.jpg" alt="en-mac-a-uses.jpg"></p>
+<ul>
+<li>支持平台： Mac、iOS、Windows</li>
+<li>售价：单平台 360￥</li>
+<li>优势：老牌导图软件，稳定性很强；Native 开发，性能好；支持买断</li>
+<li>劣势：有点小众，界面略丑</li>
+<li>推荐：★★★☆</li>
+</ul>
+<p>iThoughts 可以算是我接触最早的思维导图软件了，大概在12-13 年左右开始使用，最开始的时候感觉还是蛮棒的，颜值一般，但是性能很优秀，编辑撤销、拖拽等都很不错。使用多起来之后发现有点不尽人意了，我当时用的时候只有 Mac 跟 iOS，换 Windows 电脑就无法编辑了（现在已经支持），且样式、模板支持的很少，不支持圈选概要等，逐步不再使用了。</p>
+<h2 id="Mindnode"><a href="#Mindnode" class="headerlink" title="Mindnode"></a>Mindnode</h2><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605104643.png" alt="img"></p>
+<ul>
+<li>支持平台： Mac、iOS</li>
+<li>售价：订阅制 130￥每年</li>
+<li>优势：界面超级简洁优雅；Native 开发，性能好；任务管理较好；Lock-in 成本低</li>
+<li>劣势：新版本只能订阅； 免费版几乎不可用；仅支持苹果全家桶；不支持选定分支导出</li>
+<li>推荐：★★★★</li>
+</ul>
+<p>Mindnode 是我在抛弃 iThought 之后接触到的软件，同样也是基于 Native 开发的，这种模式的优势在于能够最好的利用原生系统，例如 iOS 上面的各种手势，同时性能通常都很棒，各种拖拽、编辑撤销都不在话下，体验十分顺滑；劣势就是一般跨平台支持不佳，原因在于每个系统都需要进行一套新的开发适配，Mac 跟 iOS 相对是最好打通的了，但是 Windows 和安卓的支持就比较困难，同时不同系统间差异性很大，想要完成迁移且保持跟苹果系统中同样的体验是非常困难的，我想这也是 Mindnode 至今没有出 Windows 版的原因。</p>
+<p>Mindnode 基本上可以说是我用过的导图软件里面颜值最高的，且界面非常克制，简洁的不像话，没有那些花里胡哨的功能，给人十分优雅的感觉。同时，Mindnode 的任务管理是这些软件里面做的最好的，父节点标注为 Task，会直接将全部子节点都标记为 Task，且子节点完成时候会实时更新父节点进度。</p>
+<p>很长一段时间内，我都在 XMind 和 Mindnode 之前纠结徘徊，感觉这两款软件都有做的很棒的地方，不过后面还是 转向了 XMind，毕竟国产软件很大程度上是具有先天优势的。</p>
+<h2 id="XMind"><a href="#XMind" class="headerlink" title="XMind"></a>XMind</h2><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605110342.png" alt="PC"></p>
+<ul>
+<li>支持平台： 全平台，Mac、Windows、Linux、iOS、安卓</li>
+<li>售价：订阅制 388￥每年</li>
+<li>优势：Electric 开发，跨平台支持好；国产软件，本土化程度最高；功能超级丰富</li>
+<li>劣势：不支持买断；售价不菲；格式 Lock-in 成本较高；图片编辑较差；流畅程度不及 Native 软件</li>
+<li>推荐：★★★★☆</li>
+</ul>
+<p>XMind 可以说是国产之光了，目前国内思维导图这块使用者最多，后来者居上，赶超了各种国内外老牌思维导图软件。</p>
+<p>我最早接触到这款软件是通过 XMind8，当时还是用 Java 开发的，界面不说丑陋反正也不好看，而且操作很容易卡顿，主要是因为公司内置了这款软件，同事间交流很方便，因此被迫使用，当时的主力还是 Mindnode。</p>
+<h3 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h3><p>那时候我还不知道 XMind 的开发者在国内，只是突然有一天关注到 XMind 新出了一款替代产品，XMind Zen。最开始确实有点惊为天人的感觉，完全甩 XMind8 不知道几条街，根本看不出来是一款迭代产品，实际上了解下来，基本上可以说是完全重做了，底层的也换成了 electric 开发，最显而易见的好处就是颜值立马在线了，且操作流畅程度大幅度提升，直接进入到了思维导图第一梯队，可以跟 Mindnode 正面抗衡了。</p>
+<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605111825.png" alt="image-20210605111825481" style="zoom:50%;" />
+
+<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605112553.png" alt="image-20210605112553242" style="zoom:50%;" />
+
+<p>但不得不说，国内互联网开发者推出的产品最大优势就是本土化程度实在是高出国外软件不知道多少，且国内互联网的另一个特点就是拼，非常的拼（可以说深得内卷精髓），产品迭代速度通常都是碾压国外软件，在最近短短一两年内，XMind 就推出了众多重磅功能，Zen 模式、密码设置，还有接下来还即将要推出<strong>演示模式</strong>，可以说都是非常符合国人诉求的。同时，XMind 中提供了大量丰富的样式与模板，包括矩阵、树状图、时间轴、鱼骨图等等；还提供了一个图库，包含很多非常有用的模板，例如简历、读后感、组织架构图等等，也难怪市场占有率如此之高。</p>
+<h3 id="劣势"><a href="#劣势" class="headerlink" title="劣势"></a>劣势</h3><p>不过 XMind 目前还是存在部分使用上的问题的，我个人比较不爽的就是软件格式的 Lock-In 成本有点高，这也是国产软件的通病。所谓的软件 Lock-in 成本就是指当你想要从该软件迁移到同类其他软件的时候，所需要花费的代价。通常，国外软件不管做的好还是差，一般导出功能都是比较完整的，可以很简单的就将用户数据迁移到其他软件，而国产软件的套路通常是导入功能第一优先级开发，不管你是什么奇奇怪怪的小众格式，只要你有用户，我就支持，且一般支持的都还不错；当用户迁移完毕之后，想要出去就没那么简单了，导出格式较少、bug 很多、导出数据不完整这都算是小意思了，更有甚者，想要导出，可以，买会员先（说的就是你，收趣），真的是把我恶心到了。</p>
+<p>XMind 支持的导出格式倒是不少，PDF、Word、Markdown 等，看起来很够用了，不过这里对于图片的编辑导出实在是太弱了。类似 PDF 这种格式就不提了，只是单向导出，并不能进行编辑。你总不希望你以后所有的导图都是一个只读的 PDF 吧。所以我比较关注的是可以双向读写的 Markdown 格式，Textbundle 本质上就是 Markdown+图片。</p>
+<p>当你粘贴图片的时候，没有任何问题，但当你想要把图片拷贝出来的时候，问题来了， 你会发现你拷贝出来的内容大概是这样的 <code>[&#123;&quot;src&quot;:&quot;xap:resources/4a36ee50ecad8ba5db10a187b23d1024db4c4cbc1527f90fc65251f6499ff926.png&quot;,&quot;width&quot;:756,&quot;height&quot;:702&#125;]</code> ，怎么样，是不是看不懂，看不懂就对了，这个路径是 XMind 自己内部的一个资源库路径，对外根本不可读（而且 XMind 至今都不支持 URL Scheme），这时候你能做的就是将这个图片右键另存为，当你发现你的导图里面保存了几十张图片的时候，是不是要死的心都有了？</p>
+<p>此时你可能想，我直接导出文件不好吗，年轻人，太天真了，当你导出 Markdown 时候会发现根本没有任何图片，此时你可能想到我上面说的，TextBundle 可以啊，然而当你点击 TextBundle 导出的时候，你会看到如下对话框：</p>
+<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605114541.png" alt="image-20210605114540987" style="zoom:50%;" />
+
+<p>惊不惊喜，意不意外？是不是感觉这个套路很熟悉，好像在哪里见过？于是你不得不接受一个事实，哪怕你可以用它任意编辑，随便白嫖，原本以为只是导出图片有点水印，根本不影响使用，但你想要跳出 XMind 的时候，发现你的套路全部都在意料之中，对方早就预判了你的预判。</p>
+<p><img src="http://img.soogif.com/UdBrosApKOFLptMkiOG45OVe6zj4pVTK.gif"></p>
+<p>这时候你的选择是什么？当然是原谅她，老老实实买个会员再说。</p>
+<h2 id="FreePlane"><a href="#FreePlane" class="headerlink" title="FreePlane"></a>FreePlane</h2><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605120411.jpeg" alt="Some applications of Freeplane"></p>
+<ul>
+<li>支持平台： 仅支持桌面端，Mac、Windows、Linux</li>
+<li>售价：开源免费</li>
+<li>优势：Java 开发，跨平台；支持 URL Scheme；功能齐全，支持框选、总结等</li>
+<li>劣势：界面实在是下不了手；导出功能太差；中文支持一般；图片编辑非常不好用；不支持预览</li>
+<li>推荐：★★☆</li>
+</ul>
+<p>我是在一个偶然的机会看到知乎上 @临时哈桑 对思维导图的评价中知道 Freeplane 的，原话是 Freeplane 从性能到功能都吊打各种商业产品，唯一的缺点是丑。当时我刚好是想要替换到 XMind 的，除了贵，就是偶尔卡顿，Lock-in 成本较高，于是抱着很期待的心态下载了 Freeplane 进行使用。</p>
+<h3 id="优势-1"><a href="#优势-1" class="headerlink" title="优势"></a>优势</h3><p>先说优点吧，别的不提，Freeplane 是开源免费软件，这一点就足够让人心动了，大部分人的使用频次都没有那么高，为了一个一周用两三次的软件，每年花几百块，说实话是有点贵的。开源的优势在于，不用担心这个软件哪天突然死掉，比如 XMind 现在公司经营不善倒了，可能会良心的提供非会员也导出功能；还有一种可能性是趁倒之前捞一波，劝你赶紧买会员导出。而开源软件就不会有这个问题，大不了自己把代码拉下来编译一次就可以了，该怎么用就怎么用；况且一般这种开源软件不再维护的时候，通常会提供比较完整的善后手段，或者会有其他产品接盘。</p>
+<p>其次，功能是真的齐全，我个人不负责任的猜测 XMind 中的大部分功能可能是有借鉴 Freeplane 的，上图可以看到，支持各种样式、总结、指向等等，甚至编辑框直接内嵌了一个 HTML，可以自由发挥。</p>
+<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605122515.png" alt="image-20210605122515228" style="zoom:50%;" />
+
+<p>支持 URL Scheme，可以从任意支持 URL 的软件直接跳转到对应的导图甚至节点，配合很多编辑软件或者 GTD 软件有奇效。</p>
+<p>可以说作为一款免费软件，确实功能已经非常丰富了，单从功能上来说，可以碾压之前的 XMind8，部分功能超过现在的 XMind Zen，不过XMind Zen 实在发展太快，已经赶上来甚至部分超越了。</p>
+<h3 id="劣势-1"><a href="#劣势-1" class="headerlink" title="劣势"></a>劣势</h3><p>说完了优点，来聊一下这款软件的缺点。</p>
+<p>首先， 界面是真的丑，软件是使用 Java 开发的，延续了十几年前那种 Java UI 的风格，可以说对比起 Mindnode 和 XMind Zen 来说，完全下不了手，不过这个也在预期内，可以理解，毕竟是开源产品，用爱发电。</p>
+<p>其次，中文支持不够完善，我个人自从学会双拼之后就再也离不开了，可以说双拼极大地提升了我的打字效率，然而，Freeplane 对双拼支持贼差，每次新建节点编辑的时候，都会将双拼的第一个字母也带上输出出来，大概长这样： <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605123147.png" alt="image-20210605123147077" style="zoom:50%;" />，测试的双拼是 <code>ceui</code> ，就会把第一个 c 带到文字里面，十分不方便。</p>
+<ul>
+<li>这里我总结出一个小技巧，当你新建节点的时候，先按<code>F2</code> 进入文本编辑模式，之后再进行输入就 OK 了，不过每次都这么搞一下，依然十分蛋疼</li>
+</ul>
+<p>图片编辑很不方便，无法像 XMind 那种，好歹是把图片拷贝到他自己的资源库目录中，Freeplane 的图片只能选择本地文件进行插入，且只是挂了一个链接，大概长这样，可以看到格式是使用的 URI, 也就是标定一个本地路径，<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605123922.png" alt="image-20210605123922350">。</p>
+<p>好处是什么呢？保存的导图文件里面不带有原始图片，大小会非常小，同样节点的 XMind 大约是 Freeplane 格式的 <strong>4 倍</strong>大小，算上大图片那就远远不止了；坏处也非常明显，当你本地这个图片的位置发生变更之后，对应的导图文件当然也没有图片了，直接报错，大概长这样：<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605124031.png" alt="image-20210605124031113" style="zoom:50%;" />，你应该能想象出来，这是有多么蛋疼。</p>
+<ul>
+<li>小技巧：将图片拷贝到导图目录下，新建一个 assets 文件夹专门用于存放导图资源可以缓解这个问题，不过依然难受。</li>
+</ul>
+<p>文件格式是纯文本，Freeplane 的文件格式采用的是 XML 格式，后缀名为 <code>.mm</code> ，是不是有点熟悉，没错，默认打开方式是 Xcode，让我有种回到之前开发 iOS 的感觉。短暂怀念一下之后你会发现，纯文本格式的劣势就是完全无法预览，我在文件列表里面看到一堆导图的时候，根本不知道每个里面都是什么，除非我一个个打开，会有种拆盲盒的感觉，这时候你才会发现 XMind 这种可以直接在文件列表里面预览全部内容的软件是多么的可爱。</p>
+<p>如果说上面的问题都还是小毛病的话，那么导出问题可以说是非常致命了。看起来 Freeplane 支持的导出格式非常的多，不仅支持PDF、Markdown、XML、PNG，还支持 HTML、SVG，可以说很多格式我听都没听说过，比如 <code>.tji</code> 、 <code>.twi</code> 等等，总之就是非常强大啦。然而实际使用的时候你就会发现，导出 PDF 时候直接整个 App 卡死，这没什么，毕竟它有提示你<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605124604.png" alt="image-20210605124604936">，但当你等了一小时之后，依然卡在这里的时候，你大概也会像我一样怀疑人生了。不确定这个 bug 是否跟中文有关。</p>
+<img src="http://img.soogif.com/9IWYiRP2Cz3mvVIlaP8Bhxq9CoFfBck1.jpeg" style="zoom:50%;" />
+
+<p>同时它还支持分支导出，嗯，跟整个导图导出支持的格式还不一样，真正常用的 PNG、PDF这时候你会发现全部不支持，OK，这个忍了。继续操作，导出 Markdown 总可以了吧，这时候你会发现，永远提示你导出失败，且重试无效，依然失败。</p>
+<p>吐槽结束，总的来说，Freeplane 在某些地方确实还是有可取之处的，例如内链、支持总结、高度自由的编辑器等等，但作为一个用户来说，说实话我无法接受使用这种产品，如果你不是程序员，你可能接受程度比我还低，根本不知道为什么 <code>.mm</code> 后缀会无法预览，不明白什么是 XML，玩不懂里面的内链。我的结论是这款软件可以把玩一下，但不适合普通用户日常使用。</p>
+<p><del>幕布（未完待续）</del></p>
+<p><del>ProcessOn（未完待续）</del></p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>这里上一个汇总表格，可以比较直观的看出各个软件的差异，目前看起来最能打的依然还是 XMind，希望后面开发者能够多上点心，用产品而不是用小手段吸引用户。</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210605130906.png" alt="image-20210605130906530"></p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>测评</tag>
+        <tag>Software</tag>
+        <tag>思维导图</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>跨平台书签同步:Xmarks</title>
+    <url>/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/">原文链接</a></p>
+</blockquote>
+<h2 id="Xmarks简介"><a href="#Xmarks简介" class="headerlink" title="Xmarks简介"></a>Xmarks简介</h2><p><a href="https://www.xmarks.com/">Xmarks</a> 是一款浏览器书签同步工具，它可以实现不同设备，不同浏览器之间的书签同步，并且是免费的。</p>
+<p>有人会说，我们为什么需要一款专门的书签同步工具呢？Safari 自带的 iCloud 书签同步，Chrome 自带的同步设置不都是挺好用的吗？ 我个人选择 Xmarks 的原因是，经常需要在 Mac 机器和 Windows 机器之间进行切换，Safari 当然是挺好用的，但是 Windows 下没得用，切换到 Windows 机器只能选择使用 Chrome 或者 Firefox， 就存在书签同步的需求了。当然你也可以说每个平台都是用 Firefox 或者 Chrome 即可，但就我个人而言，这两款浏览器在 Mac 下的便捷性目前看来还是比不上 Safari 的。</p>
+<span id="more"></span>
+
+<h2 id="多浏览器支持"><a href="#多浏览器支持" class="headerlink" title="多浏览器支持"></a>多浏览器支持</h2><p> Xmarks 目前支持 Firefox、Chrome、IE、Safari 这几种常见浏览器，完全可以满足大部分用户需求。</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_001.png"></p>
+<p>仅需要在官网上下载相对应的浏览器插件，登录 Xmarks 账号即可开始使用，十分便捷。</p>
+<h2 id="支持恢复已删除书签"><a href="#支持恢复已删除书签" class="headerlink" title="支持恢复已删除书签"></a>支持恢复已删除书签</h2><p> Xmarks 会对用户每次的同步操作进行备份，同时可以很方便的进行查看和导出还原等操作。这个功能在多台设备间同步出错的时候十分实用</p>
+<p> <img src="http://7xlmda.com1.z0.glb.clouddn.com/xmarks_002.png"></p>
+<p>同时还允许查找重复书签，十分人性化的功能，有时候经常一个页面添加到不同的书签文件夹里面，时间长了自己都忘记了，很适合我这种强迫症患者。</p>
+<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><p>Xmarks 有一个最大的缺点是与浏览器自带同步机制产生冲突，例如，Chrome 自带书签同步，同时 Xmarks 默认安装后是会隔一段时间或者每当书签发生变动时候进行自动同步，这时候问题就来了，即使没有任何书签变动，由于 Chrome 自己的同步机制，Xmarks 经常会产生另一份重复的书签，这时Xmarks 又会自动同步到服务器端，一不小心发现每个浏览器下面的书签文件夹都是好几份，只能使用直接下载覆盖，发现还是无法解决，最后使用杀手锏，恢复到之前正常的一个书签备份。</p>
+<p>被这个问题折磨了几次之后终于发现原来问题是出在浏览器自带的同步书签功能上面，最后我的解决办法是在 Chrome 的同步设置里面去除书签同步，反正每次重装 Chrome 时候，会自动同步 Xmarks 插件，这时进行下载覆盖本地书签即可。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说，对于多浏览器（尤其是包括 Safari 浏览器）的用户来说，Xmarks 是一个十分好用的同步工具。</p>
+<p>享受它的便捷性的同时，它带来的问题就是，无法使用浏览器自带的同步功能了，对于 Chrome 和 Firefox 来说，这个问题还不是很明显，但是对于 Mac 和 iPhone 用户来说，这相当于抛弃了 iCloud 自带的书签同步功能，手机上的书签就需要自己手动同步了。可以根据自己的需求来取舍。</p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>Xmarks</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何创建一个 Cocoapods 插件</title>
     <url>/2019/04/22/Ruby/Gem/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6/</url>
     <content><![CDATA[<blockquote>
@@ -1614,49 +1722,6 @@
       </categories>
       <tags>
         <tag>Cocoapods</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Mac下如何自动备份目录到七牛云?</title>
-    <url>/2016/01/19/Utilities/Mac/Mac%E4%B8%8B%E5%A6%82%E4%BD%95%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E7%9B%AE%E5%BD%95%E5%88%B0%E4%B8%83%E7%89%9B%E4%BA%91/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2016/01/19/Utilities/Mac/Mac%E4%B8%8B%E5%A6%82%E4%BD%95%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E7%9B%AE%E5%BD%95%E5%88%B0%E4%B8%83%E7%89%9B%E4%BA%91/">原文链接</a></p>
-</blockquote>
-<p>七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.</p>
-<span id="more"></span>
-
-<h2 id="QRSBox简介"><a href="#QRSBox简介" class="headerlink" title="QRSBox简介"></a>QRSBox简介</h2><p>这里为什么要使用QRSBox呢,主要有两方面原因:</p>
-<ol>
-<li>QRSBox 支持增量同步, 这样上传过后的文件就可以立刻删掉了,对于笔记本来说,硬盘空间毕竟还是很宝贵的.</li>
-<li>QRSBox 不会同步文件的删除操作,因为我通常是使用七牛来作为图床使用,基本都是上传博客图片在里面,所以不太需要删除操作的同步.</li>
-</ol>
-<h2 id="下载安装"><a href="#下载安装" class="headerlink" title="下载安装"></a>下载安装</h2><p>下载链接:<a href="http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz">http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz</a>, 这里我只裂了 Mac 版本,其他版本都可以在官网进行下载.</p>
-<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><p>下载解压后,得到一堆Unix可执行程序, 将其中的<code>qrsboxcli</code>拷贝到<code>$PATH</code>里任意路径即可,在这里,我拷贝到了<code>/usr/local/bin</code>路径下,之后重启终端,即可全局使用<code> qrsboxcli</code>命令.</p>
-<p>接下来,进入<a href="https://portal.qiniu.com/setting/key">开发者自主平台</a>, 查看自己的 AccessKey 和 SecretKey, 命令行输入如下:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&lt;!--注意这里没有尖括号,使用自己的AccessKey, SecretKey替换下方尖括号里的内容--&gt;</span><br><span class="line">qrsboxcli init &lt;AccessKey&gt; &lt;SecretKey&gt; &lt;同步文件夹&gt; &lt;空间名称&gt;</span><br></pre></td></tr></table></figure>
-
-<p>完整的命令列表如下:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">qrsboxcli</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  qrsboxcli init &lt;AccessKey&gt; &lt;SecretKey&gt; &lt;SyncDir&gt; &lt;Bucket&gt;  - Init qrsbox conf</span><br><span class="line">  qrsboxcli sync &amp;                                           - Watch &lt;SyncDir&gt; and sync files</span><br><span class="line">  qrsboxcli status [&lt;Path&gt;]                                  - View path status</span><br><span class="line">  qrsboxcli <span class="built_in">log</span>                                              - View sync <span class="built_in">log</span></span><br><span class="line">  qrsboxcli stop                                             - Kill qrsboxcli sync process</span><br><span class="line"></span><br><span class="line">BuildVersion:</span><br><span class="line">  qrsboxcli v3.0.20150529</span><br></pre></td></tr></table></figure>
-
-<p>至此,就可以开心的使用七牛图床啦.</p>
-<h2 id="更改截图路径"><a href="#更改截图路径" class="headerlink" title="更改截图路径"></a>更改截图路径</h2><p>Mac 上自带的截图就十分好用, 我们可以通过变更系统快捷键来让它更加实用. 打开系统设置-&gt;键盘-&gt;快捷键, 之后选中屏幕快照,更改快捷键即可.</p>
-<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-20_21-47-47.png"></p>
-<p>有些同学可能觉得这样仍然不够方便,毕竟,系统默认是保存截图到桌面的,还需要我们把它拷贝到自动上传目录下才行,那么我们还可以变更系统默认截屏路径. 打开终端,并输入下面的命令:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">`defaults write com.apple.screencapture location /path/`</span><br></pre></td></tr></table></figure>
-
-<p>这里其中的<code> path</code>部分就是你想要变更的截图路径,需要注意的是, 输入命令时候记得前后各有一个`符号,我当时输错了好多次才注意到这点.</p>
-<p>这里我们将截图路径设置为七牛云自动上传路径, 以后就可以快速截图加上传,只要打开图床网站获取外部链接即可直接使用在博客之类的地方,是不是很方便呢?</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档:"></a>参考文档:</h2><ul>
-<li><a href="http://developer.qiniu.com/docs/v6/tools/qrsbox.html">http://developer.qiniu.com/docs/v6/tools/qrsbox.html</a></li>
-<li><a href="http://www.cnblogs.com/ygm900/p/4237593.html">如何修改Mac截屏保存路径</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Utilities</category>
-      </categories>
-      <tags>
-        <tag>图床</tag>
-        <tag>七牛云</tag>
       </tags>
   </entry>
   <entry>
@@ -1700,6 +1765,49 @@
       </categories>
       <tags>
         <tag>iCloud</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mac下如何自动备份目录到七牛云?</title>
+    <url>/2016/01/19/Utilities/Mac/Mac%E4%B8%8B%E5%A6%82%E4%BD%95%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E7%9B%AE%E5%BD%95%E5%88%B0%E4%B8%83%E7%89%9B%E4%BA%91/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2016/01/19/Utilities/Mac/Mac%E4%B8%8B%E5%A6%82%E4%BD%95%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD%E7%9B%AE%E5%BD%95%E5%88%B0%E4%B8%83%E7%89%9B%E4%BA%91/">原文链接</a></p>
+</blockquote>
+<p>七牛云是个很好用的图床,但是 Mac 下并没有什么很好用的客户端,每次上传都需要在网页上手动一个个传文件,十分麻烦,于是仔细看了下七牛云的部分文档,打算使用QRSBox来自动上传图片.</p>
+<span id="more"></span>
+
+<h2 id="QRSBox简介"><a href="#QRSBox简介" class="headerlink" title="QRSBox简介"></a>QRSBox简介</h2><p>这里为什么要使用QRSBox呢,主要有两方面原因:</p>
+<ol>
+<li>QRSBox 支持增量同步, 这样上传过后的文件就可以立刻删掉了,对于笔记本来说,硬盘空间毕竟还是很宝贵的.</li>
+<li>QRSBox 不会同步文件的删除操作,因为我通常是使用七牛来作为图床使用,基本都是上传博客图片在里面,所以不太需要删除操作的同步.</li>
+</ol>
+<h2 id="下载安装"><a href="#下载安装" class="headerlink" title="下载安装"></a>下载安装</h2><p>下载链接:<a href="http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz">http://devtools.qiniu.com/qiniu-devtools-darwin_amd64-current.tar.gz</a>, 这里我只裂了 Mac 版本,其他版本都可以在官网进行下载.</p>
+<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><p>下载解压后,得到一堆Unix可执行程序, 将其中的<code>qrsboxcli</code>拷贝到<code>$PATH</code>里任意路径即可,在这里,我拷贝到了<code>/usr/local/bin</code>路径下,之后重启终端,即可全局使用<code> qrsboxcli</code>命令.</p>
+<p>接下来,进入<a href="https://portal.qiniu.com/setting/key">开发者自主平台</a>, 查看自己的 AccessKey 和 SecretKey, 命令行输入如下:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&lt;!--注意这里没有尖括号,使用自己的AccessKey, SecretKey替换下方尖括号里的内容--&gt;</span><br><span class="line">qrsboxcli init &lt;AccessKey&gt; &lt;SecretKey&gt; &lt;同步文件夹&gt; &lt;空间名称&gt;</span><br></pre></td></tr></table></figure>
+
+<p>完整的命令列表如下:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">qrsboxcli</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  qrsboxcli init &lt;AccessKey&gt; &lt;SecretKey&gt; &lt;SyncDir&gt; &lt;Bucket&gt;  - Init qrsbox conf</span><br><span class="line">  qrsboxcli sync &amp;                                           - Watch &lt;SyncDir&gt; and sync files</span><br><span class="line">  qrsboxcli status [&lt;Path&gt;]                                  - View path status</span><br><span class="line">  qrsboxcli <span class="built_in">log</span>                                              - View sync <span class="built_in">log</span></span><br><span class="line">  qrsboxcli stop                                             - Kill qrsboxcli sync process</span><br><span class="line"></span><br><span class="line">BuildVersion:</span><br><span class="line">  qrsboxcli v3.0.20150529</span><br></pre></td></tr></table></figure>
+
+<p>至此,就可以开心的使用七牛图床啦.</p>
+<h2 id="更改截图路径"><a href="#更改截图路径" class="headerlink" title="更改截图路径"></a>更改截图路径</h2><p>Mac 上自带的截图就十分好用, 我们可以通过变更系统快捷键来让它更加实用. 打开系统设置-&gt;键盘-&gt;快捷键, 之后选中屏幕快照,更改快捷键即可.</p>
+<p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-20_21-47-47.png"></p>
+<p>有些同学可能觉得这样仍然不够方便,毕竟,系统默认是保存截图到桌面的,还需要我们把它拷贝到自动上传目录下才行,那么我们还可以变更系统默认截屏路径. 打开终端,并输入下面的命令:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">`defaults write com.apple.screencapture location /path/`</span><br></pre></td></tr></table></figure>
+
+<p>这里其中的<code> path</code>部分就是你想要变更的截图路径,需要注意的是, 输入命令时候记得前后各有一个`符号,我当时输错了好多次才注意到这点.</p>
+<p>这里我们将截图路径设置为七牛云自动上传路径, 以后就可以快速截图加上传,只要打开图床网站获取外部链接即可直接使用在博客之类的地方,是不是很方便呢?</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档:"></a>参考文档:</h2><ul>
+<li><a href="http://developer.qiniu.com/docs/v6/tools/qrsbox.html">http://developer.qiniu.com/docs/v6/tools/qrsbox.html</a></li>
+<li><a href="http://www.cnblogs.com/ygm900/p/4237593.html">如何修改Mac截屏保存路径</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>图床</tag>
+        <tag>七牛云</tag>
       </tags>
   </entry>
   <entry>
