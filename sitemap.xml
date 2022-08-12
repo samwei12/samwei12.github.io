@@ -214,6 +214,13 @@
   </url>
   
   <url>
+    <loc>http://blog.samwei12.cn/tags/Cheatsheet/</loc>
+    <lastmod>2022-08-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://blog.samwei12.cn/tags/AVCaptureSession/</loc>
     <lastmod>2022-08-12</lastmod>
     <changefreq>daily</changefreq>
@@ -278,13 +285,6 @@
   
   <url>
     <loc>http://blog.samwei12.cn/tags/Jinja2/</loc>
-    <lastmod>2022-08-12</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/tags/Cheatsheet/</loc>
     <lastmod>2022-08-12</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -375,13 +375,6 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/tags/GTD/</loc>
-    <lastmod>2022-08-12</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://blog.samwei12.cn/tags/Software/</loc>
     <lastmod>2022-08-12</lastmod>
     <changefreq>daily</changefreq>
@@ -390,6 +383,13 @@
   
   <url>
     <loc>http://blog.samwei12.cn/tags/%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/</loc>
+    <lastmod>2022-08-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.samwei12.cn/tags/GTD/</loc>
     <lastmod>2022-08-12</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -461,6 +461,13 @@
   </url>
   
   <url>
+    <loc>http://blog.samwei12.cn/categories/Reading/</loc>
+    <lastmod>2022-08-12</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://blog.samwei12.cn/categories/iOS/</loc>
     <lastmod>2022-08-12</lastmod>
     <changefreq>daily</changefreq>
@@ -475,7 +482,7 @@
   </url>
   
   <url>
-    <loc>http://blog.samwei12.cn/categories/Reading/</loc>
+    <loc>http://blog.samwei12.cn/categories/Assembly/</loc>
     <lastmod>2022-08-12</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -490,13 +497,6 @@
   
   <url>
     <loc>http://blog.samwei12.cn/categories/Python/</loc>
-    <lastmod>2022-08-12</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://blog.samwei12.cn/categories/Assembly/</loc>
     <lastmod>2022-08-12</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
