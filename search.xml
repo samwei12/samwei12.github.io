@@ -31,154 +31,6 @@
       </tags>
   </entry>
   <entry>
-    <title>简悦+Logseq 搭建本地化个人知识库</title>
-    <url>/2022/03/21/%E7%AE%80%E6%82%A6-Logseq-%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0%E7%9F%A5%E8%AF%86%E5%BA%93/</url>
-    <content><![CDATA[<p>最近在少数派上看到了 <a href="https://sspai.com/post/72022">简悦 +Logseq 个人知识库搭建 | 从零开始完全指南 - 少数派</a>， 一时间感觉打开了新世界，其实我很早就买了简悦 2.0，但由于一直没有很好的使用场景，外加配置实在过于复杂， 始终吃灰。直到看到这篇文章，发现原来简悦也可以直接跟 Logseq 打通，那么稍后读的最大弊端终于有了完美的解决方案。</p>
-<p>不过实际按照教程配置的过程中，发现原作者是基于坚果云搭建的，不符合我本地化的思路（主要是公司不允许用云盘），因此尝试摸索一个本地任意文件夹均可实现的方案，过程中踩了非常多的坑，记录下来，希望对大家有帮助。</p>
-<span id="more"></span>
-
-<h2 id="核心配置步骤"><a href="#核心配置步骤" class="headerlink" title="核心配置步骤"></a>核心配置步骤</h2><p>因为原文已经写的非常详细了，所以这里我不再一一列举配置，而是仅把本地化配置需要注意的事项标注出来。</p>
-<h3 id="安装同步与导出工具"><a href="#安装同步与导出工具" class="headerlink" title="安装同步与导出工具"></a>安装同步与导出工具</h3><p>这里坚果云不再是必选项，而是任意本地目录即可，注意必须要保证目录结构为 <code>xx/SimpRead</code> 才行，这个是硬性要求，否则会无法使用简悦的本地知识库功能。其实只需要在同步文件夹里选择一个名为 SimpRead 的文件夹即可，导出部分使用默认</p>
-<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321222459.png" alt="20220321222459"></p>
-<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321222627.png" alt="20220321222627"></p>
-<p>详细服务设定参考原文，全部打开。</p>
-<blockquote>
-<p>关于简悦知识库相关内容，可以查阅官方文档 <a href="https://kb.simpread.pro/#/page/%E5%BB%BA%E7%AB%8B%E7%9F%A5%E8%AF%86%E5%BA%93">建立知识库</a></p>
-</blockquote>
-<h3 id="通用-amp-高级"><a href="#通用-amp-高级" class="headerlink" title="通用&amp;高级"></a>通用&amp;高级</h3><ul>
-<li>自动同步相关参考原文，不需要做改动（也不需要覆盖本地配置文件这一步）</li>
-<li>标注部分保持一致，确保导出时候一定要选 <code>全文（含标注）+标注</code></li>
-</ul>
-<h3 id="服务"><a href="#服务" class="headerlink" title="服务"></a>服务</h3><p>这里是配置大头，也是容易出错的地方，重点说一下。</p>
-<p>【授权】</p>
-<ul>
-<li>因为没有用坚果云，这里可以不用关心授权</li>
-</ul>
-<p>【定制导出】</p>
-<ul>
-<li>自定义标题一定要开，这个也是知识库使用的前提，同时标题必须要保证是 <code>&#123;&#123;id&#125;&#125;&#123;&#123;un_title&#125;&#125;&#123;&#123;mode&#125;&#125;</code>  (这个主要是为了后面稍后读能够加载本地文件)</li>
-<li>模板部分，我个人做了一定的改动，这个可以自定义</li>
-</ul>
-<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">tags:: #[[SimpRead]] &#123;&#123;tags&#125;&#125;</span><br><span class="line">type:: [[Literature Notes]]</span><br><span class="line">time:: [[&#123;&#123;date<span class="emphasis">_format|now|yyyy-MM-dd&#125;&#125; ]]</span></span><br><span class="line"><span class="emphasis">source:: [<span class="string">&#123;&#123;title&#125;&#125;</span>](<span class="link">&#123;&#123;url&#125;&#125;</span>) </span></span><br><span class="line"><span class="emphasis">desc:: &#123;&#123;desc&#125;&#125;</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">&#123;&#123;#each&#125;&#125;</span></span><br><span class="line"><span class="emphasis">- &gt; [<span class="string">📌</span>](<span class="link">&lt;&#123;&#123;an_int_uri&#125;&#125;&gt;</span>) &#123;&#123;an_</span>html&#125;&#125;</span><br><span class="line">  </span><br><span class="line">&#123;&#123;  - |an<span class="emphasis">_note&#125;&#125;&#123;&#123;an_</span>tags&#125;&#125;</span><br><span class="line">&#123;&#123;/each&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>主要改动包括：</p>
-<ul>
-<li>添加部分元数据，用于 Logseq 的 query 功能，例如： type、tags、time 等</li>
-<li>标注部分把原文放在前面，同时加引文标识，自己的话放在后面，且添加缩进</li>
-</ul>
-<p>效果图：</p>
-<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321223653.png" alt="20220321223653"></p>
-<p>这里一定要注意，<code>[[&#123;&#123;date_format|now|yyyy-MM-dd&#125;&#125; ]]</code> 后面是有一个空格的，它不是作者笔误，而是必须要这样才能正常添加时间戳，参见： <a href="http://ksria.com/simpread/docs/#/%E5%AE%9A%E5%88%B6%E5%8C%96%E5%AF%BC%E5%87%BA?id=markdown">定制导出</a> ，<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321224231.png" alt="image-20220321224231231"></p>
-<h3 id="增强导出（保持原文配置）"><a href="#增强导出（保持原文配置）" class="headerlink" title="增强导出（保持原文配置）"></a>增强导出（保持原文配置）</h3><h3 id="自动化"><a href="#自动化" class="headerlink" title="自动化"></a>自动化</h3><p>这里有一个坑花了我三天时间，必须要重点讲一下。</p>
-<blockquote>
-<p>但这里更建议是保存为 <a href="http://textbundle.org/">Textbundle </a>格式，因为离线 HTML 需要将图片转译为 Base64 的代码，碰到多图杀猫的文章很容易卡顿或失败。</p>
-</blockquote>
-<p>因此在自动化中，我导出了 HTML、Markdown、Textbundle，结果就是，尝试了各种方案，包括数次卸载重装、排查本地端口占用、卸载同步助手重装等，都无法成功在本地使用 <code>http://localhost:7026/reading/</code> 跳转文件，一直提示 404，<img src="https://user-images.githubusercontent.com/12758352/158979936-06fa9e67-8a68-4fd8-ab13-e854377e87e9.png">，中间尝试了各种方案，一度怀疑是否只能使用坚果云才能用知识库功能。 结果发现全部卸载重装之后，坚果云也无法使用，中间联系简悦作者 <strong><a href="https://github.com/Kenshin">Kenshin</a></strong> 排查了很久，最终发现是因为同步助手无法识别 <code>.textbundle</code> 文件，导致不能正常建立索引。</p>
-<p>这个问题有两种解决方案： 1. 放弃 Textbundle，改为使用离线 HTML  2. 通过文件规则，将 <code>.textbundle</code> 格式文件移动到其他目录下。我选择了第二种，原因就是离线 HTML 下载容易造成卡顿。不过遇到了另一个问题，那就是 <strong>Hazel</strong> 实在是太快了，在简悦刚开始创建 Textbundle 文件的时候，就已经把文件夹挪到了其他文件，导致此时简悦正在下载的图片找不到存放目录，引发大量报错。这个问题也卡了我不少时间，具体解决方案稍后单独介绍。</p>
-<p>关于这部分，Kenshin 戏称说这个 issue 的长度可以在 2000 个 issue 里面排到前五，过程确实比较曲折，我中间走了非常多的弯路（不然也不会花掉一个周末的时间折腾），一度都想卸载简悦放弃了。有兴趣的同学可以看一下 <a href="https://github.com/Kenshin/simpread/issues/3554">自定义导出无法使用稍后读加载本地缓存文件 · Issue #3554 · Kenshin/simpread</a></p>
-<p>第二个坑，这里原文作者也有提到，那就是稍后读的自动化流程，必须要在阅读模式下才可以，否则不生效， 参考： <a href="https://github.com/Kenshin/simpread/discussions/2362">部分操作方式加入稍后读时，无法触发自动化 · Discussion #2362 · Kenshin/simpread</a></p>
-<h3 id="开放平台（本地方案不需要，跳过）"><a href="#开放平台（本地方案不需要，跳过）" class="headerlink" title="开放平台（本地方案不需要，跳过）"></a>开放平台（本地方案不需要，跳过）</h3><h3 id="定制导出"><a href="#定制导出" class="headerlink" title="定制导出"></a>定制导出</h3><ul>
-<li>这里一定要注意： 必须要跟原作者保持一致， <code>http://localhost:7026/reading/</code> 路径是简悦知识库必须的配置，否则会导致链接无法跳转以及稍后读无法使用本地缓存文件。</li>
-<li>另一个问题就是简悦存在 bug，刷新完一定要检查一下配置是否符合预期</li>
-</ul>
-<h3 id="稍后读后台设置"><a href="#稍后读后台设置" class="headerlink" title="稍后读后台设置"></a>稍后读后台设置</h3><ul>
-<li>基本保持一致，唯一一个小改动点就是 <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321225751.png" alt="image-20220321225751261">，因为我只用简悦来进行深度阅读，并不需要在这里查看标注，所以通常都是进入阅读模式。</li>
-</ul>
-<h3 id="MD-文件自动移动（保持一致，使用-Hazel-即可，实际上后面我放弃了使用-Hazel）"><a href="#MD-文件自动移动（保持一致，使用-Hazel-即可，实际上后面我放弃了使用-Hazel）" class="headerlink" title="MD 文件自动移动（保持一致，使用 Hazel 即可，实际上后面我放弃了使用 Hazel）"></a>MD 文件自动移动（保持一致，使用 Hazel 即可，实际上后面我放弃了使用 Hazel）</h3><p>至此，整个核心配置基本就已经完成了，我们实现的功能包括：</p>
-<ol>
-<li>添加标注自动保存 HTML、Markdown 到 output 文件夹</li>
-<li>标注文件自动移动到 Logseq 目录中</li>
-<li>稍后读自动加载本地缓存 HTML 文件 <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321230602.png" alt="image-20220321230602224"></li>
-</ol>
-<h2 id="优化点"><a href="#优化点" class="headerlink" title="优化点"></a>优化点</h2><h3 id="Textbundle永久保存方案（Mac、Linux-适用）"><a href="#Textbundle永久保存方案（Mac、Linux-适用）" class="headerlink" title="Textbundle永久保存方案（Mac、Linux 适用）"></a>Textbundle永久保存方案（Mac、Linux 适用）</h3><p>接着上面提到的，详细展开一下如何处理 Textbundle 文件。</p>
-<p>首先，我一下子想到的就是利用 Hazel，新建一个规则就可以，当我实际上这么操作的时候，发现遇到了简悦写入图片时文件夹已经被移动导致报错问题。</p>
-<p>此时，我的思路是，如果有办法能够延长移动文件夹的速度就好了。但简悦跟 Hazel 是相互不知道的，很可惜的是 Hazel 中也没有配置延迟操作或者定时任务这一功能，那么我们只能想办法自己动手了（当然这里还有一条路，希望简悦后续的文件写入能够先把图片下载完，之后再生成文件夹）。</p>
-<p>我想到的解决方案是使用 *nix 系统的 cron 功能，不了解的小伙伴可以看一下 <a href="https://serverfault.com/questions/449651/why-is-my-crontab-not-working-and-how-can-i-troubleshoot-it">linux - Why is my crontab not working, and how can I troubleshoot it? - Server Fault</a> ，非常详细的介绍了 cron crontab 分别是什么， 如何使用，以及如何排查错误，受益匪浅。</p>
-<p>这里需要做的事情非常简单，将所有后缀为 <code>.textbundle</code> 的文件移动到另一个目录中，实际操作起来并不简单，因为 <code>mv</code> 命令无法直接移动文件夹，而 textbundle 其实是一个文件夹而不是文件，包括了 json、图片以及 markdown，所以第一步就卡住了。我改为使用 <code>rsync</code> 来实现这个功能，可以很方便的把某个目录下所有的 Textbundle 移动到另一个目录。之后我们把源文件夹中的 Textbundle 文件删除。这里由于无法使用 Hazel 实现全部功能，那我干脆把移动 <code>@annotate.md</code> 文件的部分也放在自己的脚本里面实现了。完整的脚本文件如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">cd 你的目录/SimpRead</span><br><span class="line">mv output/*@annote.md  Logseq目录/SimpleRead/</span><br><span class="line">rsync -axvP output/*.textbundle archieves（存放 Textbundle 的目录）</span><br><span class="line">rm -rf output/*.textbundle</span><br></pre></td></tr></table></figure>
-
-<p>可以直接新建一个 <code>simpread.sh</code> 之后把上面的代码粘贴过去，记得把上面中文说明的部分都替换掉，同时为了手动执行方便，可以 <code>chmod +x simpread.sh</code> 一下。</p>
-<p>然后就是使用 cron 让电脑自动执行这个脚本，这里可以使用 <a href="https://crontab.guru/#*/5_*_*_*_*">Crontab.guru - The cron schedule expression editor</a> 这个网站调试一下定时任务，比如我目前的配置是每隔 5 分钟执行一次脚本。注意不能执行太频繁，否则一样会遇到简悦下载出错（5 分钟也不能保证完全不出错，理论上间隔越久，出错概率越小）。</p>
-<p>具体的添加步骤（我是 Mac，以下请在命令行中执行）</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">export EDITOR=&#x27;vi&#x27; (不是必须)</span><br><span class="line">crontab -e</span><br><span class="line"></span><br><span class="line">然后输入</span><br><span class="line">*/5 * * * * /bin/sh 你的简悦目录/SimpRead/simpread.sh</span><br><span class="line">之后输入 :wq 保存即可</span><br></pre></td></tr></table></figure>
-
-<p>提示： <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321232144.png" alt="image-20220321232140468"></p>
-<p>就代表定时任务添加成功，可以把 Hazel 卸载掉了。</p>
-<h3 id="快速进入稍后读"><a href="#快速进入稍后读" class="headerlink" title="快速进入稍后读"></a>快速进入稍后读</h3><p>看到简悦同步助手里面有如何快速打开稍后读的方式，参见： <a href="http://ksria.com/simpread/docs/#/%E7%A8%8D%E5%90%8E%E8%AF%BB?id=%E5%88%9B%E5%BB%BA%E5%BF%AB%E6%8D%B7%E6%96%B9%E5%BC%8F">稍后读</a> ，我就琢磨了一下，感觉效率还可以再提高一下。</p>
-<h3 id="配置快捷方式"><a href="#配置快捷方式" class="headerlink" title="配置快捷方式"></a>配置快捷方式</h3><p>文档中把快捷方式跟独立窗口分开成两步，实际上 Chrome 浏览器支持直接创建一个独立窗口的 PWA 应用（关于 PWA，参考： <a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps">Progressive web apps (PWAs) | MDN</a>）。</p>
-<p>打开稍后读： <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321232814.png" alt="image-20220321232814407"></p>
-<p>选择独立窗口：</p>
-<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321232832.png" alt="image-20220321232832834"></p>
-<p>然后你可以在用户目录下找到它 </p>
-<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321232955.png" alt="image-20220321232955685"></p>
-<p>也可以通过 Alfred 或者 Spotlight 找到它 </p>
-<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321233044.png" alt="image-20220321233044890"></p>
-<h3 id="Manico-配置快速跳转"><a href="#Manico-配置快速跳转" class="headerlink" title="Manico 配置快速跳转"></a>Manico 配置快速跳转</h3><p>这里不得不强推一个效率软件了，官方网站： <a href="https://manico.im/">Manico - macOS 下的快速 App 切换器</a></p>
-<p>基本上可以说这个软件是我目前每天使用频率最高的软件，应该没有之一，大概是 18 年左右 25￥购入。它的主要作用就是快速切换软件，比如你可以配置 option+1 打开 Chrome，option+2 打开微信等等，而且再次点击快捷键可以隐藏该软件，能够极大的节约软件切换的时间。这虽然是一款付费软件，但绝对是我在 Mac 上买过的最物超所值的软件。</p>
-<p>核心配置：快速隐藏应用 <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321233606.png" alt="image-20220321233606404"></p>
-<p>如何配置稍后读快速打开隐藏： <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321233522.png" alt="image-20220321233522695"></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我一般的处理流程是手机浏览公众号或者 RSS 初筛到 Cubox，之后电脑上打开 Cubox，跳转到简悦进行深度阅读，添加标注，同步到 Logseq，之后进行定期整理。</p>
-<p>这样，整个从文章到标注，到 Logseq 整理的过程就打通了。简悦作为一个稍后读软件，最大的亮点就是作为一个粘合剂，可以很好地跟各种笔记类软件打通，称为知识管理工作流中不可或缺的一部分，把浏览阅读到的信息和知识真正的经过深度阅读，让它有机会融入到已有的知识体系中，内化为自己的东西，就这一点已经远远超越了 Evernote、Cubox、Pinbox 等同类剪藏产品。</p>
-<p>不过简悦问题也很明显，太极客了，配置使用成本巨高无比，我身为一个程序员，都好几次尝试无果弃坑了，个人感觉它的功能已经足够强大了，希望作者能够多花点心思在交互跟实际使用体验上，真的不需要再加那么多新功能了，适当的做减法非常有必要。希望我的踩坑经历能够对你有一些帮助。</p>
-]]></content>
-      <categories>
-        <category>PKM</category>
-      </categories>
-      <tags>
-        <tag>简悦</tag>
-        <tag>Logseq</tag>
-        <tag>PKM</tag>
-        <tag>稍后读</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>常用汇编指令总结</title>
-    <url>/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/">原文链接</a></p>
-</blockquote>
-<span id="more"></span>
-
-<h2 id="浮点数相关"><a href="#浮点数相关" class="headerlink" title="浮点数相关"></a>浮点数相关</h2><h3 id="mm-unpacklo-ps"><a href="#mm-unpacklo-ps" class="headerlink" title="_mm_unpacklo_ps"></a><code>_mm_unpacklo_ps</code></h3><blockquote>
-<p>Selects and interleaves the lower two SP FP values from a and b.</p>
-</blockquote>
-<p>将两个128位浮点数的低64位分别取出，返回新的128位浮点数</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">INTERLEAVE_DWORDS</span>(src1[<span class="number">127</span>:<span class="number">0</span>], src2[<span class="number">127</span>:<span class="number">0</span>])&#123;</span><br><span class="line">	dst[<span class="number">31</span>:<span class="number">0</span>] := src1[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">63</span>:<span class="number">32</span>] := src2[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">95</span>:<span class="number">64</span>] := src1[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	dst[<span class="number">127</span>:<span class="number">96</span>] := src2[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	RETURN dst[<span class="number">127</span>:<span class="number">0</span>]</span><br><span class="line">&#125;	</span><br><span class="line"></span><br><span class="line">dst[<span class="number">127</span>:<span class="number">0</span>] := <span class="built_in">INTERLEAVE_DWORDS</span>(a[<span class="number">127</span>:<span class="number">0</span>], b[<span class="number">127</span>:<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
-
-<p>输入如果为：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,a1,a2,a3</span><br><span class="line">b0,b1,b2,b3</span><br></pre></td></tr></table></figure>
-
-<p>则输出结果为：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,b0,a1,b1</span><br></pre></td></tr></table></figure>
-
-<h3 id="mm-mul-ps"><a href="#mm-mul-ps" class="headerlink" title="_mm_mul_ps"></a><code>_mm_mul_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">FOR j := <span class="number">0</span> to <span class="number">3</span></span><br><span class="line">	i := j*<span class="number">32</span></span><br><span class="line">	dst[i+<span class="number">31</span>:i] := a[i+<span class="number">31</span>:i] * b[i+<span class="number">31</span>:i]</span><br><span class="line">ENDFOR</span><br></pre></td></tr></table></figure>
-
-<p>分别将两个128位浮点数的每个float相乘，结果仍然是128位浮点数<br>也就是:</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] * b[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">63</span>:<span class="number">32</span>] * b[<span class="number">63</span>:<span class="number">32</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] * b[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">127</span>:<span class="number">96</span>] * b[<span class="number">127</span>:<span class="number">96</span>]</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="mm-moveldup-ps"><a href="#mm-moveldup-ps" class="headerlink" title="_mm_moveldup_ps"></a><code>_mm_moveldup_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">95</span>:<span class="number">64</span>]</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>Source data: 0.100000 0.200000 0.300000 0.400000<br>Calling _mm_moveldup_ps to load the values.<br>Result: 0.100000 0.100000 0.300000 0.300000</p>
-</blockquote>
-<p>将128bit浮点数的第一个及第三个float分别复制到第二个及第四个float中</p>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
-<li><a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide">https://software.intel.com/sites/landingpage/IntrinsicsGuide</a></li>
-<li><a href="https://software.intel.com/en-us/node/524266">https://software.intel.com/en-us/node/524266</a></li>
-<li><a href="https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx">https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx</a></li>
-<li><a href="https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx">https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Assembly</category>
-      </categories>
-      <tags>
-        <tag>Cheatsheet</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>AVCaptureSession部分用法</title>
     <url>/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/</url>
     <content><![CDATA[<blockquote>
@@ -515,6 +367,53 @@
       </categories>
       <tags>
         <tag>Jinja2</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>常用汇编指令总结</title>
+    <url>/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2018/07/07/Assembly/%E5%B8%B8%E7%94%A8%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/">原文链接</a></p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="浮点数相关"><a href="#浮点数相关" class="headerlink" title="浮点数相关"></a>浮点数相关</h2><h3 id="mm-unpacklo-ps"><a href="#mm-unpacklo-ps" class="headerlink" title="_mm_unpacklo_ps"></a><code>_mm_unpacklo_ps</code></h3><blockquote>
+<p>Selects and interleaves the lower two SP FP values from a and b.</p>
+</blockquote>
+<p>将两个128位浮点数的低64位分别取出，返回新的128位浮点数</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="built_in">INTERLEAVE_DWORDS</span>(src1[<span class="number">127</span>:<span class="number">0</span>], src2[<span class="number">127</span>:<span class="number">0</span>])&#123;</span><br><span class="line">	dst[<span class="number">31</span>:<span class="number">0</span>] := src1[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">63</span>:<span class="number">32</span>] := src2[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">	dst[<span class="number">95</span>:<span class="number">64</span>] := src1[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	dst[<span class="number">127</span>:<span class="number">96</span>] := src2[<span class="number">63</span>:<span class="number">32</span>] </span><br><span class="line">	RETURN dst[<span class="number">127</span>:<span class="number">0</span>]</span><br><span class="line">&#125;	</span><br><span class="line"></span><br><span class="line">dst[<span class="number">127</span>:<span class="number">0</span>] := <span class="built_in">INTERLEAVE_DWORDS</span>(a[<span class="number">127</span>:<span class="number">0</span>], b[<span class="number">127</span>:<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+
+<p>输入如果为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,a1,a2,a3</span><br><span class="line">b0,b1,b2,b3</span><br></pre></td></tr></table></figure>
+
+<p>则输出结果为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">a0,b0,a1,b1</span><br></pre></td></tr></table></figure>
+
+<h3 id="mm-mul-ps"><a href="#mm-mul-ps" class="headerlink" title="_mm_mul_ps"></a><code>_mm_mul_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">FOR j := <span class="number">0</span> to <span class="number">3</span></span><br><span class="line">	i := j*<span class="number">32</span></span><br><span class="line">	dst[i+<span class="number">31</span>:i] := a[i+<span class="number">31</span>:i] * b[i+<span class="number">31</span>:i]</span><br><span class="line">ENDFOR</span><br></pre></td></tr></table></figure>
+
+<p>分别将两个128位浮点数的每个float相乘，结果仍然是128位浮点数<br>也就是:</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] * b[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">63</span>:<span class="number">32</span>] * b[<span class="number">63</span>:<span class="number">32</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] * b[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">127</span>:<span class="number">96</span>] * b[<span class="number">127</span>:<span class="number">96</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="mm-moveldup-ps"><a href="#mm-moveldup-ps" class="headerlink" title="_mm_moveldup_ps"></a><code>_mm_moveldup_ps</code></h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">dst[<span class="number">31</span>:<span class="number">0</span>] := a[<span class="number">31</span>:<span class="number">0</span>] </span><br><span class="line">dst[<span class="number">63</span>:<span class="number">32</span>] := a[<span class="number">31</span>:<span class="number">0</span>]</span><br><span class="line">dst[<span class="number">95</span>:<span class="number">64</span>] := a[<span class="number">95</span>:<span class="number">64</span>] </span><br><span class="line">dst[<span class="number">127</span>:<span class="number">96</span>] := a[<span class="number">95</span>:<span class="number">64</span>]</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Source data: 0.100000 0.200000 0.300000 0.400000<br>Calling _mm_moveldup_ps to load the values.<br>Result: 0.100000 0.100000 0.300000 0.300000</p>
+</blockquote>
+<p>将128bit浮点数的第一个及第三个float分别复制到第二个及第四个float中</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide">https://software.intel.com/sites/landingpage/IntrinsicsGuide</a></li>
+<li><a href="https://software.intel.com/en-us/node/524266">https://software.intel.com/en-us/node/524266</a></li>
+<li><a href="https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx">https://msdn.microsoft.com/zh-cn/library/708ya3be(v=vs.110).aspx</a></li>
+<li><a href="https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx">https://msdn.microsoft.com/zh-cn/library/26td21ds(v=vs.140).aspx</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Assembly</category>
+      </categories>
+      <tags>
+        <tag>Cheatsheet</tag>
       </tags>
   </entry>
   <entry>
@@ -923,250 +822,6 @@
       </tags>
   </entry>
   <entry>
-    <title>JDBC学习一---JDBC入门</title>
-    <url>/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/">原文链接</a></p>
-</blockquote>
-<p>今天开始会写一系列 Java 后端学习的笔记，一方面是为了以后翻阅查看，更主要的原因是通过写作输出的方式让自己的印象更深，避免遗忘。</p>
-<p>首先是简单记录下自己学习使用 JDBC 的历程，由于目前基本都是通过一些类似 MyBatis 的框架来进行数据库操作，所以 JDBC 的使用不需要掌握太深入，仅作为了解即可。</p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>首先我们学习任何东西之前都需要先了解几个问题，基本上的思路是：<br>    1. xxx 是什么？<br>    2. 有什么作用？也就是为什么需要 xxx？<br>    3. 怎么使用（简单入门即可）？<br>    4. 分别就主要链路进行知识补充<br>之后，可以根据实际情况决定是否要进一步深入了解，还是只作为简单学习即可。</p>
-<p>JDBC 也不例外。</p>
-<span id="more"></span>
-
-<h3 id="什么是-JDBC？"><a href="#什么是-JDBC？" class="headerlink" title="什么是 JDBC？"></a>什么是 JDBC？</h3><blockquote>
-<p>Java数据库连接，（Java Database Connectivity，简称JDBC）是Java语言中用来规范客户端程序如何来访问数据库的应用程序接口，提供了诸如查询和更新数据库中数据的方法。JDBC也是Sun Microsystems的商标[1]。JDBC是面向关系型数据库的。</p>
-</blockquote>
-<p>上面是维基百科的解释，从这里我们获取到的几个有用信息：</p>
-<ol>
-<li>简单来说，JDBC 就是 Java 定义的一套用来规范和约束客户端程序如何访问数据库的<strong>接口</strong>，尤其是需要注意接口一词</li>
-<li>JDBC 是面向关系型数据库的，也就是说对于非关系型数据库用这一套接口是不行的。</li>
-</ol>
-<h3 id="为什么需要-JDBC？"><a href="#为什么需要-JDBC？" class="headerlink" title="为什么需要 JDBC？"></a>为什么需要 JDBC？</h3><p>回答类似这种问题其实套路也比较简单，我们思考一下，假如没有 JDBC 会怎么样？</p>
-<p>我们知道，关系型数据库是有很多分类的，例如常见的 MySQL、Oracle、SQL Server等等，那么如果没有一套标准接口的话，意味着我们如果开发 MySQL 数据库，不光需要引入 MySQL 的官方驱动，还需要引入官方的 Jar 包，根据对应的 CRUD 接口编写数据库操作代码，如果这时候你还有另一个使用 Oracle 项目，那么同样的工作需要重新进行一次，可想而知，这个适配成本是随着数据库厂商的增多逐渐上升的。</p>
-<p>那么怎么解决这类问题呢？有一句名言是这么说的，<strong>“计算机科学领域的任何问题都可以通过增加一个简介的中间层来解决。”</strong>，回到我们的问题上，Java 开发者就提供了这么一个中间层，也就是 <strong>JDBC</strong>。</p>
-<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200301214356.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200301214356.png" alt="20200301214356"></a></p>
-<p>通过这个图可以看到，由于有了这么一个中间层，我们在开发代码时，只需要使用 JDBC 相关的接口即可，不需要关心具体实现底层的是 MySQL 还是 Oracle。</p>
-<h2 id="如何使用-JDBC？"><a href="#如何使用-JDBC？" class="headerlink" title="如何使用 JDBC？"></a>如何使用 JDBC？</h2><p>接下来我们看下如何快速搭建一个 JDBC 的demo。通常在 Java 后端开发中，我们只需要掌握几个核心点就可以快速上手一个框架，它们分别是：</p>
-<ol>
-<li>jar 包或者 maven坐标</li>
-<li>关键的配置文件和属性</li>
-<li>核心的类和 API</li>
-</ol>
-<p>下面我们就从这个几方面入手快速了解一下：</p>
-<h3 id="jar-包或者-maven坐标"><a href="#jar-包或者-maven坐标" class="headerlink" title="jar 包或者 maven坐标"></a>jar 包或者 maven坐标</h3><p>使用数据库需要这么几个比较重要的包：</p>
-<ol>
-<li><code>java.sql</code>：所有与 JDBC 访问数据库相关的接口和类,可以说有了这里面提供的接口和类已经足够搭建一个 demo 实现基本功能</li>
-<li><code>javax.sql</code>：数据库扩展包，提供数据库额外的功能，如：连接池。接下来我们只是实现基本功能，可以不使用这个包。</li>
-<li>数据库的驱动：由各大数据库厂商提供，需要额外去下载，是对 JDBC 接口实现的类。</li>
-</ol>
-<p>这里面只有数据库的驱动是需要我们自己使用 jar 包或者 maven 依赖的。</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>mysql<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mysql-connector-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.0.17<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>这里由于我本地的 MySQL 是 8.x 版本，因此使用了 8.0.17， 如果你的 MySQL 是 5.x 版本可以使用 5.1.39。</p>
-<h3 id="关键的配置文件和属性"><a href="#关键的配置文件和属性" class="headerlink" title="关键的配置文件和属性"></a>关键的配置文件和属性</h3><p>JDBC 中可以通过使用配置文件来加载数据库相关配置，例如指定数据库 URL、账户、密码等，这个等下详细介绍。</p>
-<h3 id="核心的类和-API"><a href="#核心的类和-API" class="headerlink" title="核心的类和 API"></a>核心的类和 API</h3><p>JDBC 中几个比较核心的类和作用如下：</p>
-<ul>
-<li>DriverManager 类<ul>
-<li>管理和注册数据库驱动</li>
-<li>得到数据库连接对象</li>
-</ul>
-</li>
-<li>Connection 接口<ul>
-<li>一个连接对象，可用于创建 Statement 和 PreparedStatement 对象</li>
-</ul>
-</li>
-<li>Statement 接口<ul>
-<li>一个 SQL 语句对象，用于将 SQL 语句发送给数据库服务器。</li>
-</ul>
-</li>
-<li>PreparedStatemen 接口<ul>
-<li>一个 SQL 语句对象，是 Statement 的子接口</li>
-</ul>
-</li>
-<li>ResultSet 接口<ul>
-<li>用于封装数据库查询的结果集，返回给客户端 Java 程序</li>
-</ul>
-</li>
-</ul>
-<p>简单了解即可，等下具体搭建工程会详细介绍。</p>
-<h3 id="搭建测试工程"><a href="#搭建测试工程" class="headerlink" title="搭建测试工程"></a>搭建测试工程</h3><p>这里我们先简单建一个表，然后插入几条数据用于查看。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `bank` (</span><br><span class="line">    `name` <span class="type">varchar</span>(<span class="number">10</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    `money` <span class="keyword">double</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> bank</span><br><span class="line"><span class="keyword">values</span> (money <span class="operator">=</span> <span class="number">100</span>, name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">200</span>, name <span class="operator">=</span> <span class="string">&#x27;李四&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">300</span>, name <span class="operator">=</span> <span class="string">&#x27;王五&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">400</span>, name <span class="operator">=</span> <span class="string">&#x27;赵六&#x27;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>这样我们的表就建好了，数据也有了，我们就正式开始通过编写代码查找表中的数据。</p>
-<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307202152.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307202152.png" alt="20200307202152"></a></p>
-<p>其实说白了使用 JDBC 的核心步骤就是这些：</p>
-<ol>
-<li>导入驱动jar包</li>
-<li>注册驱动</li>
-<li>获取数据库连接对象</li>
-<li>定义sql</li>
-<li>获取执行sql语句的对象 Statement</li>
-<li>执行sql，接受返回结果</li>
-<li>处理结果</li>
-<li>释放资源</li>
-</ol>
-<p>那么我们看下，这里其中导入 jar 包我们已经通过引入 maven 坐标解决了，接下来看看如何注册驱动。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Class.forName(<span class="string">&quot;com.mysql.cj.jdbc.Driver&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>这不就是加载类吗？哪里有注册驱动呢？别着急，我们看下源码。跳到 <code>com.mysql.cj.jdbc.Driver</code> 中，我们发现 <code>Driver</code> 中的静态代码块调用了 <code>DriverManager</code> 的<code>registerDriver</code>方法，然后创建了一个<code>Driver</code>对象作为入参传入。这也跟我们之前提到的 <code>DriverManager</code> 有管理和注册驱动的作用是吻合的。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        DriverManager.registerDriver(<span class="keyword">new</span> Driver());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (SQLException var1) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;Can&#x27;t register driver!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们看下 <code>DriverManager</code> 的官方文档，可以看到</p>
-<blockquote>
-<p>JDBC 4.0 Drivers must include the file META-INF/services/java.sql.Driver. This file contains the name of the JDBC drivers implementation of java.sql.Driver.</p>
-</blockquote>
-<blockquote>
-<p>Applications no longer need to explicitly load JDBC drivers using Class.forName(). Existing programs which currently load JDBC drivers using Class.forName() will continue to work without modification.</p>
-</blockquote>
-<p>这几句话是什么意思呢？简单来说就是可能 JDK 觉得大家老是这么加载驱动比较繁琐，在 JDBC4.0 之后新增了一个约定，数据库驱动实现方必须要在 jar 包的 <code>META-INF/services/java.sql.Driver</code> 路径里面写明指定的 <code>Driver</code> 类，这样 JVM 会自动将对应的驱动进行加载，而不再需要程序员在开发过程中手动调用 <code>Class.forName()</code> 了，当然已经调用了的代码可以正常运行而不会受到影响，所以这一步我们可以省略了。</p>
-<p>接下来是获取数据库连接对象 <code>Connection</code>，前面我们已经提到，这个类是用来创建 <code>Statement</code> 对象的，而 <code>Statement</code> 对象就是真正进行数据库操作的类，</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> Connection connection = DriverManager.getConnection(<span class="string">&quot;jdbc:mysql://localhost:3306/samwei12&quot;</span>, <span class="string">&quot;root&quot;</span>,<span class="string">&quot;root&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>通过调用 <code>DriverManager</code> 的<code>getConnection</code>方法，我们就得到了一个 <code>Connection</code> 对象。它的几个入参也比较显而易见，就是数据库连接时的 url、账户、密码等信息。这也是 <code>DriverManager</code> 的第二个功能，就是获取数据库连接对象 <code>Connection</code> 的实例。</p>
-<p>接下来是定义 sql 语句，这个最好理解，这里我们把张三的存款设置成 1000。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String sql = <span class="string">&quot;update bank set money=1000 where name=&#x27;张三&#x27;&quot;</span>;</span><br></pre></td></tr></table></figure>
-
-<p>接下来是创建 <code>Statement</code> 对象，</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br></pre></td></tr></table></figure>
-
-<p>执行 sql 语句：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> count = statement.executeUpdate(sql);</span><br></pre></td></tr></table></figure>
-
-<p>入参代表我们需要执行的 sql 语句，出参代表本条 update 语句影响的行数。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">System.out.println(count);</span><br></pre></td></tr></table></figure>
-<p>这里我们简单打印下就可以，如果查询到的是需要封装的对象，那么还需要其他处理，这里不展开。</p>
-<p>最后就是释放资源，这个一定要记住。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">statement.close();</span><br><span class="line">connection.close();</span><br></pre></td></tr></table></figure>
-
-<p>之后我们执行一下，可以看到打印结果是 1，同时数据库中对应数据也发生了变动。</p>
-<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307192219.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307192219.png" alt="20200307192219"></a></p>
-<p>示例代码地址：</p>
-<ul>
-<li><a href="https://github.com/samwei12/jdbc-demo">https://github.com/samwei12/jdbc-demo</a></li>
-</ul>
-<h2 id="详细-API-了解"><a href="#详细-API-了解" class="headerlink" title="详细 API 了解"></a>详细 API 了解</h2><h3 id="DriverManager"><a href="#DriverManager" class="headerlink" title="DriverManager"></a>DriverManager</h3><p>前面已经讲得比较清楚，它的主要作用就是注册驱动+管理数据库连接，这里只说一下 MySQL 的 URL 写法。</p>
-<ul>
-<li><code>jdbc:mysql://ip地址(域名):端口号/数据库名称</code><ul>
-<li>例子：<code>jdbc:mysql://localhost:3306/samwei12</code></li>
-<li>细节：如果连接的是本机mysql服务器，并且mysql服务默认端口是3306，则url可以简写为：<code>jdbc:mysql:///数据库名称</code></li>
-</ul>
-</li>
-</ul>
-<h3 id="Connection"><a href="#Connection" class="headerlink" title="Connection"></a>Connection</h3><p>数据库连接对象，它的主要功能包括创建一个 <code>Statement</code> 和管理事务。</p>
-<ol>
-<li>获取执行sql 的对象<ul>
-<li><code>Statement createStatement()</code></li>
-<li><code>PreparedStatement prepareStatement(String sql)</code></li>
-</ul>
-</li>
-<li>管理事务：<ul>
-<li>开启事务：<code>setAutoCommit(boolean autoCommit)</code> ：调用该方法设置参数为false，即开启事务</li>
-<li>提交事务：<code>commit()</code></li>
-<li>回滚事务：<code>rollback()</code></li>
-</ul>
-</li>
-</ol>
-<h3 id="Statement"><a href="#Statement" class="headerlink" title="Statement"></a>Statement</h3><p>执行sql的对象，CRUD 都可以执行：</p>
-<ol>
-<li><code>boolean execute(String sql)</code> ：可以执行任意的sql语句</li>
-<li><code>int executeUpdate(String sql)</code> ：执行DML（insert、update、delete）语句、DDL(create，alter、drop)语句<ul>
-<li>返回值：影响的行数，可以通过这个影响的行数判断DML语句是否执行成功 返回值&gt;0的则执行成功，反之，则失败。</li>
-</ul>
-</li>
-<li><code>ResultSet executeQuery(String sql)</code>：执行DQL(select) 语句</li>
-</ol>
-<p>这里我们最常用的的一般就是最后一个方法了，示例代码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//4. 定义sql</span></span><br><span class="line">String sql = <span class="string">&quot;select * from bank&quot;</span>;</span><br><span class="line"><span class="comment">// 5. 获取执行sql语句的对象 Statement</span></span><br><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br><span class="line"><span class="comment">// 6. 执行sql，接受返回结果</span></span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = statement.executeQuery(sql);</span><br><span class="line"><span class="comment">// 7. 处理结果</span></span><br><span class="line"><span class="keyword">while</span> (resultSet.next()) &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">double</span> money = resultSet.getDouble(<span class="string">&quot;money&quot;</span>);</span><br><span class="line">    <span class="keyword">final</span> String name = resultSet.getString(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">    System.out.println(name+<span class="string">&quot;银行账户：&quot;</span>+money);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>通过 <code>ResultSet</code> 的 <code>next</code> 方法遍历结果，之后得到的就是一行的数据，分别取出每一列的数据处理即可。</p>
-<h3 id="ResultSet"><a href="#ResultSet" class="headerlink" title="ResultSet"></a>ResultSet</h3><p>结果集对象，封装查询结果</p>
-<ul>
-<li><code>boolean next()</code>: 游标向下移动一行，判断当前行是否是最后一行末尾(是否有数据)，如果是，则返回false，如果不是则返回true</li>
-<li><code>getXxx(参数)</code>:获取数据<ul>
-<li>Xxx：代表数据类型，如： <code>int getInt() , String getString()</code></li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>具体的使用方法 <code>executeQuery</code> 这里已经展示过了</li>
-</ul>
-<h3 id="PreparedStatement"><a href="#PreparedStatement" class="headerlink" title="PreparedStatement"></a>PreparedStatement</h3><p>执行sql的对象，继承自 <code>Statement</code>。看到这里你可能会比较奇怪，我们不是已经有了 <code>Statement</code> 类了嘛，为什么还需要再搞一个子类出来呢？我们先通过一个示例介绍一下什么是 <strong>SQL 注入</strong>。</p>
-<p>创建一个用户登录信息表，包括用户名和密码。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span> (</span><br><span class="line"></span><br><span class="line">id <span class="type">int</span> <span class="keyword">primary</span> key auto_increment,</span><br><span class="line"></span><br><span class="line">name <span class="type">varchar</span>(<span class="number">20</span>),</span><br><span class="line"></span><br><span class="line">password <span class="type">varchar</span>(<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span> (<span class="keyword">null</span>,<span class="string">&#x27;jack&#x27;</span>,<span class="string">&#x27;123&#x27;</span>),(<span class="keyword">null</span>,<span class="string">&#x27;rose&#x27;</span>,<span class="string">&#x27;456&#x27;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>然后模拟一下用户的登录，如果用户输入的用户名和密码能够匹配到一条记录，那么我们认为登录成功，否则认为登录失败。</p>
-<p>代码比较简单，核心代码如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String sql = <span class="string">&quot;select * from user where name=&#x27;&quot;</span>+userName+<span class="string">&quot;&#x27; and password=&#x27;&quot;</span>+password+<span class="string">&quot;&#x27;&quot;</span>;</span><br><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = statement.executeQuery(sql);</span><br><span class="line"><span class="keyword">if</span> (resultSet.next()) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录成功，欢迎您：&quot;</span> + userName);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录失败&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>验证一下：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">JACK</span><br><span class="line">请输入用户密码：</span><br><span class="line">123</span><br><span class="line">登录成功，欢迎您：JACK</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">jack1</span><br><span class="line">请输入用户密码：</span><br><span class="line">123</span><br><span class="line">登录失败</span><br></pre></td></tr></table></figure>
-
-<p>看起来好像一切正常，没毛病，那么我们尝试一下如下输入：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">我是一个不存在的用户</span><br><span class="line">请输入用户密码：</span><br><span class="line">我是密码<span class="string">&#x27; or &#x27;</span>a<span class="string">&#x27;=&#x27;</span>a</span><br></pre></td></tr></table></figure>
-
-<p>这时我们发现，神奇的事情出现了：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">登录成功，欢迎您：我是一个不存在的用户</span><br></pre></td></tr></table></figure>
-
-<p>这是为什么呢？？？其实我们 debug 一下就会发现，原因很简单，我们传给 <code>Statement</code> 对象的是一个字符串，那么上述参数真正执行的 SQL 语句是 <code>select * from user where name=&#39;我是一个不存在的用户&#39; and password=&#39;我是密码&#39; or &#39;a&#39;=&#39;a&#39;</code>。 大家发现了吗？我们的原始 SQL 只是查询用户名和密码信息，但是如果用户输入了类似上面这种奇怪的密码，在我们的 SQL 后面拼接上其他字符串，就可以绕过我们的检查，随意输入任何用户名和密码都可以获得登录授权，这无疑是很危险的。</p>
-<blockquote>
-<p>SQL注入（英语：SQL injection），也称SQL注入或SQL注码，是发生于应用程序与数据库层的安全漏洞。简而言之，是在输入的字符串之中注入SQL指令，在设计不良的程序当中忽略了字符检查，那么这些注入进去的恶意指令就会被数据库服务器误认为是正常的SQL指令而运行，因此遭到破坏或是入侵。</p>
-</blockquote>
-<p>以上是维基百科对应的词条解释，那么怎么解决这种问题呢？JDK 的作者们提供的 <code>PreparedStatement</code> 就是用来处理这种问题的。我们来看一下它的用法。</p>
-<ol>
-<li>Connection 接口中的方法<ol>
-<li><code>PreparedStatement prepareStatement(String sql)</code>: 指定预编译的 SQL 语句，SQL 语句中使用占位符 <code>?</code> 创建一个语句对象</li>
-</ol>
-</li>
-<li>PreparedStatement 接口中的方法<ol>
-<li><code>int executeUpdate()</code>: 执行 DML，增删改的操作，返回影响的行数。</li>
-<li><code>ResultSet executeQuery()</code>: 执行 DQL，查询的操作，返回结果集</li>
-</ol>
-</li>
-</ol>
-<p>使用步骤：</p>
-<ol start="3">
-<li>编写 SQL 语句，未知内容使用?占位：<code>&quot;SELECT * FROM user WHERE name=? AND password=?&quot;;</code></li>
-<li>获得 <code>PreparedStatement</code> 对象</li>
-<li>设置实际参数：<code>setXxx(占位符的位置, 真实的值)</code><ol>
-<li>对应一系列重载的方法</li>
-</ol>
-</li>
-<li>执行参数化 SQL 语句</li>
-<li>关闭资源</li>
-</ol>
-<p>具体的代码示例如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 构造一个带参数的 SQL 语句，这里不需要加单引号了，而是使用占位符 ？</span></span><br><span class="line">String sql = <span class="string">&quot;select * from user where name=? and password=?&quot;</span>;</span><br><span class="line"><span class="comment">// 2. 获取 PreparedStatement 对象</span></span><br><span class="line"><span class="keyword">final</span> PreparedStatement preparedStatement = connection.prepareStatement(sql);</span><br><span class="line"><span class="comment">// 3. 设置参数，这里需要注意的是索引是从 1 开始的，而不是 0</span></span><br><span class="line">preparedStatement.setString(<span class="number">1</span>, userName);</span><br><span class="line">preparedStatement.setString(<span class="number">2</span>, userName);</span><br><span class="line"><span class="comment">// 4. 执行参数化 SQL 语句，这里由于 sql 语句已经准备好了，不再需要传入参数，直接执行即可</span></span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = preparedStatement.executeQuery();</span><br><span class="line"><span class="keyword">if</span> (resultSet.next()) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录成功，欢迎您：&quot;</span> + userName);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录失败&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>使用起来还是比较简单的，需要注意的几个点已经写在了注释里面。<br>执行结果如下：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">我是一个不存在的用户</span><br><span class="line">请输入用户密码：</span><br><span class="line">我是密码<span class="string">&#x27; or &#x27;</span>a<span class="string">&#x27;=&#x27;</span>a</span><br><span class="line">登录失败</span><br></pre></td></tr></table></figure>
-
-<p>可以看到使用 <code>PreparedStatement</code> 有效的解决了 SQL 注入的问题，它还有以下好处：</p>
-<ol>
-<li><code>prepareStatement()</code> 方法会先将 SQL 语句发送给数据库预编译。<code>PreparedStatement</code> 会引用着预编译后的结果。 可以多次传入不同的参数给 <code>PreparedStatement</code> 对象并执行。减少 SQL 编译次数，提高效率。</li>
-<li>提高了程序的可读性</li>
-</ol>
-<p>所以我们尽可能全部都使用 <code>PreparedStatement</code> 的方式，而不是 <code>Statement</code> 类。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，一个简单的 JDBC demo 就搭建完毕了。由于目前已经不会有人直接使用 JDBC 进行数据库操作了，我们只是为了接下来学习 MyBatis 进行一个铺垫，简单了解即可，不需要深入。</p>
-<p>示例代码地址：</p>
-<ul>
-<li><a href="https://github.com/samwei12/jdbc-demo">https://github.com/samwei12/jdbc-demo</a></li>
-</ul>
-<h2 id="Relations"><a href="#Relations" class="headerlink" title="Relations"></a>Relations</h2><ul>
-<li><a href="https://zh.wikipedia.org/wiki/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5">https://zh.wikipedia.org/wiki/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5</a></li>
-<li><a href="https://zh.wikipedia.org/wiki/SQL%E6%B3%A8%E5%85%A5">https://zh.wikipedia.org/wiki/SQL%E6%B3%A8%E5%85%A5</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Server</category>
-      </categories>
-      <tags>
-        <tag>JDBC</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>万字长文---关于PKM收集与整理系统的思考和实践</title>
     <url>/2021/05/22/Thinking/%E5%85%B3%E4%BA%8EPKM%E6%94%B6%E9%9B%86%E4%B8%8E%E6%95%B4%E7%90%86%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%80%9D%E8%80%83%E5%92%8C%E5%AE%9E%E8%B7%B5/</url>
     <content><![CDATA[<blockquote>
@@ -1551,6 +1206,314 @@
       </tags>
   </entry>
   <entry>
+    <title>JDBC学习一---JDBC入门</title>
+    <url>/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/">原文链接</a></p>
+</blockquote>
+<p>今天开始会写一系列 Java 后端学习的笔记，一方面是为了以后翻阅查看，更主要的原因是通过写作输出的方式让自己的印象更深，避免遗忘。</p>
+<p>首先是简单记录下自己学习使用 JDBC 的历程，由于目前基本都是通过一些类似 MyBatis 的框架来进行数据库操作，所以 JDBC 的使用不需要掌握太深入，仅作为了解即可。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>首先我们学习任何东西之前都需要先了解几个问题，基本上的思路是：<br>    1. xxx 是什么？<br>    2. 有什么作用？也就是为什么需要 xxx？<br>    3. 怎么使用（简单入门即可）？<br>    4. 分别就主要链路进行知识补充<br>之后，可以根据实际情况决定是否要进一步深入了解，还是只作为简单学习即可。</p>
+<p>JDBC 也不例外。</p>
+<span id="more"></span>
+
+<h3 id="什么是-JDBC？"><a href="#什么是-JDBC？" class="headerlink" title="什么是 JDBC？"></a>什么是 JDBC？</h3><blockquote>
+<p>Java数据库连接，（Java Database Connectivity，简称JDBC）是Java语言中用来规范客户端程序如何来访问数据库的应用程序接口，提供了诸如查询和更新数据库中数据的方法。JDBC也是Sun Microsystems的商标[1]。JDBC是面向关系型数据库的。</p>
+</blockquote>
+<p>上面是维基百科的解释，从这里我们获取到的几个有用信息：</p>
+<ol>
+<li>简单来说，JDBC 就是 Java 定义的一套用来规范和约束客户端程序如何访问数据库的<strong>接口</strong>，尤其是需要注意接口一词</li>
+<li>JDBC 是面向关系型数据库的，也就是说对于非关系型数据库用这一套接口是不行的。</li>
+</ol>
+<h3 id="为什么需要-JDBC？"><a href="#为什么需要-JDBC？" class="headerlink" title="为什么需要 JDBC？"></a>为什么需要 JDBC？</h3><p>回答类似这种问题其实套路也比较简单，我们思考一下，假如没有 JDBC 会怎么样？</p>
+<p>我们知道，关系型数据库是有很多分类的，例如常见的 MySQL、Oracle、SQL Server等等，那么如果没有一套标准接口的话，意味着我们如果开发 MySQL 数据库，不光需要引入 MySQL 的官方驱动，还需要引入官方的 Jar 包，根据对应的 CRUD 接口编写数据库操作代码，如果这时候你还有另一个使用 Oracle 项目，那么同样的工作需要重新进行一次，可想而知，这个适配成本是随着数据库厂商的增多逐渐上升的。</p>
+<p>那么怎么解决这类问题呢？有一句名言是这么说的，<strong>“计算机科学领域的任何问题都可以通过增加一个简介的中间层来解决。”</strong>，回到我们的问题上，Java 开发者就提供了这么一个中间层，也就是 <strong>JDBC</strong>。</p>
+<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200301214356.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200301214356.png" alt="20200301214356"></a></p>
+<p>通过这个图可以看到，由于有了这么一个中间层，我们在开发代码时，只需要使用 JDBC 相关的接口即可，不需要关心具体实现底层的是 MySQL 还是 Oracle。</p>
+<h2 id="如何使用-JDBC？"><a href="#如何使用-JDBC？" class="headerlink" title="如何使用 JDBC？"></a>如何使用 JDBC？</h2><p>接下来我们看下如何快速搭建一个 JDBC 的demo。通常在 Java 后端开发中，我们只需要掌握几个核心点就可以快速上手一个框架，它们分别是：</p>
+<ol>
+<li>jar 包或者 maven坐标</li>
+<li>关键的配置文件和属性</li>
+<li>核心的类和 API</li>
+</ol>
+<p>下面我们就从这个几方面入手快速了解一下：</p>
+<h3 id="jar-包或者-maven坐标"><a href="#jar-包或者-maven坐标" class="headerlink" title="jar 包或者 maven坐标"></a>jar 包或者 maven坐标</h3><p>使用数据库需要这么几个比较重要的包：</p>
+<ol>
+<li><code>java.sql</code>：所有与 JDBC 访问数据库相关的接口和类,可以说有了这里面提供的接口和类已经足够搭建一个 demo 实现基本功能</li>
+<li><code>javax.sql</code>：数据库扩展包，提供数据库额外的功能，如：连接池。接下来我们只是实现基本功能，可以不使用这个包。</li>
+<li>数据库的驱动：由各大数据库厂商提供，需要额外去下载，是对 JDBC 接口实现的类。</li>
+</ol>
+<p>这里面只有数据库的驱动是需要我们自己使用 jar 包或者 maven 依赖的。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>mysql<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mysql-connector-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.0.17<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里由于我本地的 MySQL 是 8.x 版本，因此使用了 8.0.17， 如果你的 MySQL 是 5.x 版本可以使用 5.1.39。</p>
+<h3 id="关键的配置文件和属性"><a href="#关键的配置文件和属性" class="headerlink" title="关键的配置文件和属性"></a>关键的配置文件和属性</h3><p>JDBC 中可以通过使用配置文件来加载数据库相关配置，例如指定数据库 URL、账户、密码等，这个等下详细介绍。</p>
+<h3 id="核心的类和-API"><a href="#核心的类和-API" class="headerlink" title="核心的类和 API"></a>核心的类和 API</h3><p>JDBC 中几个比较核心的类和作用如下：</p>
+<ul>
+<li>DriverManager 类<ul>
+<li>管理和注册数据库驱动</li>
+<li>得到数据库连接对象</li>
+</ul>
+</li>
+<li>Connection 接口<ul>
+<li>一个连接对象，可用于创建 Statement 和 PreparedStatement 对象</li>
+</ul>
+</li>
+<li>Statement 接口<ul>
+<li>一个 SQL 语句对象，用于将 SQL 语句发送给数据库服务器。</li>
+</ul>
+</li>
+<li>PreparedStatemen 接口<ul>
+<li>一个 SQL 语句对象，是 Statement 的子接口</li>
+</ul>
+</li>
+<li>ResultSet 接口<ul>
+<li>用于封装数据库查询的结果集，返回给客户端 Java 程序</li>
+</ul>
+</li>
+</ul>
+<p>简单了解即可，等下具体搭建工程会详细介绍。</p>
+<h3 id="搭建测试工程"><a href="#搭建测试工程" class="headerlink" title="搭建测试工程"></a>搭建测试工程</h3><p>这里我们先简单建一个表，然后插入几条数据用于查看。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `bank` (</span><br><span class="line">    `name` <span class="type">varchar</span>(<span class="number">10</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    `money` <span class="keyword">double</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> bank</span><br><span class="line"><span class="keyword">values</span> (money <span class="operator">=</span> <span class="number">100</span>, name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">200</span>, name <span class="operator">=</span> <span class="string">&#x27;李四&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">300</span>, name <span class="operator">=</span> <span class="string">&#x27;王五&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">400</span>, name <span class="operator">=</span> <span class="string">&#x27;赵六&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这样我们的表就建好了，数据也有了，我们就正式开始通过编写代码查找表中的数据。</p>
+<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307202152.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307202152.png" alt="20200307202152"></a></p>
+<p>其实说白了使用 JDBC 的核心步骤就是这些：</p>
+<ol>
+<li>导入驱动jar包</li>
+<li>注册驱动</li>
+<li>获取数据库连接对象</li>
+<li>定义sql</li>
+<li>获取执行sql语句的对象 Statement</li>
+<li>执行sql，接受返回结果</li>
+<li>处理结果</li>
+<li>释放资源</li>
+</ol>
+<p>那么我们看下，这里其中导入 jar 包我们已经通过引入 maven 坐标解决了，接下来看看如何注册驱动。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Class.forName(<span class="string">&quot;com.mysql.cj.jdbc.Driver&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这不就是加载类吗？哪里有注册驱动呢？别着急，我们看下源码。跳到 <code>com.mysql.cj.jdbc.Driver</code> 中，我们发现 <code>Driver</code> 中的静态代码块调用了 <code>DriverManager</code> 的<code>registerDriver</code>方法，然后创建了一个<code>Driver</code>对象作为入参传入。这也跟我们之前提到的 <code>DriverManager</code> 有管理和注册驱动的作用是吻合的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        DriverManager.registerDriver(<span class="keyword">new</span> Driver());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (SQLException var1) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;Can&#x27;t register driver!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看下 <code>DriverManager</code> 的官方文档，可以看到</p>
+<blockquote>
+<p>JDBC 4.0 Drivers must include the file META-INF/services/java.sql.Driver. This file contains the name of the JDBC drivers implementation of java.sql.Driver.</p>
+</blockquote>
+<blockquote>
+<p>Applications no longer need to explicitly load JDBC drivers using Class.forName(). Existing programs which currently load JDBC drivers using Class.forName() will continue to work without modification.</p>
+</blockquote>
+<p>这几句话是什么意思呢？简单来说就是可能 JDK 觉得大家老是这么加载驱动比较繁琐，在 JDBC4.0 之后新增了一个约定，数据库驱动实现方必须要在 jar 包的 <code>META-INF/services/java.sql.Driver</code> 路径里面写明指定的 <code>Driver</code> 类，这样 JVM 会自动将对应的驱动进行加载，而不再需要程序员在开发过程中手动调用 <code>Class.forName()</code> 了，当然已经调用了的代码可以正常运行而不会受到影响，所以这一步我们可以省略了。</p>
+<p>接下来是获取数据库连接对象 <code>Connection</code>，前面我们已经提到，这个类是用来创建 <code>Statement</code> 对象的，而 <code>Statement</code> 对象就是真正进行数据库操作的类，</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> Connection connection = DriverManager.getConnection(<span class="string">&quot;jdbc:mysql://localhost:3306/samwei12&quot;</span>, <span class="string">&quot;root&quot;</span>,<span class="string">&quot;root&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>通过调用 <code>DriverManager</code> 的<code>getConnection</code>方法，我们就得到了一个 <code>Connection</code> 对象。它的几个入参也比较显而易见，就是数据库连接时的 url、账户、密码等信息。这也是 <code>DriverManager</code> 的第二个功能，就是获取数据库连接对象 <code>Connection</code> 的实例。</p>
+<p>接下来是定义 sql 语句，这个最好理解，这里我们把张三的存款设置成 1000。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String sql = <span class="string">&quot;update bank set money=1000 where name=&#x27;张三&#x27;&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>接下来是创建 <code>Statement</code> 对象，</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br></pre></td></tr></table></figure>
+
+<p>执行 sql 语句：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> count = statement.executeUpdate(sql);</span><br></pre></td></tr></table></figure>
+
+<p>入参代表我们需要执行的 sql 语句，出参代表本条 update 语句影响的行数。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">System.out.println(count);</span><br></pre></td></tr></table></figure>
+<p>这里我们简单打印下就可以，如果查询到的是需要封装的对象，那么还需要其他处理，这里不展开。</p>
+<p>最后就是释放资源，这个一定要记住。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">statement.close();</span><br><span class="line">connection.close();</span><br></pre></td></tr></table></figure>
+
+<p>之后我们执行一下，可以看到打印结果是 1，同时数据库中对应数据也发生了变动。</p>
+<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307192219.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307192219.png" alt="20200307192219"></a></p>
+<p>示例代码地址：</p>
+<ul>
+<li><a href="https://github.com/samwei12/jdbc-demo">https://github.com/samwei12/jdbc-demo</a></li>
+</ul>
+<h2 id="详细-API-了解"><a href="#详细-API-了解" class="headerlink" title="详细 API 了解"></a>详细 API 了解</h2><h3 id="DriverManager"><a href="#DriverManager" class="headerlink" title="DriverManager"></a>DriverManager</h3><p>前面已经讲得比较清楚，它的主要作用就是注册驱动+管理数据库连接，这里只说一下 MySQL 的 URL 写法。</p>
+<ul>
+<li><code>jdbc:mysql://ip地址(域名):端口号/数据库名称</code><ul>
+<li>例子：<code>jdbc:mysql://localhost:3306/samwei12</code></li>
+<li>细节：如果连接的是本机mysql服务器，并且mysql服务默认端口是3306，则url可以简写为：<code>jdbc:mysql:///数据库名称</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="Connection"><a href="#Connection" class="headerlink" title="Connection"></a>Connection</h3><p>数据库连接对象，它的主要功能包括创建一个 <code>Statement</code> 和管理事务。</p>
+<ol>
+<li>获取执行sql 的对象<ul>
+<li><code>Statement createStatement()</code></li>
+<li><code>PreparedStatement prepareStatement(String sql)</code></li>
+</ul>
+</li>
+<li>管理事务：<ul>
+<li>开启事务：<code>setAutoCommit(boolean autoCommit)</code> ：调用该方法设置参数为false，即开启事务</li>
+<li>提交事务：<code>commit()</code></li>
+<li>回滚事务：<code>rollback()</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="Statement"><a href="#Statement" class="headerlink" title="Statement"></a>Statement</h3><p>执行sql的对象，CRUD 都可以执行：</p>
+<ol>
+<li><code>boolean execute(String sql)</code> ：可以执行任意的sql语句</li>
+<li><code>int executeUpdate(String sql)</code> ：执行DML（insert、update、delete）语句、DDL(create，alter、drop)语句<ul>
+<li>返回值：影响的行数，可以通过这个影响的行数判断DML语句是否执行成功 返回值&gt;0的则执行成功，反之，则失败。</li>
+</ul>
+</li>
+<li><code>ResultSet executeQuery(String sql)</code>：执行DQL(select) 语句</li>
+</ol>
+<p>这里我们最常用的的一般就是最后一个方法了，示例代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//4. 定义sql</span></span><br><span class="line">String sql = <span class="string">&quot;select * from bank&quot;</span>;</span><br><span class="line"><span class="comment">// 5. 获取执行sql语句的对象 Statement</span></span><br><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br><span class="line"><span class="comment">// 6. 执行sql，接受返回结果</span></span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = statement.executeQuery(sql);</span><br><span class="line"><span class="comment">// 7. 处理结果</span></span><br><span class="line"><span class="keyword">while</span> (resultSet.next()) &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">double</span> money = resultSet.getDouble(<span class="string">&quot;money&quot;</span>);</span><br><span class="line">    <span class="keyword">final</span> String name = resultSet.getString(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">    System.out.println(name+<span class="string">&quot;银行账户：&quot;</span>+money);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过 <code>ResultSet</code> 的 <code>next</code> 方法遍历结果，之后得到的就是一行的数据，分别取出每一列的数据处理即可。</p>
+<h3 id="ResultSet"><a href="#ResultSet" class="headerlink" title="ResultSet"></a>ResultSet</h3><p>结果集对象，封装查询结果</p>
+<ul>
+<li><code>boolean next()</code>: 游标向下移动一行，判断当前行是否是最后一行末尾(是否有数据)，如果是，则返回false，如果不是则返回true</li>
+<li><code>getXxx(参数)</code>:获取数据<ul>
+<li>Xxx：代表数据类型，如： <code>int getInt() , String getString()</code></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>具体的使用方法 <code>executeQuery</code> 这里已经展示过了</li>
+</ul>
+<h3 id="PreparedStatement"><a href="#PreparedStatement" class="headerlink" title="PreparedStatement"></a>PreparedStatement</h3><p>执行sql的对象，继承自 <code>Statement</code>。看到这里你可能会比较奇怪，我们不是已经有了 <code>Statement</code> 类了嘛，为什么还需要再搞一个子类出来呢？我们先通过一个示例介绍一下什么是 <strong>SQL 注入</strong>。</p>
+<p>创建一个用户登录信息表，包括用户名和密码。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span> (</span><br><span class="line"></span><br><span class="line">id <span class="type">int</span> <span class="keyword">primary</span> key auto_increment,</span><br><span class="line"></span><br><span class="line">name <span class="type">varchar</span>(<span class="number">20</span>),</span><br><span class="line"></span><br><span class="line">password <span class="type">varchar</span>(<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span> (<span class="keyword">null</span>,<span class="string">&#x27;jack&#x27;</span>,<span class="string">&#x27;123&#x27;</span>),(<span class="keyword">null</span>,<span class="string">&#x27;rose&#x27;</span>,<span class="string">&#x27;456&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>然后模拟一下用户的登录，如果用户输入的用户名和密码能够匹配到一条记录，那么我们认为登录成功，否则认为登录失败。</p>
+<p>代码比较简单，核心代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String sql = <span class="string">&quot;select * from user where name=&#x27;&quot;</span>+userName+<span class="string">&quot;&#x27; and password=&#x27;&quot;</span>+password+<span class="string">&quot;&#x27;&quot;</span>;</span><br><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = statement.executeQuery(sql);</span><br><span class="line"><span class="keyword">if</span> (resultSet.next()) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录成功，欢迎您：&quot;</span> + userName);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录失败&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>验证一下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">JACK</span><br><span class="line">请输入用户密码：</span><br><span class="line">123</span><br><span class="line">登录成功，欢迎您：JACK</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">jack1</span><br><span class="line">请输入用户密码：</span><br><span class="line">123</span><br><span class="line">登录失败</span><br></pre></td></tr></table></figure>
+
+<p>看起来好像一切正常，没毛病，那么我们尝试一下如下输入：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">我是一个不存在的用户</span><br><span class="line">请输入用户密码：</span><br><span class="line">我是密码<span class="string">&#x27; or &#x27;</span>a<span class="string">&#x27;=&#x27;</span>a</span><br></pre></td></tr></table></figure>
+
+<p>这时我们发现，神奇的事情出现了：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">登录成功，欢迎您：我是一个不存在的用户</span><br></pre></td></tr></table></figure>
+
+<p>这是为什么呢？？？其实我们 debug 一下就会发现，原因很简单，我们传给 <code>Statement</code> 对象的是一个字符串，那么上述参数真正执行的 SQL 语句是 <code>select * from user where name=&#39;我是一个不存在的用户&#39; and password=&#39;我是密码&#39; or &#39;a&#39;=&#39;a&#39;</code>。 大家发现了吗？我们的原始 SQL 只是查询用户名和密码信息，但是如果用户输入了类似上面这种奇怪的密码，在我们的 SQL 后面拼接上其他字符串，就可以绕过我们的检查，随意输入任何用户名和密码都可以获得登录授权，这无疑是很危险的。</p>
+<blockquote>
+<p>SQL注入（英语：SQL injection），也称SQL注入或SQL注码，是发生于应用程序与数据库层的安全漏洞。简而言之，是在输入的字符串之中注入SQL指令，在设计不良的程序当中忽略了字符检查，那么这些注入进去的恶意指令就会被数据库服务器误认为是正常的SQL指令而运行，因此遭到破坏或是入侵。</p>
+</blockquote>
+<p>以上是维基百科对应的词条解释，那么怎么解决这种问题呢？JDK 的作者们提供的 <code>PreparedStatement</code> 就是用来处理这种问题的。我们来看一下它的用法。</p>
+<ol>
+<li>Connection 接口中的方法<ol>
+<li><code>PreparedStatement prepareStatement(String sql)</code>: 指定预编译的 SQL 语句，SQL 语句中使用占位符 <code>?</code> 创建一个语句对象</li>
+</ol>
+</li>
+<li>PreparedStatement 接口中的方法<ol>
+<li><code>int executeUpdate()</code>: 执行 DML，增删改的操作，返回影响的行数。</li>
+<li><code>ResultSet executeQuery()</code>: 执行 DQL，查询的操作，返回结果集</li>
+</ol>
+</li>
+</ol>
+<p>使用步骤：</p>
+<ol start="3">
+<li>编写 SQL 语句，未知内容使用?占位：<code>&quot;SELECT * FROM user WHERE name=? AND password=?&quot;;</code></li>
+<li>获得 <code>PreparedStatement</code> 对象</li>
+<li>设置实际参数：<code>setXxx(占位符的位置, 真实的值)</code><ol>
+<li>对应一系列重载的方法</li>
+</ol>
+</li>
+<li>执行参数化 SQL 语句</li>
+<li>关闭资源</li>
+</ol>
+<p>具体的代码示例如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 构造一个带参数的 SQL 语句，这里不需要加单引号了，而是使用占位符 ？</span></span><br><span class="line">String sql = <span class="string">&quot;select * from user where name=? and password=?&quot;</span>;</span><br><span class="line"><span class="comment">// 2. 获取 PreparedStatement 对象</span></span><br><span class="line"><span class="keyword">final</span> PreparedStatement preparedStatement = connection.prepareStatement(sql);</span><br><span class="line"><span class="comment">// 3. 设置参数，这里需要注意的是索引是从 1 开始的，而不是 0</span></span><br><span class="line">preparedStatement.setString(<span class="number">1</span>, userName);</span><br><span class="line">preparedStatement.setString(<span class="number">2</span>, userName);</span><br><span class="line"><span class="comment">// 4. 执行参数化 SQL 语句，这里由于 sql 语句已经准备好了，不再需要传入参数，直接执行即可</span></span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = preparedStatement.executeQuery();</span><br><span class="line"><span class="keyword">if</span> (resultSet.next()) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录成功，欢迎您：&quot;</span> + userName);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录失败&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用起来还是比较简单的，需要注意的几个点已经写在了注释里面。<br>执行结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">我是一个不存在的用户</span><br><span class="line">请输入用户密码：</span><br><span class="line">我是密码<span class="string">&#x27; or &#x27;</span>a<span class="string">&#x27;=&#x27;</span>a</span><br><span class="line">登录失败</span><br></pre></td></tr></table></figure>
+
+<p>可以看到使用 <code>PreparedStatement</code> 有效的解决了 SQL 注入的问题，它还有以下好处：</p>
+<ol>
+<li><code>prepareStatement()</code> 方法会先将 SQL 语句发送给数据库预编译。<code>PreparedStatement</code> 会引用着预编译后的结果。 可以多次传入不同的参数给 <code>PreparedStatement</code> 对象并执行。减少 SQL 编译次数，提高效率。</li>
+<li>提高了程序的可读性</li>
+</ol>
+<p>所以我们尽可能全部都使用 <code>PreparedStatement</code> 的方式，而不是 <code>Statement</code> 类。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，一个简单的 JDBC demo 就搭建完毕了。由于目前已经不会有人直接使用 JDBC 进行数据库操作了，我们只是为了接下来学习 MyBatis 进行一个铺垫，简单了解即可，不需要深入。</p>
+<p>示例代码地址：</p>
+<ul>
+<li><a href="https://github.com/samwei12/jdbc-demo">https://github.com/samwei12/jdbc-demo</a></li>
+</ul>
+<h2 id="Relations"><a href="#Relations" class="headerlink" title="Relations"></a>Relations</h2><ul>
+<li><a href="https://zh.wikipedia.org/wiki/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5">https://zh.wikipedia.org/wiki/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/SQL%E6%B3%A8%E5%85%A5">https://zh.wikipedia.org/wiki/SQL%E6%B3%A8%E5%85%A5</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Server</category>
+      </categories>
+      <tags>
+        <tag>JDBC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Logseq 系列之 Git 同步</title>
+    <url>/2022/08/12/Utilities/Logseq%E7%B3%BB%E5%88%97%E4%B9%8BGit%E5%90%8C%E6%AD%A5/</url>
+    <content><![CDATA[<p>这篇文章主要介绍一下我自己使用 Git 同步 Logseq 的一些心得。前置知识是需要你懂一些基本的 Git 操作，或者起码有一定的动手能力。如果你没听过 Git，那可能本文不太适合你。</p>
+<p>随着 Logseq 的 iOS 版本发布及更新，手机上也能够快速的访问甚至随手自己的笔记了，这无疑是一个非常棒的事情。当然，由于 iOS 系统本身的特点，我们只能使用iCloud 进行 PC 和手机之间同步，这本身并没有什么问题，甚至为了手机端同步，我花了一点时间把放到自己 NAS 里面的笔记全部迁到了 iCloud，并且重新订阅起了 iCloud 的服务（每月 6 元最低档）。</p>
+<p>然而，经过一段时间的使用，我发现事情并没有想象中的那么简单。</p>
+<span id="more"></span>
+
+<h2 id="为什么要使用-Git-进行同步？"><a href="#为什么要使用-Git-进行同步？" class="headerlink" title="为什么要使用 Git 进行同步？"></a>为什么要使用 Git 进行同步？</h2><p>使用云盘这类服务首先需要面对的一个问题就是版本控制，当然不是说云盘无法做到版本控制，目前大部分云盘都已经支持历史版本（虽然有不少都是需要额外付费），其中做的比较好的当属坚果云，可以比较方便的查看某个文件的多个历史版本，可以恢复到指定版本。由于个人原因，我无法使用坚果云同步笔记，在迁移到 iCloud 之前使用的是自己的 NAS 同步，基本也能满足需求，但也只限于基础需求了。如果我想知道今天新增了哪些笔记、 某个笔记最近都修改了哪些内容，那么普通的版本管理就很不够用了，更别提 iCloud 的版本管理甚至不如 NAS 的同步盘。</p>
+<p>如果仅仅是这个问题，倒也还能忍，但 iCloud 时不时的文件冲突就让人很烦躁了，而且这种同步盘有一个设计感觉使用起来很难受，那就是文件冲突的时候并不是提示你修复冲突，而是自作主张就帮你选好了一个版本，同时舍弃的版本还重命名一下，于是使用一段时间之后你就会发现文件夹里面多了 n 多相同前缀的重复文件，后缀以不同时间戳之类的命名。</p>
+<p>iCloud 另一个非常让人难受的地方就是同步稳定性，照理说服务器都在国内，同步速度应该非常顺畅才对，但有时候它的同步逻辑就非常迷，就是有个别文件迟迟不同步，什么时候同步看它心情，这方面网上文章非常多了，可以搜一下解决办法。但偶尔在手机上查看某文件的时候发现不是最新就非常难受了。</p>
+<p>其他一些易用性的问题也非常多，比如，不希望同步指定文件夹，例如 Logseq 的 bak 文件夹，或者部分隐藏文件等，在 iCloud 或者一般的同步盘里面都是非常难看到的功能，顺便一提，NAS 同步盘倒是支持，而且还支持通配符，很不错。</p>
+<p>总之，云盘的同步功能比起 git 来简直是天上地下，如果你对 git 稍微有点了解的话，应该知道版本控制、断网提交、忽略指定文件等等在云盘上非常难看到或者难用的功能在 git 这里可以说是最基本的本领了，在官方同步版本迟迟未更新的时候，对于稍微有点动手能力的同学来说，选择使用 git 无疑是一个非常省心的决定。</p>
+<blockquote>
+<p>不了解的朋友可以看下官方介绍，对于人均程序员的 Logseq 用户来说相信不存在这个问题~ <a href="https://git-scm.com/about/branching-and-merging">About - Git</a></p>
+</blockquote>
+<h2 id="如何搭建一个-Git-服务？"><a href="#如何搭建一个-Git-服务？" class="headerlink" title="如何搭建一个 Git 服务？"></a>如何搭建一个 Git 服务？</h2><p>接下来我们聊一下如何搭建一个 git 服务。</p>
+<p>最简单的方案就是使用现成的免费服务，例如 <a href="https://github.com/">GitHub</a>， 或者 <a href="https://about.gitlab.com/">The One DevOps Platform | GitLab</a> 以及 <a href="https://gitee.com/">Gitee - 基于 Git 的代码托管和研发协作平台</a>，对于有能力使用外网的同学，推荐使用 GitHub，相信网速也并不是问题，愿意选择国内服务的话，gitee 也还不错。这些服务也都支持个人免费使用，同时支持私有仓库，也就是说你推送的内容，除了你别人都看不到。</p>
+<p>但有部分人会担心自己的笔记放在他人的服务商会不安全，存在隐私泄漏问题，尤其还是个人笔记这种十分隐私的内容。我自己也是这么想的，所以我选择第二种方案，自己搭建一个 git 服务器。</p>
+<p>搭建一个 Git 服务器非常简单，甚至你安装好 git 命令行之后可以在几分钟之内搭建一个自己本地的仓库，从笔记文件夹提交到另一个仓库文件夹中。由于本文篇幅有限，就不展开介绍 git 命令以及搭建了。我自己由于家里有一台 NAS，本着资源利用最大化的思想，就在 NAS 的 Docker 中安装了 <a href="https://gitea.io/zh-cn/">Gitea</a>， 这里你也可以选择使用 Gitlab 等服务，群晖系统可以直接在套件中心下载安装，比较简单省心。 但我个人比较推荐使用 Gitea，除了它是开源免费以外，最主要的原因就是轻量级，它的功能基本已经能够满足小型团队所有的日常开发工作，包括权限管理、自动化等等，这种情况下它的安装包只有 148 MB，占用的内容更是非常少，如果换成 Gitlab 这种庞然大物，起码是 2GB 内存起步。</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812221641.png" alt="感受一下"></p>
+<p>这里简单说两个安装过程中遇到的问题吧，使用 Docker Compose 安装的话，mysql 的创建速度会比较慢，此时直接配置 gitea 会导致报错，提示无法连接 mysql。最简单的解决方案就是安装的时候多等一会，可以通过执行 <code>docker logs -f xx</code> 查看 mysql 的日志输出情况，提示 mysql 创建完成之后，再进入到配置页面进行配置。</p>
+<p>另一个问题就是关于 ssh 配置的问题，为了安全起见，ssh 端口号最好不要使用默认，而是自己改一下，注意修改完之后，docker 配置里面必须使用相同的端口号，且域名中不能带 http，这样会导致克隆的时候没有办法使用 ssh，只能使用 http 方式。</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812221404.png" alt="20220812221404"></p>
+<h2 id="如何在-iOS-上使用-Git？"><a href="#如何在-iOS-上使用-Git？" class="headerlink" title="如何在 iOS 上使用 Git？"></a>如何在 iOS 上使用 Git？</h2><p>如果你是安卓手机，那么可以跳过这一章，直接开心的用起来就好了，这里推荐使用 Termux。</p>
+<p>好了，目前你已经有了一个自建的 Git 服务，也能够在电脑上编辑完之后提交推送到远程仓库里面，那么如何在 iOS 上拉取到最新提交呢？</p>
+<p>由于 iOS 的文件夹权限限制，正常的 APP 都只能在自己的创建的文件夹中进行文件操作，除非是 Logseq 自带 Git 支持，否则是无法使用 Git 服务的。我之前也被这个问题困扰许久，直到了解到了 Working Copy 这个神器。 在这里必须要隆重介绍一下这个 Git 仓库 <a href="https://github.com/CharlesChiuGit/Logseq-Git-Sync-101">CharlesChiuGit/Logseq-Git-Sync-101: This repo aims to help Logseq users to sync their data with Git and GitHub.</a>， 作者详细的分析了各种同步方式，介绍了 Git 的使用，以及整个工作流，可以说本文大部分内容都是基于这个仓库的，十分感谢原作者 CharlesChiuGit。</p>
+<p>Working Copy 这款软件从 2014 年就上架了，它里面最厉害的一个功能就是能够同步自己内部的一个文件夹和其他 APP 的文件夹，并且这种同步可以做到双向，这样每当你利用 Working Copy 进行 git 拉取的时候，它会自动更新 Logseq 里面的那一份，反之，每当 Logseq 中的内容进行变更的时候，它可以将变更提交到远程仓库。</p>
+<p>整个流程步骤如下：</p>
+<ol>
+<li>使用 Logseq 的 iOS 客户端，在手机本地创建一个文件夹，注意不要选 iCloud 下，而是我的手机下</li>
+<li>使用 Working Copy ，关联该文件夹，并且添加 remote 仓库，这里的仓库需要提前在自己的 git 服务器上或者 GitHub、Gitlab 上建好，推荐使用 ssh 方式</li>
+<li>然后在手机上推送到远程，之后在电脑上克隆同一个仓库，把所有笔记拷贝过去，再次推送</li>
+<li>手机上拉取即可</li>
+</ol>
+<p>其中，3.4 的顺序并不固定，如果你的仓库中已经提交好了笔记，在 2 这里直接拉取也可以。</p>
+<blockquote>
+<p>需要注意的是： Working Copy 链接外部文件夹功能是一个付费功能，但作者非常良心的提供了 10 天的试用期，所以如果只是在手机上查看而不是编辑的话，你可以利用试用期把需要的仓库都克隆到手机上，之后即使试用过期，你也仍然能够使用已有功能。</p>
+</blockquote>
+<p>虽然可以免费使用，但还是建议大家购买正版支持一下作者，终身买断 128 人民币，并不是很贵，而且免费版是无法进行推送的，如果你经常使用 Flashcards 功能的话，就会发现手机上进行复习是非常方便的，这时候不推送是无法保存手机学习记录的。</p>
+<h2 id="提效-tips"><a href="#提效-tips" class="headerlink" title="提效 tips"></a>提效 tips</h2><p>到这里，你已经可以愉快地在手机和电脑上都用上 Logseq 了，并且 git 同步非常的稳定，再也不会出现想要的文件不同步或者是重复文件的情况了，你还能获得一大堆其他 feature， 比如在 <code>.gitignore</code> 中简单配置下面这两行就可以确保不会每次同步一大堆废弃的文件。</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812224040.png" alt="20220812224040"></p>
+<p>又或者，你可以查看自己每天更新的笔记情况，甚至是每个文件的改动情况。</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812224339.png" alt="20220812224339"></p>
+<p>更高阶的玩法包括回滚某次提交、 恢复到指定版本等等等等。</p>
+<h3 id="自动化"><a href="#自动化" class="headerlink" title="自动化"></a>自动化</h3><p>但还有一点点可以提效优化的地方。首先，如果是切换设备之前先在设备 A 提交一次，再去设备 B 拉取一次，那肯定是非常难受的，毕竟连同步盘都能做到后台自动同步呢。所以我们要先把提交变为自动化。</p>
+<p>这里也有两个方案，方案一是通过脚本定时提交，参考 <a href="https://github.com/logseq/git-auto/blob/master/git-auto">git-auto/git-auto at master · logseq/git-auto</a>， 用起来也很方便，开机之后跑一下脚本就可以了，有一点可以改进一下的就是这个脚本通常只会自动提交并 push，如果切换了设备，是不会自动拉取最新版本的，可以在 66 行这边补一下拉取更新的逻辑，每次提交前先拉取最新版本，就更加好用了； 方案二更加方便，在仓库的隐藏文件夹 <code>.git</code> 中找到 hooks ，从 <a href="https://github.com/CharlesChiuGit/Logseq-Git-Sync-101">CharlesChiuGit/Logseq-Git-Sync-101: This repo aims to help Logseq users to sync their data with Git and GitHub.</a> 中下载 git-hooks 中的文件并复制到 hooks 中，记得使用 <code>chmod +x ./pre-commit &amp;&amp; chmod +x ./post-commit</code> 将文件变为可执行文件，这样 hooks 才能生效，之后在 Logseq 的设置中打开版本控制，开启自动提交，重启 Logseq 即可。它的原理是利用了 <a href="https://www.atlassian.com/git/tutorials/git-hooks">Git Hooks | Atlassian Git Tutorial</a> 的能力，在每次自动提交之前拉取一下远程仓库，同时在每次自动提交之后把改动推送到远程仓库中，同时 Logseq 的这个配置项开启之后，内部会启动一个定时器定期检查是否有可提交改动，如果有则触发 commit，如果没有改动则不做任何事情。 个人更加推荐使用方案二，相对来说更加自动化一点，且拉取跟推送的问题都解决掉了，非常完美了。</p>
+<h3 id="iOS-捷径"><a href="#iOS-捷径" class="headerlink" title="iOS 捷径"></a>iOS 捷径</h3><p>另一个可以优化的地方就是 iOS 的操作了，毕竟手机上并没有类似电脑上自动 commit 的功能，每次打开 Logseq 之前还要先去 Working Copy 中选中仓库，然后点击拉取，用完了点击提交推送，还是很麻烦的。我们可以通过系统提供的捷径功能简化操作，不需要打开 Working Copy的情况下，把提交和推送都完成。</p>
+<p>Working Copy 提供的捷径已经非常简单易懂了，我这里直接上两个截图，分别是拉取更新和提交更新的步骤，正常没有冲突的情况下基本都够用了。</p>
+<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812230743.png" width="30%" height="30%"> 
+<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812231820.jpg" width="30%" height="30%">
+
+<p>如果有冲突需要解决，最好还是去 Working Copy 里面进一步进行处理。</p>
+<p>之后再把这两个捷径添加到桌面上，放到 Logseq 旁边，这样，每次打开 Logseq 前点一下拉取，编辑完再点一下提交，能满足绝大部分需求了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，整个 Logseq 的 Git 同步方案就完成了，应该说如果跳过自建 Gitea 的步骤，还是比较简单的，但用上之后就真的停不下来了，可以说好的同步方式能够解决大部分 Logseq 的使用问题，让 Logseq 变得更加好用~ 希望本文能够对你有所帮助。</p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>Logseq</tag>
+        <tag>Git</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>使用 Wekan 搭建个人看板</title>
     <url>/2020/05/03/Utilities/Wekan/</url>
     <content><![CDATA[<blockquote>
@@ -1794,6 +1757,107 @@
         <tag>测评</tag>
         <tag>Software</tag>
         <tag>思维导图</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>简悦+Logseq 搭建本地化个人知识库</title>
+    <url>/2022/03/21/Utilities/%E7%AE%80%E6%82%A6-Logseq-%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0%E7%9F%A5%E8%AF%86%E5%BA%93/</url>
+    <content><![CDATA[<p>最近在少数派上看到了 <a href="https://sspai.com/post/72022">简悦 +Logseq 个人知识库搭建 | 从零开始完全指南 - 少数派</a>， 一时间感觉打开了新世界，其实我很早就买了简悦 2.0，但由于一直没有很好的使用场景，外加配置实在过于复杂， 始终吃灰。直到看到这篇文章，发现原来简悦也可以直接跟 Logseq 打通，那么稍后读的最大弊端终于有了完美的解决方案。</p>
+<p>不过实际按照教程配置的过程中，发现原作者是基于坚果云搭建的，不符合我本地化的思路（主要是公司不允许用云盘），因此尝试摸索一个本地任意文件夹均可实现的方案，过程中踩了非常多的坑，记录下来，希望对大家有帮助。</p>
+<span id="more"></span>
+
+<h2 id="核心配置步骤"><a href="#核心配置步骤" class="headerlink" title="核心配置步骤"></a>核心配置步骤</h2><p>因为原文已经写的非常详细了，所以这里我不再一一列举配置，而是仅把本地化配置需要注意的事项标注出来。</p>
+<h3 id="安装同步与导出工具"><a href="#安装同步与导出工具" class="headerlink" title="安装同步与导出工具"></a>安装同步与导出工具</h3><p>这里坚果云不再是必选项，而是任意本地目录即可，注意必须要保证目录结构为 <code>xx/SimpRead</code> 才行，这个是硬性要求，否则会无法使用简悦的本地知识库功能。其实只需要在同步文件夹里选择一个名为 SimpRead 的文件夹即可，导出部分使用默认</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321222459.png" alt="20220321222459"></p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321222627.png" alt="20220321222627"></p>
+<p>详细服务设定参考原文，全部打开。</p>
+<blockquote>
+<p>关于简悦知识库相关内容，可以查阅官方文档 <a href="https://kb.simpread.pro/#/page/%E5%BB%BA%E7%AB%8B%E7%9F%A5%E8%AF%86%E5%BA%93">建立知识库</a></p>
+</blockquote>
+<h3 id="通用-amp-高级"><a href="#通用-amp-高级" class="headerlink" title="通用&amp;高级"></a>通用&amp;高级</h3><ul>
+<li>自动同步相关参考原文，不需要做改动（也不需要覆盖本地配置文件这一步）</li>
+<li>标注部分保持一致，确保导出时候一定要选 <code>全文（含标注）+标注</code></li>
+</ul>
+<h3 id="服务"><a href="#服务" class="headerlink" title="服务"></a>服务</h3><p>这里是配置大头，也是容易出错的地方，重点说一下。</p>
+<p>【授权】</p>
+<ul>
+<li>因为没有用坚果云，这里可以不用关心授权</li>
+</ul>
+<p>【定制导出】</p>
+<ul>
+<li>自定义标题一定要开，这个也是知识库使用的前提，同时标题必须要保证是 <code>&#123;&#123;id&#125;&#125;&#123;&#123;un_title&#125;&#125;&#123;&#123;mode&#125;&#125;</code>  (这个主要是为了后面稍后读能够加载本地文件)</li>
+<li>模板部分，我个人做了一定的改动，这个可以自定义</li>
+</ul>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">tags:: #[[SimpRead]] &#123;&#123;tags&#125;&#125;</span><br><span class="line">type:: [[Literature Notes]]</span><br><span class="line">time:: [[&#123;&#123;date<span class="emphasis">_format|now|yyyy-MM-dd&#125;&#125; ]]</span></span><br><span class="line"><span class="emphasis">source:: [<span class="string">&#123;&#123;title&#125;&#125;</span>](<span class="link">&#123;&#123;url&#125;&#125;</span>) </span></span><br><span class="line"><span class="emphasis">desc:: &#123;&#123;desc&#125;&#125;</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">&#123;&#123;#each&#125;&#125;</span></span><br><span class="line"><span class="emphasis">- &gt; [<span class="string">📌</span>](<span class="link">&lt;&#123;&#123;an_int_uri&#125;&#125;&gt;</span>) &#123;&#123;an_</span>html&#125;&#125;</span><br><span class="line">  </span><br><span class="line">&#123;&#123;  - |an<span class="emphasis">_note&#125;&#125;&#123;&#123;an_</span>tags&#125;&#125;</span><br><span class="line">&#123;&#123;/each&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主要改动包括：</p>
+<ul>
+<li>添加部分元数据，用于 Logseq 的 query 功能，例如： type、tags、time 等</li>
+<li>标注部分把原文放在前面，同时加引文标识，自己的话放在后面，且添加缩进</li>
+</ul>
+<p>效果图：</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321223653.png" alt="20220321223653"></p>
+<p>这里一定要注意，<code>[[&#123;&#123;date_format|now|yyyy-MM-dd&#125;&#125; ]]</code> 后面是有一个空格的，它不是作者笔误，而是必须要这样才能正常添加时间戳，参见： <a href="http://ksria.com/simpread/docs/#/%E5%AE%9A%E5%88%B6%E5%8C%96%E5%AF%BC%E5%87%BA?id=markdown">定制导出</a> ，<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321224231.png" alt="image-20220321224231231"></p>
+<h3 id="增强导出（保持原文配置）"><a href="#增强导出（保持原文配置）" class="headerlink" title="增强导出（保持原文配置）"></a>增强导出（保持原文配置）</h3><h3 id="自动化"><a href="#自动化" class="headerlink" title="自动化"></a>自动化</h3><p>这里有一个坑花了我三天时间，必须要重点讲一下。</p>
+<blockquote>
+<p>但这里更建议是保存为 <a href="http://textbundle.org/">Textbundle </a>格式，因为离线 HTML 需要将图片转译为 Base64 的代码，碰到多图杀猫的文章很容易卡顿或失败。</p>
+</blockquote>
+<p>因此在自动化中，我导出了 HTML、Markdown、Textbundle，结果就是，尝试了各种方案，包括数次卸载重装、排查本地端口占用、卸载同步助手重装等，都无法成功在本地使用 <code>http://localhost:7026/reading/</code> 跳转文件，一直提示 404，<img src="https://user-images.githubusercontent.com/12758352/158979936-06fa9e67-8a68-4fd8-ab13-e854377e87e9.png">，中间尝试了各种方案，一度怀疑是否只能使用坚果云才能用知识库功能。 结果发现全部卸载重装之后，坚果云也无法使用，中间联系简悦作者 <strong><a href="https://github.com/Kenshin">Kenshin</a></strong> 排查了很久，最终发现是因为同步助手无法识别 <code>.textbundle</code> 文件，导致不能正常建立索引。</p>
+<p>这个问题有两种解决方案： 1. 放弃 Textbundle，改为使用离线 HTML  2. 通过文件规则，将 <code>.textbundle</code> 格式文件移动到其他目录下。我选择了第二种，原因就是离线 HTML 下载容易造成卡顿。不过遇到了另一个问题，那就是 <strong>Hazel</strong> 实在是太快了，在简悦刚开始创建 Textbundle 文件的时候，就已经把文件夹挪到了其他文件，导致此时简悦正在下载的图片找不到存放目录，引发大量报错。这个问题也卡了我不少时间，具体解决方案稍后单独介绍。</p>
+<p>关于这部分，Kenshin 戏称说这个 issue 的长度可以在 2000 个 issue 里面排到前五，过程确实比较曲折，我中间走了非常多的弯路（不然也不会花掉一个周末的时间折腾），一度都想卸载简悦放弃了。有兴趣的同学可以看一下 <a href="https://github.com/Kenshin/simpread/issues/3554">自定义导出无法使用稍后读加载本地缓存文件 · Issue #3554 · Kenshin/simpread</a></p>
+<p>第二个坑，这里原文作者也有提到，那就是稍后读的自动化流程，必须要在阅读模式下才可以，否则不生效， 参考： <a href="https://github.com/Kenshin/simpread/discussions/2362">部分操作方式加入稍后读时，无法触发自动化 · Discussion #2362 · Kenshin/simpread</a></p>
+<h3 id="开放平台（本地方案不需要，跳过）"><a href="#开放平台（本地方案不需要，跳过）" class="headerlink" title="开放平台（本地方案不需要，跳过）"></a>开放平台（本地方案不需要，跳过）</h3><h3 id="定制导出"><a href="#定制导出" class="headerlink" title="定制导出"></a>定制导出</h3><ul>
+<li>这里一定要注意： 必须要跟原作者保持一致， <code>http://localhost:7026/reading/</code> 路径是简悦知识库必须的配置，否则会导致链接无法跳转以及稍后读无法使用本地缓存文件。</li>
+<li>另一个问题就是简悦存在 bug，刷新完一定要检查一下配置是否符合预期</li>
+</ul>
+<h3 id="稍后读后台设置"><a href="#稍后读后台设置" class="headerlink" title="稍后读后台设置"></a>稍后读后台设置</h3><ul>
+<li>基本保持一致，唯一一个小改动点就是 <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321225751.png" alt="image-20220321225751261">，因为我只用简悦来进行深度阅读，并不需要在这里查看标注，所以通常都是进入阅读模式。</li>
+</ul>
+<h3 id="MD-文件自动移动（保持一致，使用-Hazel-即可，实际上后面我放弃了使用-Hazel）"><a href="#MD-文件自动移动（保持一致，使用-Hazel-即可，实际上后面我放弃了使用-Hazel）" class="headerlink" title="MD 文件自动移动（保持一致，使用 Hazel 即可，实际上后面我放弃了使用 Hazel）"></a>MD 文件自动移动（保持一致，使用 Hazel 即可，实际上后面我放弃了使用 Hazel）</h3><p>至此，整个核心配置基本就已经完成了，我们实现的功能包括：</p>
+<ol>
+<li>添加标注自动保存 HTML、Markdown 到 output 文件夹</li>
+<li>标注文件自动移动到 Logseq 目录中</li>
+<li>稍后读自动加载本地缓存 HTML 文件 <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321230602.png" alt="image-20220321230602224"></li>
+</ol>
+<h2 id="优化点"><a href="#优化点" class="headerlink" title="优化点"></a>优化点</h2><h3 id="Textbundle永久保存方案（Mac、Linux-适用）"><a href="#Textbundle永久保存方案（Mac、Linux-适用）" class="headerlink" title="Textbundle永久保存方案（Mac、Linux 适用）"></a>Textbundle永久保存方案（Mac、Linux 适用）</h3><p>接着上面提到的，详细展开一下如何处理 Textbundle 文件。</p>
+<p>首先，我一下子想到的就是利用 Hazel，新建一个规则就可以，当我实际上这么操作的时候，发现遇到了简悦写入图片时文件夹已经被移动导致报错问题。</p>
+<p>此时，我的思路是，如果有办法能够延长移动文件夹的速度就好了。但简悦跟 Hazel 是相互不知道的，很可惜的是 Hazel 中也没有配置延迟操作或者定时任务这一功能，那么我们只能想办法自己动手了（当然这里还有一条路，希望简悦后续的文件写入能够先把图片下载完，之后再生成文件夹）。</p>
+<p>我想到的解决方案是使用 *nix 系统的 cron 功能，不了解的小伙伴可以看一下 <a href="https://serverfault.com/questions/449651/why-is-my-crontab-not-working-and-how-can-i-troubleshoot-it">linux - Why is my crontab not working, and how can I troubleshoot it? - Server Fault</a> ，非常详细的介绍了 cron crontab 分别是什么， 如何使用，以及如何排查错误，受益匪浅。</p>
+<p>这里需要做的事情非常简单，将所有后缀为 <code>.textbundle</code> 的文件移动到另一个目录中，实际操作起来并不简单，因为 <code>mv</code> 命令无法直接移动文件夹，而 textbundle 其实是一个文件夹而不是文件，包括了 json、图片以及 markdown，所以第一步就卡住了。我改为使用 <code>rsync</code> 来实现这个功能，可以很方便的把某个目录下所有的 Textbundle 移动到另一个目录。之后我们把源文件夹中的 Textbundle 文件删除。这里由于无法使用 Hazel 实现全部功能，那我干脆把移动 <code>@annotate.md</code> 文件的部分也放在自己的脚本里面实现了。完整的脚本文件如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">cd 你的目录/SimpRead</span><br><span class="line">mv output/*@annote.md  Logseq目录/SimpleRead/</span><br><span class="line">rsync -axvP output/*.textbundle archieves（存放 Textbundle 的目录）</span><br><span class="line">rm -rf output/*.textbundle</span><br></pre></td></tr></table></figure>
+
+<p>可以直接新建一个 <code>simpread.sh</code> 之后把上面的代码粘贴过去，记得把上面中文说明的部分都替换掉，同时为了手动执行方便，可以 <code>chmod +x simpread.sh</code> 一下。</p>
+<p>然后就是使用 cron 让电脑自动执行这个脚本，这里可以使用 <a href="https://crontab.guru/#*/5_*_*_*_*">Crontab.guru - The cron schedule expression editor</a> 这个网站调试一下定时任务，比如我目前的配置是每隔 5 分钟执行一次脚本。注意不能执行太频繁，否则一样会遇到简悦下载出错（5 分钟也不能保证完全不出错，理论上间隔越久，出错概率越小）。</p>
+<p>具体的添加步骤（我是 Mac，以下请在命令行中执行）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">export EDITOR=&#x27;vi&#x27; (不是必须)</span><br><span class="line">crontab -e</span><br><span class="line"></span><br><span class="line">然后输入</span><br><span class="line">*/5 * * * * /bin/sh 你的简悦目录/SimpRead/simpread.sh</span><br><span class="line">之后输入 :wq 保存即可</span><br></pre></td></tr></table></figure>
+
+<p>提示： <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321232144.png" alt="image-20220321232140468"></p>
+<p>就代表定时任务添加成功，可以把 Hazel 卸载掉了。</p>
+<h3 id="快速进入稍后读"><a href="#快速进入稍后读" class="headerlink" title="快速进入稍后读"></a>快速进入稍后读</h3><p>看到简悦同步助手里面有如何快速打开稍后读的方式，参见： <a href="http://ksria.com/simpread/docs/#/%E7%A8%8D%E5%90%8E%E8%AF%BB?id=%E5%88%9B%E5%BB%BA%E5%BF%AB%E6%8D%B7%E6%96%B9%E5%BC%8F">稍后读</a> ，我就琢磨了一下，感觉效率还可以再提高一下。</p>
+<h3 id="配置快捷方式"><a href="#配置快捷方式" class="headerlink" title="配置快捷方式"></a>配置快捷方式</h3><p>文档中把快捷方式跟独立窗口分开成两步，实际上 Chrome 浏览器支持直接创建一个独立窗口的 PWA 应用（关于 PWA，参考： <a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps">Progressive web apps (PWAs) | MDN</a>）。</p>
+<p>打开稍后读： <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321232814.png" alt="image-20220321232814407"></p>
+<p>选择独立窗口：</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321232832.png" alt="image-20220321232832834"></p>
+<p>然后你可以在用户目录下找到它 </p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321232955.png" alt="image-20220321232955685"></p>
+<p>也可以通过 Alfred 或者 Spotlight 找到它 </p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321233044.png" alt="image-20220321233044890"></p>
+<h3 id="Manico-配置快速跳转"><a href="#Manico-配置快速跳转" class="headerlink" title="Manico 配置快速跳转"></a>Manico 配置快速跳转</h3><p>这里不得不强推一个效率软件了，官方网站： <a href="https://manico.im/">Manico - macOS 下的快速 App 切换器</a></p>
+<p>基本上可以说这个软件是我目前每天使用频率最高的软件，应该没有之一，大概是 18 年左右 25￥购入。它的主要作用就是快速切换软件，比如你可以配置 option+1 打开 Chrome，option+2 打开微信等等，而且再次点击快捷键可以隐藏该软件，能够极大的节约软件切换的时间。这虽然是一款付费软件，但绝对是我在 Mac 上买过的最物超所值的软件。</p>
+<p>核心配置：快速隐藏应用 <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321233606.png" alt="image-20220321233606404"></p>
+<p>如何配置稍后读快速打开隐藏： <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220321233522.png" alt="image-20220321233522695"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我一般的处理流程是手机浏览公众号或者 RSS 初筛到 Cubox，之后电脑上打开 Cubox，跳转到简悦进行深度阅读，添加标注，同步到 Logseq，之后进行定期整理。</p>
+<p>这样，整个从文章到标注，到 Logseq 整理的过程就打通了。简悦作为一个稍后读软件，最大的亮点就是作为一个粘合剂，可以很好地跟各种笔记类软件打通，称为知识管理工作流中不可或缺的一部分，把浏览阅读到的信息和知识真正的经过深度阅读，让它有机会融入到已有的知识体系中，内化为自己的东西，就这一点已经远远超越了 Evernote、Cubox、Pinbox 等同类剪藏产品。</p>
+<p>不过简悦问题也很明显，太极客了，配置使用成本巨高无比，我身为一个程序员，都好几次尝试无果弃坑了，个人感觉它的功能已经足够强大了，希望作者能够多花点心思在交互跟实际使用体验上，真的不需要再加那么多新功能了，适当的做减法非常有必要。希望我的踩坑经历能够对你有一些帮助。</p>
+]]></content>
+      <categories>
+        <category>PKM</category>
+      </categories>
+      <tags>
+        <tag>PKM</tag>
+        <tag>稍后读</tag>
+        <tag>Logseq</tag>
+        <tag>简悦</tag>
       </tags>
   </entry>
   <entry>

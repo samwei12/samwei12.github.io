@@ -6,7 +6,7 @@
   <link href="http://blog.samwei12.cn/atom.xml" rel="self"/>
   
   <link href="http://blog.samwei12.cn/"/>
-  <updated>2022-03-21T15:44:37.508Z</updated>
+  <updated>2022-08-12T15:21:56.770Z</updated>
   <id>http://blog.samwei12.cn/</id>
   
   <author>
@@ -17,9 +17,34 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Logseq 系列之 Git 同步</title>
+    <link href="http://blog.samwei12.cn/2022/08/12/Utilities/Logseq%E7%B3%BB%E5%88%97%E4%B9%8BGit%E5%90%8C%E6%AD%A5/"/>
+    <id>http://blog.samwei12.cn/2022/08/12/Utilities/Logseq%E7%B3%BB%E5%88%97%E4%B9%8BGit%E5%90%8C%E6%AD%A5/</id>
+    <published>2022-08-12T13:25:40.000Z</published>
+    <updated>2022-08-12T15:21:56.770Z</updated>
+    
+    <content type="html"><![CDATA[<p>这篇文章主要介绍一下我自己使用 Git 同步 Logseq 的一些心得。前置知识是需要你懂一些基本的 Git 操作，或者起码有一定的动手能力。如果你没听过 Git，那可能本文不太适合你。</p><p>随着 Logseq 的 iOS 版本发布及更新，手机上也能够快速的访问甚至随手自己的笔记了，这无疑是一个非常棒的事情。当然，由于 iOS 系统本身的特点，我们只能使用iCloud 进行 PC 和手机之间同步，这本身并没有什么问题，甚至为了手机端同步，我花了一点时间把放到自己 NAS 里面的笔记全部迁到了 iCloud，并且重新订阅起了 iCloud 的服务（每月 6 元最低档）。</p><p>然而，经过一段时间的使用，我发现事情并没有想象中的那么简单。</p><span id="more"></span><h2 id="为什么要使用-Git-进行同步？"><a href="#为什么要使用-Git-进行同步？" class="headerlink" title="为什么要使用 Git 进行同步？"></a>为什么要使用 Git 进行同步？</h2><p>使用云盘这类服务首先需要面对的一个问题就是版本控制，当然不是说云盘无法做到版本控制，目前大部分云盘都已经支持历史版本（虽然有不少都是需要额外付费），其中做的比较好的当属坚果云，可以比较方便的查看某个文件的多个历史版本，可以恢复到指定版本。由于个人原因，我无法使用坚果云同步笔记，在迁移到 iCloud 之前使用的是自己的 NAS 同步，基本也能满足需求，但也只限于基础需求了。如果我想知道今天新增了哪些笔记、 某个笔记最近都修改了哪些内容，那么普通的版本管理就很不够用了，更别提 iCloud 的版本管理甚至不如 NAS 的同步盘。</p><p>如果仅仅是这个问题，倒也还能忍，但 iCloud 时不时的文件冲突就让人很烦躁了，而且这种同步盘有一个设计感觉使用起来很难受，那就是文件冲突的时候并不是提示你修复冲突，而是自作主张就帮你选好了一个版本，同时舍弃的版本还重命名一下，于是使用一段时间之后你就会发现文件夹里面多了 n 多相同前缀的重复文件，后缀以不同时间戳之类的命名。</p><p>iCloud 另一个非常让人难受的地方就是同步稳定性，照理说服务器都在国内，同步速度应该非常顺畅才对，但有时候它的同步逻辑就非常迷，就是有个别文件迟迟不同步，什么时候同步看它心情，这方面网上文章非常多了，可以搜一下解决办法。但偶尔在手机上查看某文件的时候发现不是最新就非常难受了。</p><p>其他一些易用性的问题也非常多，比如，不希望同步指定文件夹，例如 Logseq 的 bak 文件夹，或者部分隐藏文件等，在 iCloud 或者一般的同步盘里面都是非常难看到的功能，顺便一提，NAS 同步盘倒是支持，而且还支持通配符，很不错。</p><p>总之，云盘的同步功能比起 git 来简直是天上地下，如果你对 git 稍微有点了解的话，应该知道版本控制、断网提交、忽略指定文件等等在云盘上非常难看到或者难用的功能在 git 这里可以说是最基本的本领了，在官方同步版本迟迟未更新的时候，对于稍微有点动手能力的同学来说，选择使用 git 无疑是一个非常省心的决定。</p><blockquote><p>不了解的朋友可以看下官方介绍，对于人均程序员的 Logseq 用户来说相信不存在这个问题~ <a href="https://git-scm.com/about/branching-and-merging">About - Git</a></p></blockquote><h2 id="如何搭建一个-Git-服务？"><a href="#如何搭建一个-Git-服务？" class="headerlink" title="如何搭建一个 Git 服务？"></a>如何搭建一个 Git 服务？</h2><p>接下来我们聊一下如何搭建一个 git 服务。</p><p>最简单的方案就是使用现成的免费服务，例如 <a href="https://github.com/">GitHub</a>， 或者 <a href="https://about.gitlab.com/">The One DevOps Platform | GitLab</a> 以及 <a href="https://gitee.com/">Gitee - 基于 Git 的代码托管和研发协作平台</a>，对于有能力使用外网的同学，推荐使用 GitHub，相信网速也并不是问题，愿意选择国内服务的话，gitee 也还不错。这些服务也都支持个人免费使用，同时支持私有仓库，也就是说你推送的内容，除了你别人都看不到。</p><p>但有部分人会担心自己的笔记放在他人的服务商会不安全，存在隐私泄漏问题，尤其还是个人笔记这种十分隐私的内容。我自己也是这么想的，所以我选择第二种方案，自己搭建一个 git 服务器。</p><p>搭建一个 Git 服务器非常简单，甚至你安装好 git 命令行之后可以在几分钟之内搭建一个自己本地的仓库，从笔记文件夹提交到另一个仓库文件夹中。由于本文篇幅有限，就不展开介绍 git 命令以及搭建了。我自己由于家里有一台 NAS，本着资源利用最大化的思想，就在 NAS 的 Docker 中安装了 <a href="https://gitea.io/zh-cn/">Gitea</a>， 这里你也可以选择使用 Gitlab 等服务，群晖系统可以直接在套件中心下载安装，比较简单省心。 但我个人比较推荐使用 Gitea，除了它是开源免费以外，最主要的原因就是轻量级，它的功能基本已经能够满足小型团队所有的日常开发工作，包括权限管理、自动化等等，这种情况下它的安装包只有 148 MB，占用的内容更是非常少，如果换成 Gitlab 这种庞然大物，起码是 2GB 内存起步。</p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812221641.png" alt="感受一下"></p><p>这里简单说两个安装过程中遇到的问题吧，使用 Docker Compose 安装的话，mysql 的创建速度会比较慢，此时直接配置 gitea 会导致报错，提示无法连接 mysql。最简单的解决方案就是安装的时候多等一会，可以通过执行 <code>docker logs -f xx</code> 查看 mysql 的日志输出情况，提示 mysql 创建完成之后，再进入到配置页面进行配置。</p><p>另一个问题就是关于 ssh 配置的问题，为了安全起见，ssh 端口号最好不要使用默认，而是自己改一下，注意修改完之后，docker 配置里面必须使用相同的端口号，且域名中不能带 http，这样会导致克隆的时候没有办法使用 ssh，只能使用 http 方式。</p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812221404.png" alt="20220812221404"></p><h2 id="如何在-iOS-上使用-Git？"><a href="#如何在-iOS-上使用-Git？" class="headerlink" title="如何在 iOS 上使用 Git？"></a>如何在 iOS 上使用 Git？</h2><p>如果你是安卓手机，那么可以跳过这一章，直接开心的用起来就好了，这里推荐使用 Termux。</p><p>好了，目前你已经有了一个自建的 Git 服务，也能够在电脑上编辑完之后提交推送到远程仓库里面，那么如何在 iOS 上拉取到最新提交呢？</p><p>由于 iOS 的文件夹权限限制，正常的 APP 都只能在自己的创建的文件夹中进行文件操作，除非是 Logseq 自带 Git 支持，否则是无法使用 Git 服务的。我之前也被这个问题困扰许久，直到了解到了 Working Copy 这个神器。 在这里必须要隆重介绍一下这个 Git 仓库 <a href="https://github.com/CharlesChiuGit/Logseq-Git-Sync-101">CharlesChiuGit/Logseq-Git-Sync-101: This repo aims to help Logseq users to sync their data with Git and GitHub.</a>， 作者详细的分析了各种同步方式，介绍了 Git 的使用，以及整个工作流，可以说本文大部分内容都是基于这个仓库的，十分感谢原作者 CharlesChiuGit。</p><p>Working Copy 这款软件从 2014 年就上架了，它里面最厉害的一个功能就是能够同步自己内部的一个文件夹和其他 APP 的文件夹，并且这种同步可以做到双向，这样每当你利用 Working Copy 进行 git 拉取的时候，它会自动更新 Logseq 里面的那一份，反之，每当 Logseq 中的内容进行变更的时候，它可以将变更提交到远程仓库。</p><p>整个流程步骤如下：</p><ol><li>使用 Logseq 的 iOS 客户端，在手机本地创建一个文件夹，注意不要选 iCloud 下，而是我的手机下</li><li>使用 Working Copy ，关联该文件夹，并且添加 remote 仓库，这里的仓库需要提前在自己的 git 服务器上或者 GitHub、Gitlab 上建好，推荐使用 ssh 方式</li><li>然后在手机上推送到远程，之后在电脑上克隆同一个仓库，把所有笔记拷贝过去，再次推送</li><li>手机上拉取即可</li></ol><p>其中，3.4 的顺序并不固定，如果你的仓库中已经提交好了笔记，在 2 这里直接拉取也可以。</p><blockquote><p>需要注意的是： Working Copy 链接外部文件夹功能是一个付费功能，但作者非常良心的提供了 10 天的试用期，所以如果只是在手机上查看而不是编辑的话，你可以利用试用期把需要的仓库都克隆到手机上，之后即使试用过期，你也仍然能够使用已有功能。</p></blockquote><p>虽然可以免费使用，但还是建议大家购买正版支持一下作者，终身买断 128 人民币，并不是很贵，而且免费版是无法进行推送的，如果你经常使用 Flashcards 功能的话，就会发现手机上进行复习是非常方便的，这时候不推送是无法保存手机学习记录的。</p><h2 id="提效-tips"><a href="#提效-tips" class="headerlink" title="提效 tips"></a>提效 tips</h2><p>到这里，你已经可以愉快地在手机和电脑上都用上 Logseq 了，并且 git 同步非常的稳定，再也不会出现想要的文件不同步或者是重复文件的情况了，你还能获得一大堆其他 feature， 比如在 <code>.gitignore</code> 中简单配置下面这两行就可以确保不会每次同步一大堆废弃的文件。</p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812224040.png" alt="20220812224040"></p><p>又或者，你可以查看自己每天更新的笔记情况，甚至是每个文件的改动情况。</p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812224339.png" alt="20220812224339"></p><p>更高阶的玩法包括回滚某次提交、 恢复到指定版本等等等等。</p><h3 id="自动化"><a href="#自动化" class="headerlink" title="自动化"></a>自动化</h3><p>但还有一点点可以提效优化的地方。首先，如果是切换设备之前先在设备 A 提交一次，再去设备 B 拉取一次，那肯定是非常难受的，毕竟连同步盘都能做到后台自动同步呢。所以我们要先把提交变为自动化。</p><p>这里也有两个方案，方案一是通过脚本定时提交，参考 <a href="https://github.com/logseq/git-auto/blob/master/git-auto">git-auto/git-auto at master · logseq/git-auto</a>， 用起来也很方便，开机之后跑一下脚本就可以了，有一点可以改进一下的就是这个脚本通常只会自动提交并 push，如果切换了设备，是不会自动拉取最新版本的，可以在 66 行这边补一下拉取更新的逻辑，每次提交前先拉取最新版本，就更加好用了； 方案二更加方便，在仓库的隐藏文件夹 <code>.git</code> 中找到 hooks ，从 <a href="https://github.com/CharlesChiuGit/Logseq-Git-Sync-101">CharlesChiuGit/Logseq-Git-Sync-101: This repo aims to help Logseq users to sync their data with Git and GitHub.</a> 中下载 git-hooks 中的文件并复制到 hooks 中，记得使用 <code>chmod +x ./pre-commit &amp;&amp; chmod +x ./post-commit</code> 将文件变为可执行文件，这样 hooks 才能生效，之后在 Logseq 的设置中打开版本控制，开启自动提交，重启 Logseq 即可。它的原理是利用了 <a href="https://www.atlassian.com/git/tutorials/git-hooks">Git Hooks | Atlassian Git Tutorial</a> 的能力，在每次自动提交之前拉取一下远程仓库，同时在每次自动提交之后把改动推送到远程仓库中，同时 Logseq 的这个配置项开启之后，内部会启动一个定时器定期检查是否有可提交改动，如果有则触发 commit，如果没有改动则不做任何事情。 个人更加推荐使用方案二，相对来说更加自动化一点，且拉取跟推送的问题都解决掉了，非常完美了。</p><h3 id="iOS-捷径"><a href="#iOS-捷径" class="headerlink" title="iOS 捷径"></a>iOS 捷径</h3><p>另一个可以优化的地方就是 iOS 的操作了，毕竟手机上并没有类似电脑上自动 commit 的功能，每次打开 Logseq 之前还要先去 Working Copy 中选中仓库，然后点击拉取，用完了点击提交推送，还是很麻烦的。我们可以通过系统提供的捷径功能简化操作，不需要打开 Working Copy的情况下，把提交和推送都完成。</p><p>Working Copy 提供的捷径已经非常简单易懂了，我这里直接上两个截图，分别是拉取更新和提交更新的步骤，正常没有冲突的情况下基本都够用了。</p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812230743.png" width="30%" height="30%"> <img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812231820.jpg" width="30%" height="30%"><p>如果有冲突需要解决，最好还是去 Working Copy 里面进一步进行处理。</p><p>之后再把这两个捷径添加到桌面上，放到 Logseq 旁边，这样，每次打开 Logseq 前点一下拉取，编辑完再点一下提交，能满足绝大部分需求了。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，整个 Logseq 的 Git 同步方案就完成了，应该说如果跳过自建 Gitea 的步骤，还是比较简单的，但用上之后就真的停不下来了，可以说好的同步方式能够解决大部分 Logseq 的使用问题，让 Logseq 变得更加好用~ 希望本文能够对你有所帮助。</p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;这篇文章主要介绍一下我自己使用 Git 同步 Logseq 的一些心得。前置知识是需要你懂一些基本的 Git 操作，或者起码有一定的动手能力。如果你没听过 Git，那可能本文不太适合你。&lt;/p&gt;
+&lt;p&gt;随着 Logseq 的 iOS 版本发布及更新，手机上也能够快速的访问甚至随手自己的笔记了，这无疑是一个非常棒的事情。当然，由于 iOS 系统本身的特点，我们只能使用iCloud 进行 PC 和手机之间同步，这本身并没有什么问题，甚至为了手机端同步，我花了一点时间把放到自己 NAS 里面的笔记全部迁到了 iCloud，并且重新订阅起了 iCloud 的服务（每月 6 元最低档）。&lt;/p&gt;
+&lt;p&gt;然而，经过一段时间的使用，我发现事情并没有想象中的那么简单。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Utilities" scheme="http://blog.samwei12.cn/categories/Utilities/"/>
+    
+    
+    <category term="Logseq" scheme="http://blog.samwei12.cn/tags/Logseq/"/>
+    
+    <category term="Git" scheme="http://blog.samwei12.cn/tags/Git/"/>
+    
+  </entry>
+  
+  <entry>
     <title>简悦+Logseq 搭建本地化个人知识库</title>
-    <link href="http://blog.samwei12.cn/2022/03/21/%E7%AE%80%E6%82%A6-Logseq-%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0%E7%9F%A5%E8%AF%86%E5%BA%93/"/>
-    <id>http://blog.samwei12.cn/2022/03/21/%E7%AE%80%E6%82%A6-Logseq-%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0%E7%9F%A5%E8%AF%86%E5%BA%93/</id>
+    <link href="http://blog.samwei12.cn/2022/03/21/Utilities/%E7%AE%80%E6%82%A6-Logseq-%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0%E7%9F%A5%E8%AF%86%E5%BA%93/"/>
+    <id>http://blog.samwei12.cn/2022/03/21/Utilities/%E7%AE%80%E6%82%A6-Logseq-%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0%E7%9F%A5%E8%AF%86%E5%BA%93/</id>
     <published>2022-03-21T14:14:04.000Z</published>
     <updated>2022-03-21T15:44:37.508Z</updated>
     
@@ -34,13 +59,13 @@
     <category term="PKM" scheme="http://blog.samwei12.cn/categories/PKM/"/>
     
     
-    <category term="简悦" scheme="http://blog.samwei12.cn/tags/%E7%AE%80%E6%82%A6/"/>
-    
-    <category term="Logseq" scheme="http://blog.samwei12.cn/tags/Logseq/"/>
-    
     <category term="PKM" scheme="http://blog.samwei12.cn/tags/PKM/"/>
     
     <category term="稍后读" scheme="http://blog.samwei12.cn/tags/%E7%A8%8D%E5%90%8E%E8%AF%BB/"/>
+    
+    <category term="Logseq" scheme="http://blog.samwei12.cn/tags/Logseq/"/>
+    
+    <category term="简悦" scheme="http://blog.samwei12.cn/tags/%E7%AE%80%E6%82%A6/"/>
     
   </entry>
   
@@ -531,33 +556,6 @@
     
     
     <category term="UITabbarController" scheme="http://blog.samwei12.cn/tags/UITabbarController/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>AVCaptureSession部分用法</title>
-    <link href="http://blog.samwei12.cn/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/"/>
-    <id>http://blog.samwei12.cn/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/</id>
-    <published>2015-09-21T05:58:46.000Z</published>
-    <updated>2021-05-08T08:11:44.742Z</updated>
-    
-    <content type="html"><![CDATA[<blockquote><p><a href="http://blog.samwei12.cn/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/">原文链接</a></p></blockquote><h2 id="AVCaptureSession阻塞主线程问题"><a href="#AVCaptureSession阻塞主线程问题" class="headerlink" title="AVCaptureSession阻塞主线程问题"></a>AVCaptureSession阻塞主线程问题</h2><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>仔细看了文档之后，发现问题出在<code> stopRunning</code>这里，</p><span id="more"></span><p>苹果文档描述如下：</p><blockquote><p>Clients invoke -stopRunning to stop the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    stopped.</p></blockquote><p>重点是这个函数在 session 完全停止下来之前会始终阻塞线程， 同样的，在<code> startRunning</code>中：</p><blockquote><p>Clients invoke -startRunning to start the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    started up or failed.  A failure to start running is reported through the AVCaptureSessionRuntimeErrorNotification<br>    mechanism.</p></blockquote><p>因此这里必须放在后台线程中处理，否则，就会导致界面不响应，iOS8之后应该在这里做了优化，即使放在主线程做也没有很卡顿的现象，但 iOS7中，尤其是测试设备为4s，界面卡死问题很严重。</p><p>开启和关闭相机部分代码改为：</p><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 开启相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">[[<span class="keyword">self</span>.avCameraManager session] startRunning];</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="keyword">void</span>) &#123;</span><br><span class="line">DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 关闭相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">&#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><p>这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。</p><h2 id="相机前后台切换问题"><a href="#相机前后台切换问题" class="headerlink" title="相机前后台切换问题"></a>相机前后台切换问题</h2><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(startRunningSession) withObject:<span class="literal">nil</span> afterDelay:<span class="number">0.5</span>];</span><br></pre></td></tr></table></figure><p>当时我很奇怪，这里为什么要加延时呢？进入到前台时不是应该直接开启相机吗？于是我直接把这里改成了：</p><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span> startRunningSession];</span><br></pre></td></tr></table></figure><p>没过多久，问题出现了，多次切换前后台之后发现，相机始终黑屏，这时，进入后台再回来，问题解决了，仔细加了 log 之后发现，出现黑屏的时候，确实也正确调用了启动 session，但是并没有收到系统相机启动成功的消息，反而收到了两次相机关闭的通知。</p><p>那么之前代码中加了0.5秒延时的原因也就清楚了，是为了等待系统关闭相机之后，再调用开启相机，以免相机启动失败，但这种方式真的合理吗？其实并没有解决本质问题，如果0.5秒钟的时间并没有完全关闭系统相机呢？这里仍然会出现黑屏问题。</p><p>于是继续查看系统文档，发现系统的 sampleCode AVCam-iOS中并没有专门用于前后台处理的逻辑，原来这里并不需要我们自己手动管理相机，系统会自动根据程序状态来判断是否需要关闭或者开启相机，如果按 home 进入<code>UIApplicationStateBackground</code> 状态，那么系统自动关闭相机并在进入<code>UIApplicationStateActive</code>状态时开启相机；如果是进入<code>UIApplicationStateInactive</code>状态，例如，双击 home 调出任务管理器，这时，相机并没有被关闭，仍然能够看到 preview 画面。</p><p>我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul><li>AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作</li><li>前后台切换时，无需手动管理 CaptureSession</li></ul>]]></content>
-    
-    
-    <summary type="html">&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;http://blog.samwei12.cn/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/&quot;&gt;原文链接&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&quot;AVCaptureSession阻塞主线程问题&quot;&gt;&lt;a href=&quot;#AVCaptureSession阻塞主线程问题&quot; class=&quot;headerlink&quot; title=&quot;AVCaptureSession阻塞主线程问题&quot;&gt;&lt;/a&gt;AVCaptureSession阻塞主线程问题&lt;/h2&gt;&lt;p&gt;前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在&lt;code&gt;viewWillDisappear:&lt;/code&gt;中开销最大，这其中只调用了一个相机关闭的代码：&lt;/p&gt;
-&lt;figure class=&quot;highlight objc&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt; ([[&lt;span class=&quot;keyword&quot;&gt;self&lt;/span&gt;.avCameraManager session] isRunning]) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;			[[&lt;span class=&quot;keyword&quot;&gt;self&lt;/span&gt;.avCameraManager session] stopRunning];&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;仔细看了文档之后，发现问题出在&lt;code&gt; stopRunning&lt;/code&gt;这里，&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="iOS" scheme="http://blog.samwei12.cn/categories/iOS/"/>
-    
-    
-    <category term="AVCaptureSession" scheme="http://blog.samwei12.cn/tags/AVCaptureSession/"/>
     
   </entry>
   
