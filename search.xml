@@ -417,6 +417,75 @@
       </tags>
   </entry>
   <entry>
+    <title>十步学习法与程序员延寿指南</title>
+    <url>/2022/08/20/Reading/%E5%8D%81%E6%AD%A5%E5%AD%A6%E4%B9%A0%E6%B3%95%E4%B8%8E%E7%A8%8B%E5%BA%8F%E5%91%98%E5%BB%B6%E5%AF%BF%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<p>最近一直在思考如何制定自己的个人目标，凑巧某天开车的时候在微信读书上听到了<a href="https://book.douban.com/subject/36044253/">《软技能：代码之外的生存指南》</a> 这本书，里面提到的关于程序员职业生涯规划部分十分受用，后来到喜马拉雅上找了个更好的版本，快速把第一篇听了一遍，并且趁周末仔细的阅读了一下电子版。</p>
+<p>目前整本书还没有读完，我挑了其中个人比较感兴趣的职业篇和学习篇阅读完了，其中职业篇有介绍到设置一个人生目标，而学习篇则介绍了作者本人总结的一套学习方法，他称之为 “十步学习法”，本篇文章主要就是我自己使用十步学习法进行个人目标设置和规划的一些实践。</p>
+<span id="more"></span>
+
+<h2 id="什么是十步学习法？"><a href="#什么是十步学习法？" class="headerlink" title="什么是十步学习法？"></a>什么是十步学习法？</h2><p>作者说自己 33 岁就已经实现了财务自由，且同时还是一个健身博主、营销专家，本书的序其中还有 Robert C. Martin 这样的大牛，说明作者本身在编程领域也有很深的造诣，这些跟他自己的学习方法关系密切。同时他还利用自己总结的这套学习方法在一年内开发了超过 30 个适合开发人员的长期培训课程。当然，很多这种所谓的成功学都是有很多水分的，我们只需要借鉴其中个人觉得有价值的东西即可。</p>
+<p>这里我先直接上一张书里面的图： </p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220821101304.png" alt="20220821101304"></p>
+<p>十步学习法的基本思想就是先对自己所需要学习的内容有一个基本的了解，知道自己有哪些不会的知识点，再根据这个圈定好的范围明确目标和计划的制定。</p>
+<p>整个方法分为十步，所以被称为“十步学习法”，其中，1-6 是一次性解决的问题，7-10 则是需要重复训练学习的部分。从整个大的流程来看，十步学习法跟 PDCA 工作法或者费曼学习法有很多共通之处，作者应该也是受了相关方法论的影响总结出的更加适合自己的方法。比如在学习之前，先明确自己的整体目标，开始学习之后，不要一头扎进去，而是要边玩边学，把自己实践过程中遇到的问题记录下来，汇总部分问题之后再回头看书学习解决问题。这与 PDCA 中，制定计划、执行、定期检查的流程基本类似；而十步学习法的最后是乐为人师，这应该也是借鉴学习金字塔或者费曼学习法而来，掌握知识或者技能的最好的办法就是教会他人自己所学到的东西，既可以在整理准备的过程中回顾自己学到的内容，又可以从他人的反馈中知道自己哪些地方还没有吃透。</p>
+<p>对我个人而言，这套方法中最有价值的地方在于作者单独把 1-6，也就是如何制定目标和计划的部分加以抽象总结，这是我之前未在其他方法中看到过的。尤其是其中关于学习资源的部分，非常适用于当前这个知识大爆炸的时代，很多时候，人们并不是找不到资源，而是资源实在太多了，很容易淹没在信息大海里面，忘记了本身的初衷。</p>
+<h2 id="个人实践心得"><a href="#个人实践心得" class="headerlink" title="个人实践心得"></a>个人实践心得</h2><p>我自己最近在思考的一个个人目标就是如何健康的长寿，不光要活得健康，最好还能活得久，读了这本书刚好练习学习方法的时候制定一下自己的长寿计划。在具体练习的过程中，我发现十步学习法稍微有点冗余。每次制定学习计划时，如果都 1-10 这么来一遍，过于繁琐，且很多时候你会发现按照 1-10 这种方式挨个执行，自己都不知道自己当前在第几步，这里指的主要是前面 1-6 的部分。 比如了解全局，如何了解呢？大多数人肯定还是网上搜索资料，那这一步跟 4 寻找资源有啥区别和联系？ 2. 确定范围 跟 3. 定义目标，本身感觉也容易边界不那么清晰。当然，作者本人也提到，并不一定非要按照他这个步骤来，这些步骤本身并不重要，重点是读者需要开发出一套适合自己的自学体系。</p>
+<p>我把这十步划分为了四个大的部分，这样边界更加清晰，比较适合操作，跟原有的方法对应关系如图 </p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220821174104.png" alt="20220821174104"></p>
+<h3 id="一、制定计划前的准备工作。"><a href="#一、制定计划前的准备工作。" class="headerlink" title="一、制定计划前的准备工作。"></a>一、制定计划前的准备工作。</h3><blockquote>
+<p>你不知道哪些你不知道的事。</p>
+</blockquote>
+<p>这里包括原方法的 1-4 以及 6，重点是如何快速了解一个自己不知道或者不熟悉的主题，并且能够制定一个有明确目标的学习计划。我把筛选资源这一步也归类到准备工作中，原因是我个人觉得，在检索资源的同时，就应该利用自己的鉴别能力对资源进行筛选，只利用其中优质的资源进行计划的设定，把筛选步骤放在前面好过制定完学习计划之后发现这个信息源不靠谱，需要推倒重来。</p>
+<p>为了能够制定一个学习计划，我们需要明确以下几个问题：</p>
+<ol>
+<li>我需要掌握哪些基本知识？</li>
+<li>我现在学的东西有多宏大？我应该怎么做？</li>
+<li>哪些是属于学习了就能满足 80% 日常使用的内容？</li>
+</ol>
+<p>以健康长寿计划为例，这里首先需要明确需要研究的主题是什么，此时因为对主题缺乏足够的了解，所以有一个模糊的概念即可。我比较关心的是如何健康长寿的生活，所以直接检索 “长寿” “健康” “不生病” 等关键词，以便对于这个主题有一定了解。</p>
+<blockquote>
+<p>关于信息检索，由于目前互联网发布信息的门槛过低，以及大量 <a href="https://zh.wikipedia.org/zh-my/%E5%85%A7%E5%AE%B9%E8%BE%B2%E5%A0%B4">内容农场 - 维基百科，自由的百科全书</a> 的存在，很有可能你检索到的信息会把你往沟里带，具体例子可以参考 <a href="https://zh.wikipedia.org/wiki/%E9%AD%8F%E5%88%99%E8%A5%BF%E4%BA%8B%E4%BB%B6">魏则西事件 - 维基百科，自由的百科全书</a>，这里强烈推荐使用 Google 或者 DuckDuckGo 引擎，同时，如果你英文水平尚可的话，优先使用英文进行检索，尤其适用于一些专业度非常高的主题（比如计算机、医学等）。</p>
+</blockquote>
+<p>在你检索得到一大堆结果之后，如何快速获取自己需要的主题信息以及如何进行筛选是另外一个很重要的工作。目前网络上的资源包括各种自媒体文章、视频、音频、书籍等等，很容易就让你眼花缭乱，忘记了自己想要做什么。在这里，我的一个小建议是，优先选用一些领域专家出版的书籍作为信息源，而不是各种自媒体文章或者其他信息。这样做的原因包括： </p>
+<ol>
+<li>通常来说，领域专家在他们自己的领域内，可信度较高，他们已经在各自领域积累了大量的知识。当然，非他们领域发表的观点可以忽视。</li>
+<li>相对于自媒体文章来说，发表书籍成本更高一点，能够过滤掉大多非专业人士转载或者半懂不懂的观点。</li>
+<li>一般书籍都会标明引用来源，所以往往一本好书会给你推荐更多此主题的好书。<br>当然，这同样带来了一个弊端，那就是书籍通常迭代速度比较慢，对于一些非常前沿的领域，往往通过书籍获取不到太多有用的信息。不过，对于绝大部分人来说，可能一辈子也没有多少学习这些前沿知识的机会，所以这个弊端可以接受。</li>
+</ol>
+<p>另一个关于了解主题的建议是，快速翻阅找到的这些书籍的目录。通常来说，作者在编写书籍目录的时候都是经过深思熟虑的，某主题的书籍目录，往往涵盖了这个主题大部分内容，且一般是由浅入深，带你逐步了解熟悉这个主题。所以翻阅目录能够让你在最短的时间内知道这个主题所涵盖的大部分知识，便于你选取自己的学习目标，制定计划。</p>
+<p>拿我研究的长寿计划举例，在检索了相关关键词之后，我得到了一大堆文章，同时，我还在豆瓣、亚马逊等地方检索有关这些关键词的书籍，得到了一堆书籍，包括《管理你的健康》、 《人体的故事》、《端粒》、《长寿》、《人为什么会生病》等等。通过翻阅这些书籍的简介和目录，我大概知道了影响一个人健康和长寿的主要因素包括身体健康和心理健康，涉及到了医学、心理学、营养学等等内容。</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220821181049.png" alt="20220821181049"></p>
+<p>之后就是对这些资料进行筛选，同时慢慢对自己要研究的目标有了逐步清晰的认识，同时从 <a href="https://github.com/geekan/HowToLiveLonger">geekan/HowToLiveLonger: 程序员延寿指南 | A programmer’s guide to live longer</a> 了解到了什么是全因死亡率。同时根据个人情况逐步对已有资料进行剔除，比如自我感觉心理状态还可以，可以先跳过心理健康相关书籍和资源；目前还比较年轻，同时也没有家族遗传病史，所以疾病学相关知识也可以先略过，等以后再研究。最终，明确我的目标变成了制定一个降低自己全因死亡率的初步计划（暂不包括心理健康、疾病学相关主题）。</p>
+<p>检索资料和筛选的过程，就是逐步发现自己的目标，一步步靠近的过程，这里最实用的原则就是 ”二八定律“（也就是<a href="https://zh.wikipedia.org/wiki/%E5%B8%95%E7%B4%AF%E6%89%98%E6%B3%95%E5%88%99">帕累托法则 - 维基百科，自由的百科全书</a>）。个人精力是有限的，你不可能做到面面俱到，尤其是在你对一个新主题不了解的情况下，这时候如何根据自己当前的情况，明确自己下一步的目标就非常重要了。既能够节约你大量的时间，又能够让你摆脱知识焦虑。当你逐步达成了现有的目标之后再回过头来查漏补缺，对这个主题其他目标发动攻击。</p>
+<h3 id="二、制定学习计划。"><a href="#二、制定学习计划。" class="headerlink" title="二、制定学习计划。"></a>二、制定学习计划。</h3><p>当你有了一个比较清晰的目标之后，接下来就是要制定一个可执行的学习计划，目标就像是航海中的目的地，而计划就是航线，没有目标或者航线你就会迷失在大海之中。制定计划的过程中最重要的原则就是 <a href="https://zh.wikipedia.org/wiki/SMART%E5%8E%9F%E5%88%99">SMART原则 - 维基百科，自由的百科全书</a>，其中我感觉最受用的就是可衡量 M、可达成 A、和时限 T。时限，不用多说，通常情况下，你的学习计划都需要一个截止时间，所谓的 deadline 是第一生产力一定程度上非常准确，大部分人制定的计划也都会包含这一点，但很多计划中缺失了可衡量和可达成原则。可达成不必多说，如果你给自己设定的目标压根完不成，那计划自然也就失去了意义，比如你希望自己长生不死，这违反了已知的自然规律，自然也就无法执行落地。可衡量的重要意义在于你需要明确的知道自己到底有没有达到这个目标，比如说你的目标是锻炼，那么每周锻炼三次或者今天锻炼 45 分钟都是一个非常好的目标，今天练到爽就是一个不可衡量的目标，因为爽的定义非常难，你今天觉得练得很爽，下次相同的练习就未必了。</p>
+<p>降低自己的全因死亡率显然只是一个很粗略的目标，我们需要更加详细的执行计划，不过由于这个目标的特殊性，它并不是每个阶段产出结果的，我们只需要确保过程中的小目标都是可衡量，有时限的即可。</p>
+<p>我自己的计划设定中，很多信息都是来源于 <a href="https://github.com/geekan/HowToLiveLonger">geekan/HowToLiveLonger: 程序员延寿指南 | A programmer’s guide to live longer</a> ，推荐大家也都去了解一下。结合我自身的情况，以及是否可衡量，对已有的这些影响全因死亡率的因素进行过滤。比如，其中吸烟、喝酒等习惯我都没有，可以忽略；刷牙由于目前基本每天执行，也没必要放到计划中；同时，我尽量挑选那些影响比较大的因素（二八定律），所以少喝或不喝甜味饮料、多吃植物蛋白等也排除掉。得到一个可执行的计划：<br><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220821184129.png" alt="20220821184129"></p>
+<h3 id="三、在学习和实践中反复练习。"><a href="#三、在学习和实践中反复练习。" class="headerlink" title="三、在学习和实践中反复练习。"></a>三、在学习和实践中反复练习。</h3><p>有了一个可量化可执行的计划之后，接下来还需要解决一个很重要的问题，那就是目标追踪，也就是说你如何跟进你的进度，如何知道自己什么时候应该调整计划。现在这类目标跟踪软件网上非常多了，我自己最近在使用 Vision，这个是买断制软件，同时支持 iOS 和 Mac平台，买断价格是 88￥，感觉还是很良心的。<br><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220821184541.png" alt="20220821184541"><br>我选择这款软件的原因有：</p>
+<ol>
+<li>买断制，一次付费就可以。</li>
+<li>同时支持 iOS+Mac</li>
+<li>进度展示非常明确，支持累计次数、平均值、最大值等统计方式，定期打卡即可看到自己的进度变化，很有成就感</li>
+<li>支持日历同步，配合系统日历提醒，确保不会遗忘</li>
+</ol>
+<p>不过这个软件针对我目前这种需要重复完成的目标支持的不是很好，比如我想要完成每天早起的目标，因为目标必须要有起止时间，那么我还得计算这个周期内总共有多少天，我需要完成多少次，略有点繁琐，除此之外整体使用体验还不错。</p>
+<p>这部分另外一个重要的内容就是在学习和实践中掌握平衡，反复练习，这里不得不佩服孔子在两千多年前就提出了”学而不思则罔，思而不学则殆“，理念十分类似，类似的理论还有王阳明提出的知行合一。 如果明确目标之后，就一头扎进去看书学习，而不进行实践，你会发现自己很容易学完就忘；而如果稍微看一点就开始不断尝试，你会花费大量的时间，很可能尝试了几天都未能解决的问题，就在你要学习的下一章提到了。所以如何边学边练是这一部分的重中之重。</p>
+<p>对于降低全因死亡率这样的计划来说，并不能像学习新的编程语言或者学习如何搭建一个 SpringBoot 应用实操性那么强，不是很能体现学习和实践的紧密关系，但也是适用的。经过初步的了解之后，可以深入到各个子主题里面学习，比如如何提高自己的睡眠质量、如何提高自己的心肺功能、如何增肌等等，更具体的例子是学习了一个新的健身动作，如何通过看视频、听教练指导一步步矫正自己的动作，过程中你还可以通过录像查看自己的动作是否标准，并与学习视频逐一对照修改，直到动作十分熟练，形成肌肉记忆。</p>
+<h3 id="四、乐为人师，融会贯通。"><a href="#四、乐为人师，融会贯通。" class="headerlink" title="四、乐为人师，融会贯通。"></a>四、乐为人师，融会贯通。</h3><p>跟原有方法保持一致，参考<a href="https://wiki.mbalib.com/wiki/%E8%B4%B9%E6%9B%BC%E5%AD%A6%E4%B9%A0%E6%B3%95">费曼学习法 - MBA智库百科</a>，比如通过写博客的形式把我自己的实践经验分享出来，本文不再展开。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>这次的研究课题其实不是很适合用这个学习法，实操性比较差，后面的步骤介绍的不是很好，不过十步学习法中的重点还是在于如何检索资源、筛选资源，并且利用二八定律快速制定一个可执行性较强的学习计划，关于这部分，我感觉还是非常有用且在我制定自己计划中起到了重要帮助的，把之前可能已经在用的一些思路、原则很清晰的提炼总结了出来。<br>希望也能对你起到一定作用~</p>
+]]></content>
+      <categories>
+        <category>Reading</category>
+      </categories>
+      <tags>
+        <tag>读后感</tag>
+        <tag>健康</tag>
+        <tag>元学习</tag>
+        <tag>目标管理</tag>
+        <tag>十步学习法</tag>
+        <tag>方法论</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>小强升职记-笔记和关于时间管理的思考实践</title>
     <url>/2021/05/23/Reading/%E5%B0%8F%E5%BC%BA%E5%8D%87%E8%81%8C%E8%AE%B0-%E7%AC%94%E8%AE%B0%E5%92%8C%E5%85%B3%E4%BA%8E%E6%97%B6%E9%97%B4%E7%AE%A1%E7%90%86%E7%9A%84%E6%80%9D%E8%80%83%E5%AE%9E%E8%B7%B5/</url>
     <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>五一期间阅读完毕了《小强升职记》一书，感觉收获颇丰，对自己的时间管理进行了更加深入的思考和了解。本文就针对我在阅读过程中所记录的一些笔记以及思考实践进行一个回顾总结。</p>
@@ -822,6 +891,250 @@
       </tags>
   </entry>
   <entry>
+    <title>JDBC学习一---JDBC入门</title>
+    <url>/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/</url>
+    <content><![CDATA[<blockquote>
+<p><a href="http://blog.samwei12.cn/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/">原文链接</a></p>
+</blockquote>
+<p>今天开始会写一系列 Java 后端学习的笔记，一方面是为了以后翻阅查看，更主要的原因是通过写作输出的方式让自己的印象更深，避免遗忘。</p>
+<p>首先是简单记录下自己学习使用 JDBC 的历程，由于目前基本都是通过一些类似 MyBatis 的框架来进行数据库操作，所以 JDBC 的使用不需要掌握太深入，仅作为了解即可。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>首先我们学习任何东西之前都需要先了解几个问题，基本上的思路是：<br>    1. xxx 是什么？<br>    2. 有什么作用？也就是为什么需要 xxx？<br>    3. 怎么使用（简单入门即可）？<br>    4. 分别就主要链路进行知识补充<br>之后，可以根据实际情况决定是否要进一步深入了解，还是只作为简单学习即可。</p>
+<p>JDBC 也不例外。</p>
+<span id="more"></span>
+
+<h3 id="什么是-JDBC？"><a href="#什么是-JDBC？" class="headerlink" title="什么是 JDBC？"></a>什么是 JDBC？</h3><blockquote>
+<p>Java数据库连接，（Java Database Connectivity，简称JDBC）是Java语言中用来规范客户端程序如何来访问数据库的应用程序接口，提供了诸如查询和更新数据库中数据的方法。JDBC也是Sun Microsystems的商标[1]。JDBC是面向关系型数据库的。</p>
+</blockquote>
+<p>上面是维基百科的解释，从这里我们获取到的几个有用信息：</p>
+<ol>
+<li>简单来说，JDBC 就是 Java 定义的一套用来规范和约束客户端程序如何访问数据库的<strong>接口</strong>，尤其是需要注意接口一词</li>
+<li>JDBC 是面向关系型数据库的，也就是说对于非关系型数据库用这一套接口是不行的。</li>
+</ol>
+<h3 id="为什么需要-JDBC？"><a href="#为什么需要-JDBC？" class="headerlink" title="为什么需要 JDBC？"></a>为什么需要 JDBC？</h3><p>回答类似这种问题其实套路也比较简单，我们思考一下，假如没有 JDBC 会怎么样？</p>
+<p>我们知道，关系型数据库是有很多分类的，例如常见的 MySQL、Oracle、SQL Server等等，那么如果没有一套标准接口的话，意味着我们如果开发 MySQL 数据库，不光需要引入 MySQL 的官方驱动，还需要引入官方的 Jar 包，根据对应的 CRUD 接口编写数据库操作代码，如果这时候你还有另一个使用 Oracle 项目，那么同样的工作需要重新进行一次，可想而知，这个适配成本是随着数据库厂商的增多逐渐上升的。</p>
+<p>那么怎么解决这类问题呢？有一句名言是这么说的，<strong>“计算机科学领域的任何问题都可以通过增加一个简介的中间层来解决。”</strong>，回到我们的问题上，Java 开发者就提供了这么一个中间层，也就是 <strong>JDBC</strong>。</p>
+<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200301214356.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200301214356.png" alt="20200301214356"></a></p>
+<p>通过这个图可以看到，由于有了这么一个中间层，我们在开发代码时，只需要使用 JDBC 相关的接口即可，不需要关心具体实现底层的是 MySQL 还是 Oracle。</p>
+<h2 id="如何使用-JDBC？"><a href="#如何使用-JDBC？" class="headerlink" title="如何使用 JDBC？"></a>如何使用 JDBC？</h2><p>接下来我们看下如何快速搭建一个 JDBC 的demo。通常在 Java 后端开发中，我们只需要掌握几个核心点就可以快速上手一个框架，它们分别是：</p>
+<ol>
+<li>jar 包或者 maven坐标</li>
+<li>关键的配置文件和属性</li>
+<li>核心的类和 API</li>
+</ol>
+<p>下面我们就从这个几方面入手快速了解一下：</p>
+<h3 id="jar-包或者-maven坐标"><a href="#jar-包或者-maven坐标" class="headerlink" title="jar 包或者 maven坐标"></a>jar 包或者 maven坐标</h3><p>使用数据库需要这么几个比较重要的包：</p>
+<ol>
+<li><code>java.sql</code>：所有与 JDBC 访问数据库相关的接口和类,可以说有了这里面提供的接口和类已经足够搭建一个 demo 实现基本功能</li>
+<li><code>javax.sql</code>：数据库扩展包，提供数据库额外的功能，如：连接池。接下来我们只是实现基本功能，可以不使用这个包。</li>
+<li>数据库的驱动：由各大数据库厂商提供，需要额外去下载，是对 JDBC 接口实现的类。</li>
+</ol>
+<p>这里面只有数据库的驱动是需要我们自己使用 jar 包或者 maven 依赖的。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>mysql<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mysql-connector-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.0.17<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里由于我本地的 MySQL 是 8.x 版本，因此使用了 8.0.17， 如果你的 MySQL 是 5.x 版本可以使用 5.1.39。</p>
+<h3 id="关键的配置文件和属性"><a href="#关键的配置文件和属性" class="headerlink" title="关键的配置文件和属性"></a>关键的配置文件和属性</h3><p>JDBC 中可以通过使用配置文件来加载数据库相关配置，例如指定数据库 URL、账户、密码等，这个等下详细介绍。</p>
+<h3 id="核心的类和-API"><a href="#核心的类和-API" class="headerlink" title="核心的类和 API"></a>核心的类和 API</h3><p>JDBC 中几个比较核心的类和作用如下：</p>
+<ul>
+<li>DriverManager 类<ul>
+<li>管理和注册数据库驱动</li>
+<li>得到数据库连接对象</li>
+</ul>
+</li>
+<li>Connection 接口<ul>
+<li>一个连接对象，可用于创建 Statement 和 PreparedStatement 对象</li>
+</ul>
+</li>
+<li>Statement 接口<ul>
+<li>一个 SQL 语句对象，用于将 SQL 语句发送给数据库服务器。</li>
+</ul>
+</li>
+<li>PreparedStatemen 接口<ul>
+<li>一个 SQL 语句对象，是 Statement 的子接口</li>
+</ul>
+</li>
+<li>ResultSet 接口<ul>
+<li>用于封装数据库查询的结果集，返回给客户端 Java 程序</li>
+</ul>
+</li>
+</ul>
+<p>简单了解即可，等下具体搭建工程会详细介绍。</p>
+<h3 id="搭建测试工程"><a href="#搭建测试工程" class="headerlink" title="搭建测试工程"></a>搭建测试工程</h3><p>这里我们先简单建一个表，然后插入几条数据用于查看。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `bank` (</span><br><span class="line">    `name` <span class="type">varchar</span>(<span class="number">10</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    `money` <span class="keyword">double</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> bank</span><br><span class="line"><span class="keyword">values</span> (money <span class="operator">=</span> <span class="number">100</span>, name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">200</span>, name <span class="operator">=</span> <span class="string">&#x27;李四&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">300</span>, name <span class="operator">=</span> <span class="string">&#x27;王五&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">400</span>, name <span class="operator">=</span> <span class="string">&#x27;赵六&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这样我们的表就建好了，数据也有了，我们就正式开始通过编写代码查找表中的数据。</p>
+<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307202152.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307202152.png" alt="20200307202152"></a></p>
+<p>其实说白了使用 JDBC 的核心步骤就是这些：</p>
+<ol>
+<li>导入驱动jar包</li>
+<li>注册驱动</li>
+<li>获取数据库连接对象</li>
+<li>定义sql</li>
+<li>获取执行sql语句的对象 Statement</li>
+<li>执行sql，接受返回结果</li>
+<li>处理结果</li>
+<li>释放资源</li>
+</ol>
+<p>那么我们看下，这里其中导入 jar 包我们已经通过引入 maven 坐标解决了，接下来看看如何注册驱动。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Class.forName(<span class="string">&quot;com.mysql.cj.jdbc.Driver&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这不就是加载类吗？哪里有注册驱动呢？别着急，我们看下源码。跳到 <code>com.mysql.cj.jdbc.Driver</code> 中，我们发现 <code>Driver</code> 中的静态代码块调用了 <code>DriverManager</code> 的<code>registerDriver</code>方法，然后创建了一个<code>Driver</code>对象作为入参传入。这也跟我们之前提到的 <code>DriverManager</code> 有管理和注册驱动的作用是吻合的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        DriverManager.registerDriver(<span class="keyword">new</span> Driver());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (SQLException var1) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;Can&#x27;t register driver!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看下 <code>DriverManager</code> 的官方文档，可以看到</p>
+<blockquote>
+<p>JDBC 4.0 Drivers must include the file META-INF/services/java.sql.Driver. This file contains the name of the JDBC drivers implementation of java.sql.Driver.</p>
+</blockquote>
+<blockquote>
+<p>Applications no longer need to explicitly load JDBC drivers using Class.forName(). Existing programs which currently load JDBC drivers using Class.forName() will continue to work without modification.</p>
+</blockquote>
+<p>这几句话是什么意思呢？简单来说就是可能 JDK 觉得大家老是这么加载驱动比较繁琐，在 JDBC4.0 之后新增了一个约定，数据库驱动实现方必须要在 jar 包的 <code>META-INF/services/java.sql.Driver</code> 路径里面写明指定的 <code>Driver</code> 类，这样 JVM 会自动将对应的驱动进行加载，而不再需要程序员在开发过程中手动调用 <code>Class.forName()</code> 了，当然已经调用了的代码可以正常运行而不会受到影响，所以这一步我们可以省略了。</p>
+<p>接下来是获取数据库连接对象 <code>Connection</code>，前面我们已经提到，这个类是用来创建 <code>Statement</code> 对象的，而 <code>Statement</code> 对象就是真正进行数据库操作的类，</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> Connection connection = DriverManager.getConnection(<span class="string">&quot;jdbc:mysql://localhost:3306/samwei12&quot;</span>, <span class="string">&quot;root&quot;</span>,<span class="string">&quot;root&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>通过调用 <code>DriverManager</code> 的<code>getConnection</code>方法，我们就得到了一个 <code>Connection</code> 对象。它的几个入参也比较显而易见，就是数据库连接时的 url、账户、密码等信息。这也是 <code>DriverManager</code> 的第二个功能，就是获取数据库连接对象 <code>Connection</code> 的实例。</p>
+<p>接下来是定义 sql 语句，这个最好理解，这里我们把张三的存款设置成 1000。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String sql = <span class="string">&quot;update bank set money=1000 where name=&#x27;张三&#x27;&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>接下来是创建 <code>Statement</code> 对象，</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br></pre></td></tr></table></figure>
+
+<p>执行 sql 语句：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> count = statement.executeUpdate(sql);</span><br></pre></td></tr></table></figure>
+
+<p>入参代表我们需要执行的 sql 语句，出参代表本条 update 语句影响的行数。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">System.out.println(count);</span><br></pre></td></tr></table></figure>
+<p>这里我们简单打印下就可以，如果查询到的是需要封装的对象，那么还需要其他处理，这里不展开。</p>
+<p>最后就是释放资源，这个一定要记住。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">statement.close();</span><br><span class="line">connection.close();</span><br></pre></td></tr></table></figure>
+
+<p>之后我们执行一下，可以看到打印结果是 1，同时数据库中对应数据也发生了变动。</p>
+<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307192219.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307192219.png" alt="20200307192219"></a></p>
+<p>示例代码地址：</p>
+<ul>
+<li><a href="https://github.com/samwei12/jdbc-demo">https://github.com/samwei12/jdbc-demo</a></li>
+</ul>
+<h2 id="详细-API-了解"><a href="#详细-API-了解" class="headerlink" title="详细 API 了解"></a>详细 API 了解</h2><h3 id="DriverManager"><a href="#DriverManager" class="headerlink" title="DriverManager"></a>DriverManager</h3><p>前面已经讲得比较清楚，它的主要作用就是注册驱动+管理数据库连接，这里只说一下 MySQL 的 URL 写法。</p>
+<ul>
+<li><code>jdbc:mysql://ip地址(域名):端口号/数据库名称</code><ul>
+<li>例子：<code>jdbc:mysql://localhost:3306/samwei12</code></li>
+<li>细节：如果连接的是本机mysql服务器，并且mysql服务默认端口是3306，则url可以简写为：<code>jdbc:mysql:///数据库名称</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="Connection"><a href="#Connection" class="headerlink" title="Connection"></a>Connection</h3><p>数据库连接对象，它的主要功能包括创建一个 <code>Statement</code> 和管理事务。</p>
+<ol>
+<li>获取执行sql 的对象<ul>
+<li><code>Statement createStatement()</code></li>
+<li><code>PreparedStatement prepareStatement(String sql)</code></li>
+</ul>
+</li>
+<li>管理事务：<ul>
+<li>开启事务：<code>setAutoCommit(boolean autoCommit)</code> ：调用该方法设置参数为false，即开启事务</li>
+<li>提交事务：<code>commit()</code></li>
+<li>回滚事务：<code>rollback()</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="Statement"><a href="#Statement" class="headerlink" title="Statement"></a>Statement</h3><p>执行sql的对象，CRUD 都可以执行：</p>
+<ol>
+<li><code>boolean execute(String sql)</code> ：可以执行任意的sql语句</li>
+<li><code>int executeUpdate(String sql)</code> ：执行DML（insert、update、delete）语句、DDL(create，alter、drop)语句<ul>
+<li>返回值：影响的行数，可以通过这个影响的行数判断DML语句是否执行成功 返回值&gt;0的则执行成功，反之，则失败。</li>
+</ul>
+</li>
+<li><code>ResultSet executeQuery(String sql)</code>：执行DQL(select) 语句</li>
+</ol>
+<p>这里我们最常用的的一般就是最后一个方法了，示例代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//4. 定义sql</span></span><br><span class="line">String sql = <span class="string">&quot;select * from bank&quot;</span>;</span><br><span class="line"><span class="comment">// 5. 获取执行sql语句的对象 Statement</span></span><br><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br><span class="line"><span class="comment">// 6. 执行sql，接受返回结果</span></span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = statement.executeQuery(sql);</span><br><span class="line"><span class="comment">// 7. 处理结果</span></span><br><span class="line"><span class="keyword">while</span> (resultSet.next()) &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">double</span> money = resultSet.getDouble(<span class="string">&quot;money&quot;</span>);</span><br><span class="line">    <span class="keyword">final</span> String name = resultSet.getString(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">    System.out.println(name+<span class="string">&quot;银行账户：&quot;</span>+money);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过 <code>ResultSet</code> 的 <code>next</code> 方法遍历结果，之后得到的就是一行的数据，分别取出每一列的数据处理即可。</p>
+<h3 id="ResultSet"><a href="#ResultSet" class="headerlink" title="ResultSet"></a>ResultSet</h3><p>结果集对象，封装查询结果</p>
+<ul>
+<li><code>boolean next()</code>: 游标向下移动一行，判断当前行是否是最后一行末尾(是否有数据)，如果是，则返回false，如果不是则返回true</li>
+<li><code>getXxx(参数)</code>:获取数据<ul>
+<li>Xxx：代表数据类型，如： <code>int getInt() , String getString()</code></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>具体的使用方法 <code>executeQuery</code> 这里已经展示过了</li>
+</ul>
+<h3 id="PreparedStatement"><a href="#PreparedStatement" class="headerlink" title="PreparedStatement"></a>PreparedStatement</h3><p>执行sql的对象，继承自 <code>Statement</code>。看到这里你可能会比较奇怪，我们不是已经有了 <code>Statement</code> 类了嘛，为什么还需要再搞一个子类出来呢？我们先通过一个示例介绍一下什么是 <strong>SQL 注入</strong>。</p>
+<p>创建一个用户登录信息表，包括用户名和密码。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span> (</span><br><span class="line"></span><br><span class="line">id <span class="type">int</span> <span class="keyword">primary</span> key auto_increment,</span><br><span class="line"></span><br><span class="line">name <span class="type">varchar</span>(<span class="number">20</span>),</span><br><span class="line"></span><br><span class="line">password <span class="type">varchar</span>(<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span> (<span class="keyword">null</span>,<span class="string">&#x27;jack&#x27;</span>,<span class="string">&#x27;123&#x27;</span>),(<span class="keyword">null</span>,<span class="string">&#x27;rose&#x27;</span>,<span class="string">&#x27;456&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>然后模拟一下用户的登录，如果用户输入的用户名和密码能够匹配到一条记录，那么我们认为登录成功，否则认为登录失败。</p>
+<p>代码比较简单，核心代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String sql = <span class="string">&quot;select * from user where name=&#x27;&quot;</span>+userName+<span class="string">&quot;&#x27; and password=&#x27;&quot;</span>+password+<span class="string">&quot;&#x27;&quot;</span>;</span><br><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = statement.executeQuery(sql);</span><br><span class="line"><span class="keyword">if</span> (resultSet.next()) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录成功，欢迎您：&quot;</span> + userName);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录失败&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>验证一下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">JACK</span><br><span class="line">请输入用户密码：</span><br><span class="line">123</span><br><span class="line">登录成功，欢迎您：JACK</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">jack1</span><br><span class="line">请输入用户密码：</span><br><span class="line">123</span><br><span class="line">登录失败</span><br></pre></td></tr></table></figure>
+
+<p>看起来好像一切正常，没毛病，那么我们尝试一下如下输入：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">我是一个不存在的用户</span><br><span class="line">请输入用户密码：</span><br><span class="line">我是密码<span class="string">&#x27; or &#x27;</span>a<span class="string">&#x27;=&#x27;</span>a</span><br></pre></td></tr></table></figure>
+
+<p>这时我们发现，神奇的事情出现了：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">登录成功，欢迎您：我是一个不存在的用户</span><br></pre></td></tr></table></figure>
+
+<p>这是为什么呢？？？其实我们 debug 一下就会发现，原因很简单，我们传给 <code>Statement</code> 对象的是一个字符串，那么上述参数真正执行的 SQL 语句是 <code>select * from user where name=&#39;我是一个不存在的用户&#39; and password=&#39;我是密码&#39; or &#39;a&#39;=&#39;a&#39;</code>。 大家发现了吗？我们的原始 SQL 只是查询用户名和密码信息，但是如果用户输入了类似上面这种奇怪的密码，在我们的 SQL 后面拼接上其他字符串，就可以绕过我们的检查，随意输入任何用户名和密码都可以获得登录授权，这无疑是很危险的。</p>
+<blockquote>
+<p>SQL注入（英语：SQL injection），也称SQL注入或SQL注码，是发生于应用程序与数据库层的安全漏洞。简而言之，是在输入的字符串之中注入SQL指令，在设计不良的程序当中忽略了字符检查，那么这些注入进去的恶意指令就会被数据库服务器误认为是正常的SQL指令而运行，因此遭到破坏或是入侵。</p>
+</blockquote>
+<p>以上是维基百科对应的词条解释，那么怎么解决这种问题呢？JDK 的作者们提供的 <code>PreparedStatement</code> 就是用来处理这种问题的。我们来看一下它的用法。</p>
+<ol>
+<li>Connection 接口中的方法<ol>
+<li><code>PreparedStatement prepareStatement(String sql)</code>: 指定预编译的 SQL 语句，SQL 语句中使用占位符 <code>?</code> 创建一个语句对象</li>
+</ol>
+</li>
+<li>PreparedStatement 接口中的方法<ol>
+<li><code>int executeUpdate()</code>: 执行 DML，增删改的操作，返回影响的行数。</li>
+<li><code>ResultSet executeQuery()</code>: 执行 DQL，查询的操作，返回结果集</li>
+</ol>
+</li>
+</ol>
+<p>使用步骤：</p>
+<ol start="3">
+<li>编写 SQL 语句，未知内容使用?占位：<code>&quot;SELECT * FROM user WHERE name=? AND password=?&quot;;</code></li>
+<li>获得 <code>PreparedStatement</code> 对象</li>
+<li>设置实际参数：<code>setXxx(占位符的位置, 真实的值)</code><ol>
+<li>对应一系列重载的方法</li>
+</ol>
+</li>
+<li>执行参数化 SQL 语句</li>
+<li>关闭资源</li>
+</ol>
+<p>具体的代码示例如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 构造一个带参数的 SQL 语句，这里不需要加单引号了，而是使用占位符 ？</span></span><br><span class="line">String sql = <span class="string">&quot;select * from user where name=? and password=?&quot;</span>;</span><br><span class="line"><span class="comment">// 2. 获取 PreparedStatement 对象</span></span><br><span class="line"><span class="keyword">final</span> PreparedStatement preparedStatement = connection.prepareStatement(sql);</span><br><span class="line"><span class="comment">// 3. 设置参数，这里需要注意的是索引是从 1 开始的，而不是 0</span></span><br><span class="line">preparedStatement.setString(<span class="number">1</span>, userName);</span><br><span class="line">preparedStatement.setString(<span class="number">2</span>, userName);</span><br><span class="line"><span class="comment">// 4. 执行参数化 SQL 语句，这里由于 sql 语句已经准备好了，不再需要传入参数，直接执行即可</span></span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = preparedStatement.executeQuery();</span><br><span class="line"><span class="keyword">if</span> (resultSet.next()) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录成功，欢迎您：&quot;</span> + userName);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录失败&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用起来还是比较简单的，需要注意的几个点已经写在了注释里面。<br>执行结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">我是一个不存在的用户</span><br><span class="line">请输入用户密码：</span><br><span class="line">我是密码<span class="string">&#x27; or &#x27;</span>a<span class="string">&#x27;=&#x27;</span>a</span><br><span class="line">登录失败</span><br></pre></td></tr></table></figure>
+
+<p>可以看到使用 <code>PreparedStatement</code> 有效的解决了 SQL 注入的问题，它还有以下好处：</p>
+<ol>
+<li><code>prepareStatement()</code> 方法会先将 SQL 语句发送给数据库预编译。<code>PreparedStatement</code> 会引用着预编译后的结果。 可以多次传入不同的参数给 <code>PreparedStatement</code> 对象并执行。减少 SQL 编译次数，提高效率。</li>
+<li>提高了程序的可读性</li>
+</ol>
+<p>所以我们尽可能全部都使用 <code>PreparedStatement</code> 的方式，而不是 <code>Statement</code> 类。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，一个简单的 JDBC demo 就搭建完毕了。由于目前已经不会有人直接使用 JDBC 进行数据库操作了，我们只是为了接下来学习 MyBatis 进行一个铺垫，简单了解即可，不需要深入。</p>
+<p>示例代码地址：</p>
+<ul>
+<li><a href="https://github.com/samwei12/jdbc-demo">https://github.com/samwei12/jdbc-demo</a></li>
+</ul>
+<h2 id="Relations"><a href="#Relations" class="headerlink" title="Relations"></a>Relations</h2><ul>
+<li><a href="https://zh.wikipedia.org/wiki/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5">https://zh.wikipedia.org/wiki/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/SQL%E6%B3%A8%E5%85%A5">https://zh.wikipedia.org/wiki/SQL%E6%B3%A8%E5%85%A5</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Server</category>
+      </categories>
+      <tags>
+        <tag>JDBC</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>万字长文---关于PKM收集与整理系统的思考和实践</title>
     <url>/2021/05/22/Thinking/%E5%85%B3%E4%BA%8EPKM%E6%94%B6%E9%9B%86%E4%B8%8E%E6%95%B4%E7%90%86%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%80%9D%E8%80%83%E5%92%8C%E5%AE%9E%E8%B7%B5/</url>
     <content><![CDATA[<blockquote>
@@ -1206,250 +1519,6 @@
       </tags>
   </entry>
   <entry>
-    <title>JDBC学习一---JDBC入门</title>
-    <url>/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/</url>
-    <content><![CDATA[<blockquote>
-<p><a href="http://blog.samwei12.cn/2020/03/07/Server/JDBC%E5%AD%A6%E4%B9%A0%E4%B8%80/">原文链接</a></p>
-</blockquote>
-<p>今天开始会写一系列 Java 后端学习的笔记，一方面是为了以后翻阅查看，更主要的原因是通过写作输出的方式让自己的印象更深，避免遗忘。</p>
-<p>首先是简单记录下自己学习使用 JDBC 的历程，由于目前基本都是通过一些类似 MyBatis 的框架来进行数据库操作，所以 JDBC 的使用不需要掌握太深入，仅作为了解即可。</p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>首先我们学习任何东西之前都需要先了解几个问题，基本上的思路是：<br>    1. xxx 是什么？<br>    2. 有什么作用？也就是为什么需要 xxx？<br>    3. 怎么使用（简单入门即可）？<br>    4. 分别就主要链路进行知识补充<br>之后，可以根据实际情况决定是否要进一步深入了解，还是只作为简单学习即可。</p>
-<p>JDBC 也不例外。</p>
-<span id="more"></span>
-
-<h3 id="什么是-JDBC？"><a href="#什么是-JDBC？" class="headerlink" title="什么是 JDBC？"></a>什么是 JDBC？</h3><blockquote>
-<p>Java数据库连接，（Java Database Connectivity，简称JDBC）是Java语言中用来规范客户端程序如何来访问数据库的应用程序接口，提供了诸如查询和更新数据库中数据的方法。JDBC也是Sun Microsystems的商标[1]。JDBC是面向关系型数据库的。</p>
-</blockquote>
-<p>上面是维基百科的解释，从这里我们获取到的几个有用信息：</p>
-<ol>
-<li>简单来说，JDBC 就是 Java 定义的一套用来规范和约束客户端程序如何访问数据库的<strong>接口</strong>，尤其是需要注意接口一词</li>
-<li>JDBC 是面向关系型数据库的，也就是说对于非关系型数据库用这一套接口是不行的。</li>
-</ol>
-<h3 id="为什么需要-JDBC？"><a href="#为什么需要-JDBC？" class="headerlink" title="为什么需要 JDBC？"></a>为什么需要 JDBC？</h3><p>回答类似这种问题其实套路也比较简单，我们思考一下，假如没有 JDBC 会怎么样？</p>
-<p>我们知道，关系型数据库是有很多分类的，例如常见的 MySQL、Oracle、SQL Server等等，那么如果没有一套标准接口的话，意味着我们如果开发 MySQL 数据库，不光需要引入 MySQL 的官方驱动，还需要引入官方的 Jar 包，根据对应的 CRUD 接口编写数据库操作代码，如果这时候你还有另一个使用 Oracle 项目，那么同样的工作需要重新进行一次，可想而知，这个适配成本是随着数据库厂商的增多逐渐上升的。</p>
-<p>那么怎么解决这类问题呢？有一句名言是这么说的，<strong>“计算机科学领域的任何问题都可以通过增加一个简介的中间层来解决。”</strong>，回到我们的问题上，Java 开发者就提供了这么一个中间层，也就是 <strong>JDBC</strong>。</p>
-<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200301214356.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200301214356.png" alt="20200301214356"></a></p>
-<p>通过这个图可以看到，由于有了这么一个中间层，我们在开发代码时，只需要使用 JDBC 相关的接口即可，不需要关心具体实现底层的是 MySQL 还是 Oracle。</p>
-<h2 id="如何使用-JDBC？"><a href="#如何使用-JDBC？" class="headerlink" title="如何使用 JDBC？"></a>如何使用 JDBC？</h2><p>接下来我们看下如何快速搭建一个 JDBC 的demo。通常在 Java 后端开发中，我们只需要掌握几个核心点就可以快速上手一个框架，它们分别是：</p>
-<ol>
-<li>jar 包或者 maven坐标</li>
-<li>关键的配置文件和属性</li>
-<li>核心的类和 API</li>
-</ol>
-<p>下面我们就从这个几方面入手快速了解一下：</p>
-<h3 id="jar-包或者-maven坐标"><a href="#jar-包或者-maven坐标" class="headerlink" title="jar 包或者 maven坐标"></a>jar 包或者 maven坐标</h3><p>使用数据库需要这么几个比较重要的包：</p>
-<ol>
-<li><code>java.sql</code>：所有与 JDBC 访问数据库相关的接口和类,可以说有了这里面提供的接口和类已经足够搭建一个 demo 实现基本功能</li>
-<li><code>javax.sql</code>：数据库扩展包，提供数据库额外的功能，如：连接池。接下来我们只是实现基本功能，可以不使用这个包。</li>
-<li>数据库的驱动：由各大数据库厂商提供，需要额外去下载，是对 JDBC 接口实现的类。</li>
-</ol>
-<p>这里面只有数据库的驱动是需要我们自己使用 jar 包或者 maven 依赖的。</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>mysql<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mysql-connector-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.0.17<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>这里由于我本地的 MySQL 是 8.x 版本，因此使用了 8.0.17， 如果你的 MySQL 是 5.x 版本可以使用 5.1.39。</p>
-<h3 id="关键的配置文件和属性"><a href="#关键的配置文件和属性" class="headerlink" title="关键的配置文件和属性"></a>关键的配置文件和属性</h3><p>JDBC 中可以通过使用配置文件来加载数据库相关配置，例如指定数据库 URL、账户、密码等，这个等下详细介绍。</p>
-<h3 id="核心的类和-API"><a href="#核心的类和-API" class="headerlink" title="核心的类和 API"></a>核心的类和 API</h3><p>JDBC 中几个比较核心的类和作用如下：</p>
-<ul>
-<li>DriverManager 类<ul>
-<li>管理和注册数据库驱动</li>
-<li>得到数据库连接对象</li>
-</ul>
-</li>
-<li>Connection 接口<ul>
-<li>一个连接对象，可用于创建 Statement 和 PreparedStatement 对象</li>
-</ul>
-</li>
-<li>Statement 接口<ul>
-<li>一个 SQL 语句对象，用于将 SQL 语句发送给数据库服务器。</li>
-</ul>
-</li>
-<li>PreparedStatemen 接口<ul>
-<li>一个 SQL 语句对象，是 Statement 的子接口</li>
-</ul>
-</li>
-<li>ResultSet 接口<ul>
-<li>用于封装数据库查询的结果集，返回给客户端 Java 程序</li>
-</ul>
-</li>
-</ul>
-<p>简单了解即可，等下具体搭建工程会详细介绍。</p>
-<h3 id="搭建测试工程"><a href="#搭建测试工程" class="headerlink" title="搭建测试工程"></a>搭建测试工程</h3><p>这里我们先简单建一个表，然后插入几条数据用于查看。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `bank` (</span><br><span class="line">    `name` <span class="type">varchar</span>(<span class="number">10</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    `money` <span class="keyword">double</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> bank</span><br><span class="line"><span class="keyword">values</span> (money <span class="operator">=</span> <span class="number">100</span>, name <span class="operator">=</span> <span class="string">&#x27;张三&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">200</span>, name <span class="operator">=</span> <span class="string">&#x27;李四&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">300</span>, name <span class="operator">=</span> <span class="string">&#x27;王五&#x27;</span>),</span><br><span class="line">       (money <span class="operator">=</span> <span class="number">400</span>, name <span class="operator">=</span> <span class="string">&#x27;赵六&#x27;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>这样我们的表就建好了，数据也有了，我们就正式开始通过编写代码查找表中的数据。</p>
-<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307202152.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307202152.png" alt="20200307202152"></a></p>
-<p>其实说白了使用 JDBC 的核心步骤就是这些：</p>
-<ol>
-<li>导入驱动jar包</li>
-<li>注册驱动</li>
-<li>获取数据库连接对象</li>
-<li>定义sql</li>
-<li>获取执行sql语句的对象 Statement</li>
-<li>执行sql，接受返回结果</li>
-<li>处理结果</li>
-<li>释放资源</li>
-</ol>
-<p>那么我们看下，这里其中导入 jar 包我们已经通过引入 maven 坐标解决了，接下来看看如何注册驱动。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Class.forName(<span class="string">&quot;com.mysql.cj.jdbc.Driver&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>这不就是加载类吗？哪里有注册驱动呢？别着急，我们看下源码。跳到 <code>com.mysql.cj.jdbc.Driver</code> 中，我们发现 <code>Driver</code> 中的静态代码块调用了 <code>DriverManager</code> 的<code>registerDriver</code>方法，然后创建了一个<code>Driver</code>对象作为入参传入。这也跟我们之前提到的 <code>DriverManager</code> 有管理和注册驱动的作用是吻合的。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        DriverManager.registerDriver(<span class="keyword">new</span> Driver());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (SQLException var1) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;Can&#x27;t register driver!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们看下 <code>DriverManager</code> 的官方文档，可以看到</p>
-<blockquote>
-<p>JDBC 4.0 Drivers must include the file META-INF/services/java.sql.Driver. This file contains the name of the JDBC drivers implementation of java.sql.Driver.</p>
-</blockquote>
-<blockquote>
-<p>Applications no longer need to explicitly load JDBC drivers using Class.forName(). Existing programs which currently load JDBC drivers using Class.forName() will continue to work without modification.</p>
-</blockquote>
-<p>这几句话是什么意思呢？简单来说就是可能 JDK 觉得大家老是这么加载驱动比较繁琐，在 JDBC4.0 之后新增了一个约定，数据库驱动实现方必须要在 jar 包的 <code>META-INF/services/java.sql.Driver</code> 路径里面写明指定的 <code>Driver</code> 类，这样 JVM 会自动将对应的驱动进行加载，而不再需要程序员在开发过程中手动调用 <code>Class.forName()</code> 了，当然已经调用了的代码可以正常运行而不会受到影响，所以这一步我们可以省略了。</p>
-<p>接下来是获取数据库连接对象 <code>Connection</code>，前面我们已经提到，这个类是用来创建 <code>Statement</code> 对象的，而 <code>Statement</code> 对象就是真正进行数据库操作的类，</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> Connection connection = DriverManager.getConnection(<span class="string">&quot;jdbc:mysql://localhost:3306/samwei12&quot;</span>, <span class="string">&quot;root&quot;</span>,<span class="string">&quot;root&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>通过调用 <code>DriverManager</code> 的<code>getConnection</code>方法，我们就得到了一个 <code>Connection</code> 对象。它的几个入参也比较显而易见，就是数据库连接时的 url、账户、密码等信息。这也是 <code>DriverManager</code> 的第二个功能，就是获取数据库连接对象 <code>Connection</code> 的实例。</p>
-<p>接下来是定义 sql 语句，这个最好理解，这里我们把张三的存款设置成 1000。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String sql = <span class="string">&quot;update bank set money=1000 where name=&#x27;张三&#x27;&quot;</span>;</span><br></pre></td></tr></table></figure>
-
-<p>接下来是创建 <code>Statement</code> 对象，</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br></pre></td></tr></table></figure>
-
-<p>执行 sql 语句：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> count = statement.executeUpdate(sql);</span><br></pre></td></tr></table></figure>
-
-<p>入参代表我们需要执行的 sql 语句，出参代表本条 update 语句影响的行数。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">System.out.println(count);</span><br></pre></td></tr></table></figure>
-<p>这里我们简单打印下就可以，如果查询到的是需要封装的对象，那么还需要其他处理，这里不展开。</p>
-<p>最后就是释放资源，这个一定要记住。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">statement.close();</span><br><span class="line">connection.close();</span><br></pre></td></tr></table></figure>
-
-<p>之后我们执行一下，可以看到打印结果是 1，同时数据库中对应数据也发生了变动。</p>
-<p><a href="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307192219.png"><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20200307192219.png" alt="20200307192219"></a></p>
-<p>示例代码地址：</p>
-<ul>
-<li><a href="https://github.com/samwei12/jdbc-demo">https://github.com/samwei12/jdbc-demo</a></li>
-</ul>
-<h2 id="详细-API-了解"><a href="#详细-API-了解" class="headerlink" title="详细 API 了解"></a>详细 API 了解</h2><h3 id="DriverManager"><a href="#DriverManager" class="headerlink" title="DriverManager"></a>DriverManager</h3><p>前面已经讲得比较清楚，它的主要作用就是注册驱动+管理数据库连接，这里只说一下 MySQL 的 URL 写法。</p>
-<ul>
-<li><code>jdbc:mysql://ip地址(域名):端口号/数据库名称</code><ul>
-<li>例子：<code>jdbc:mysql://localhost:3306/samwei12</code></li>
-<li>细节：如果连接的是本机mysql服务器，并且mysql服务默认端口是3306，则url可以简写为：<code>jdbc:mysql:///数据库名称</code></li>
-</ul>
-</li>
-</ul>
-<h3 id="Connection"><a href="#Connection" class="headerlink" title="Connection"></a>Connection</h3><p>数据库连接对象，它的主要功能包括创建一个 <code>Statement</code> 和管理事务。</p>
-<ol>
-<li>获取执行sql 的对象<ul>
-<li><code>Statement createStatement()</code></li>
-<li><code>PreparedStatement prepareStatement(String sql)</code></li>
-</ul>
-</li>
-<li>管理事务：<ul>
-<li>开启事务：<code>setAutoCommit(boolean autoCommit)</code> ：调用该方法设置参数为false，即开启事务</li>
-<li>提交事务：<code>commit()</code></li>
-<li>回滚事务：<code>rollback()</code></li>
-</ul>
-</li>
-</ol>
-<h3 id="Statement"><a href="#Statement" class="headerlink" title="Statement"></a>Statement</h3><p>执行sql的对象，CRUD 都可以执行：</p>
-<ol>
-<li><code>boolean execute(String sql)</code> ：可以执行任意的sql语句</li>
-<li><code>int executeUpdate(String sql)</code> ：执行DML（insert、update、delete）语句、DDL(create，alter、drop)语句<ul>
-<li>返回值：影响的行数，可以通过这个影响的行数判断DML语句是否执行成功 返回值&gt;0的则执行成功，反之，则失败。</li>
-</ul>
-</li>
-<li><code>ResultSet executeQuery(String sql)</code>：执行DQL(select) 语句</li>
-</ol>
-<p>这里我们最常用的的一般就是最后一个方法了，示例代码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//4. 定义sql</span></span><br><span class="line">String sql = <span class="string">&quot;select * from bank&quot;</span>;</span><br><span class="line"><span class="comment">// 5. 获取执行sql语句的对象 Statement</span></span><br><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br><span class="line"><span class="comment">// 6. 执行sql，接受返回结果</span></span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = statement.executeQuery(sql);</span><br><span class="line"><span class="comment">// 7. 处理结果</span></span><br><span class="line"><span class="keyword">while</span> (resultSet.next()) &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">double</span> money = resultSet.getDouble(<span class="string">&quot;money&quot;</span>);</span><br><span class="line">    <span class="keyword">final</span> String name = resultSet.getString(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">    System.out.println(name+<span class="string">&quot;银行账户：&quot;</span>+money);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>通过 <code>ResultSet</code> 的 <code>next</code> 方法遍历结果，之后得到的就是一行的数据，分别取出每一列的数据处理即可。</p>
-<h3 id="ResultSet"><a href="#ResultSet" class="headerlink" title="ResultSet"></a>ResultSet</h3><p>结果集对象，封装查询结果</p>
-<ul>
-<li><code>boolean next()</code>: 游标向下移动一行，判断当前行是否是最后一行末尾(是否有数据)，如果是，则返回false，如果不是则返回true</li>
-<li><code>getXxx(参数)</code>:获取数据<ul>
-<li>Xxx：代表数据类型，如： <code>int getInt() , String getString()</code></li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>具体的使用方法 <code>executeQuery</code> 这里已经展示过了</li>
-</ul>
-<h3 id="PreparedStatement"><a href="#PreparedStatement" class="headerlink" title="PreparedStatement"></a>PreparedStatement</h3><p>执行sql的对象，继承自 <code>Statement</code>。看到这里你可能会比较奇怪，我们不是已经有了 <code>Statement</code> 类了嘛，为什么还需要再搞一个子类出来呢？我们先通过一个示例介绍一下什么是 <strong>SQL 注入</strong>。</p>
-<p>创建一个用户登录信息表，包括用户名和密码。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span> (</span><br><span class="line"></span><br><span class="line">id <span class="type">int</span> <span class="keyword">primary</span> key auto_increment,</span><br><span class="line"></span><br><span class="line">name <span class="type">varchar</span>(<span class="number">20</span>),</span><br><span class="line"></span><br><span class="line">password <span class="type">varchar</span>(<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span> (<span class="keyword">null</span>,<span class="string">&#x27;jack&#x27;</span>,<span class="string">&#x27;123&#x27;</span>),(<span class="keyword">null</span>,<span class="string">&#x27;rose&#x27;</span>,<span class="string">&#x27;456&#x27;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>然后模拟一下用户的登录，如果用户输入的用户名和密码能够匹配到一条记录，那么我们认为登录成功，否则认为登录失败。</p>
-<p>代码比较简单，核心代码如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String sql = <span class="string">&quot;select * from user where name=&#x27;&quot;</span>+userName+<span class="string">&quot;&#x27; and password=&#x27;&quot;</span>+password+<span class="string">&quot;&#x27;&quot;</span>;</span><br><span class="line"><span class="keyword">final</span> Statement statement = connection.createStatement();</span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = statement.executeQuery(sql);</span><br><span class="line"><span class="keyword">if</span> (resultSet.next()) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录成功，欢迎您：&quot;</span> + userName);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录失败&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>验证一下：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">JACK</span><br><span class="line">请输入用户密码：</span><br><span class="line">123</span><br><span class="line">登录成功，欢迎您：JACK</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">jack1</span><br><span class="line">请输入用户密码：</span><br><span class="line">123</span><br><span class="line">登录失败</span><br></pre></td></tr></table></figure>
-
-<p>看起来好像一切正常，没毛病，那么我们尝试一下如下输入：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">我是一个不存在的用户</span><br><span class="line">请输入用户密码：</span><br><span class="line">我是密码<span class="string">&#x27; or &#x27;</span>a<span class="string">&#x27;=&#x27;</span>a</span><br></pre></td></tr></table></figure>
-
-<p>这时我们发现，神奇的事情出现了：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">登录成功，欢迎您：我是一个不存在的用户</span><br></pre></td></tr></table></figure>
-
-<p>这是为什么呢？？？其实我们 debug 一下就会发现，原因很简单，我们传给 <code>Statement</code> 对象的是一个字符串，那么上述参数真正执行的 SQL 语句是 <code>select * from user where name=&#39;我是一个不存在的用户&#39; and password=&#39;我是密码&#39; or &#39;a&#39;=&#39;a&#39;</code>。 大家发现了吗？我们的原始 SQL 只是查询用户名和密码信息，但是如果用户输入了类似上面这种奇怪的密码，在我们的 SQL 后面拼接上其他字符串，就可以绕过我们的检查，随意输入任何用户名和密码都可以获得登录授权，这无疑是很危险的。</p>
-<blockquote>
-<p>SQL注入（英语：SQL injection），也称SQL注入或SQL注码，是发生于应用程序与数据库层的安全漏洞。简而言之，是在输入的字符串之中注入SQL指令，在设计不良的程序当中忽略了字符检查，那么这些注入进去的恶意指令就会被数据库服务器误认为是正常的SQL指令而运行，因此遭到破坏或是入侵。</p>
-</blockquote>
-<p>以上是维基百科对应的词条解释，那么怎么解决这种问题呢？JDK 的作者们提供的 <code>PreparedStatement</code> 就是用来处理这种问题的。我们来看一下它的用法。</p>
-<ol>
-<li>Connection 接口中的方法<ol>
-<li><code>PreparedStatement prepareStatement(String sql)</code>: 指定预编译的 SQL 语句，SQL 语句中使用占位符 <code>?</code> 创建一个语句对象</li>
-</ol>
-</li>
-<li>PreparedStatement 接口中的方法<ol>
-<li><code>int executeUpdate()</code>: 执行 DML，增删改的操作，返回影响的行数。</li>
-<li><code>ResultSet executeQuery()</code>: 执行 DQL，查询的操作，返回结果集</li>
-</ol>
-</li>
-</ol>
-<p>使用步骤：</p>
-<ol start="3">
-<li>编写 SQL 语句，未知内容使用?占位：<code>&quot;SELECT * FROM user WHERE name=? AND password=?&quot;;</code></li>
-<li>获得 <code>PreparedStatement</code> 对象</li>
-<li>设置实际参数：<code>setXxx(占位符的位置, 真实的值)</code><ol>
-<li>对应一系列重载的方法</li>
-</ol>
-</li>
-<li>执行参数化 SQL 语句</li>
-<li>关闭资源</li>
-</ol>
-<p>具体的代码示例如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 构造一个带参数的 SQL 语句，这里不需要加单引号了，而是使用占位符 ？</span></span><br><span class="line">String sql = <span class="string">&quot;select * from user where name=? and password=?&quot;</span>;</span><br><span class="line"><span class="comment">// 2. 获取 PreparedStatement 对象</span></span><br><span class="line"><span class="keyword">final</span> PreparedStatement preparedStatement = connection.prepareStatement(sql);</span><br><span class="line"><span class="comment">// 3. 设置参数，这里需要注意的是索引是从 1 开始的，而不是 0</span></span><br><span class="line">preparedStatement.setString(<span class="number">1</span>, userName);</span><br><span class="line">preparedStatement.setString(<span class="number">2</span>, userName);</span><br><span class="line"><span class="comment">// 4. 执行参数化 SQL 语句，这里由于 sql 语句已经准备好了，不再需要传入参数，直接执行即可</span></span><br><span class="line"><span class="keyword">final</span> ResultSet resultSet = preparedStatement.executeQuery();</span><br><span class="line"><span class="keyword">if</span> (resultSet.next()) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录成功，欢迎您：&quot;</span> + userName);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;登录失败&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>使用起来还是比较简单的，需要注意的几个点已经写在了注释里面。<br>执行结果如下：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">请输入用户名：</span><br><span class="line">我是一个不存在的用户</span><br><span class="line">请输入用户密码：</span><br><span class="line">我是密码<span class="string">&#x27; or &#x27;</span>a<span class="string">&#x27;=&#x27;</span>a</span><br><span class="line">登录失败</span><br></pre></td></tr></table></figure>
-
-<p>可以看到使用 <code>PreparedStatement</code> 有效的解决了 SQL 注入的问题，它还有以下好处：</p>
-<ol>
-<li><code>prepareStatement()</code> 方法会先将 SQL 语句发送给数据库预编译。<code>PreparedStatement</code> 会引用着预编译后的结果。 可以多次传入不同的参数给 <code>PreparedStatement</code> 对象并执行。减少 SQL 编译次数，提高效率。</li>
-<li>提高了程序的可读性</li>
-</ol>
-<p>所以我们尽可能全部都使用 <code>PreparedStatement</code> 的方式，而不是 <code>Statement</code> 类。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，一个简单的 JDBC demo 就搭建完毕了。由于目前已经不会有人直接使用 JDBC 进行数据库操作了，我们只是为了接下来学习 MyBatis 进行一个铺垫，简单了解即可，不需要深入。</p>
-<p>示例代码地址：</p>
-<ul>
-<li><a href="https://github.com/samwei12/jdbc-demo">https://github.com/samwei12/jdbc-demo</a></li>
-</ul>
-<h2 id="Relations"><a href="#Relations" class="headerlink" title="Relations"></a>Relations</h2><ul>
-<li><a href="https://zh.wikipedia.org/wiki/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5">https://zh.wikipedia.org/wiki/Java%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5</a></li>
-<li><a href="https://zh.wikipedia.org/wiki/SQL%E6%B3%A8%E5%85%A5">https://zh.wikipedia.org/wiki/SQL%E6%B3%A8%E5%85%A5</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Server</category>
-      </categories>
-      <tags>
-        <tag>JDBC</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Logseq 系列之 Git 同步</title>
     <url>/2022/08/12/Utilities/Logseq%E7%B3%BB%E5%88%97%E4%B9%8BGit%E5%90%8C%E6%AD%A5/</url>
     <content><![CDATA[<p>这篇文章主要介绍一下我自己使用 Git 同步 Logseq 的一些心得。前置知识是需要你懂一些基本的 Git 操作，或者起码有一定的动手能力。如果你没听过 Git，那可能本文不太适合你。</p>
@@ -1478,7 +1547,7 @@
 <p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812234557.png" alt="20220812234557"></p>
 <p>之后，选择提交本地改动到远程，就可以了。 注意这里挪动过文件位置之后，需要打开 Logseq 重新定位一下新的库。</p>
 <p>方案二： 如果不想 reindex 的话，可以直接打开 Logseq 配置中的版本管理，Logseq 会自动帮你创建一个本地仓库，之后再把这个本地仓库关联到自己的远程仓库即可。</p>
-<p><img src="/images/16603193025060.jpg"></p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220813000731.png" alt="20220813000731"></p>
 <p>如上图，打开这个开关，然后重启 Logseq，此时，进入到你的笔记文件夹中，打开显示隐藏文件夹选项，你应该能看到一个 <code>.git</code> 文件夹，说明已经帮你创建好了一个本地仓库，然后使用命令行，进入这个文件夹， 此时输入 <code>git remote -v</code> 应该没有任何反应，之后我们需要把这个本地仓库关联到我们在控制台创建的远程仓库， 输入命令 <code>git remote add orgin 你的仓库地址</code> 即可，之后就可以正常的进行拉取推送了。</p>
 <p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220812235217.png" alt="20220812235217"></p>
 <h2 id="如何在-iOS-上使用-Git？"><a href="#如何在-iOS-上使用-Git？" class="headerlink" title="如何在 iOS 上使用 Git？"></a>如何在 iOS 上使用 Git？</h2><p>如果你是安卓手机，那么可以跳过这一章，直接开心的用起来就好了，这里推荐使用 Termux。</p>
@@ -1608,6 +1677,58 @@
       </tags>
   </entry>
   <entry>
+    <title>使用Logseq构建GTD系统</title>
+    <url>/2021/05/08/Utilities/%E4%BD%BF%E7%94%A8Logseq%E6%9E%84%E5%BB%BAGTD%E7%B3%BB%E7%BB%9F/</url>
+    <content><![CDATA[<blockquote>
+<p>2021-05-08： 1.0版本初步完成，待完善已完成任务回顾<br>2021-05-10： 1.1版本完成，修改不重要不紧急为将来清单，且新增每周回顾</p>
+</blockquote>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在阅读《小强升职记》，感觉里面讲到的时间管理工具和方法十分有用，自己之前虽然也了解一些工具，例如四象限原则、两分钟方法等，但看完这本书之后感觉之前的理解还是太肤浅了。是时候升级一下自己的时间管理系统了。</p>
+<span id="more"></span>
+
+<p>在此之前我的工具大致包括： 稍后读软件、GTD工具（滴答清单）、写作工具（一般是VSCode+Hexo）。最近半年沉迷于使用双链笔记软件，目前在用的是 Logseq，后面专门展开介绍一下。目前在尝试将GTD工具、笔记都整合到 Logseq 里面，主要是受了这篇文章的启发 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>，下面就详细介绍一下我的实践过程。</p>
+<h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><h3 id="Datalog"><a href="#Datalog" class="headerlink" title="Datalog"></a>Datalog</h3><p>首先，需要简单学习一下Datalog语法。Logseq是基于Clojure开发的，它的底层可以简单地理解为是类似于数据库的结构，因此可以天然的支持各种查询，这也是我们能够利用它来实现 GTD 管理的前提。因此这里如果需要掌握如何使用 Logseq 来进行查询的话，最好先学习一下如何使用 Datalog。可以参考 <a href="https://logseq.github.io/#/page/advanced%20queries">官方的查询教程</a> 以及这篇 <a href="http://www.learndatalogtoday.org/">Learn Datalog Today</a>，粗略扫一遍，能够看懂大概意思就可以了。</p>
+<h3 id="CSS"><a href="#CSS" class="headerlink" title="CSS"></a>CSS</h3><p>其次，Logseq本身是列表大纲形式，无法直接支持四象限这种样式，因此需要一些 CSS功底，这里我是直接参考了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a> 里面的样式，原始版本在 <a href="https://discuss.logseq.com/t/css-template-eisenhower-matrix/526">[css+template] eisenhower matrix</a>，可以简单看下。</p>
+<h2 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h2><h3 id="块属性"><a href="#块属性" class="headerlink" title="块属性"></a>块属性</h3><p>《小强升职记》里面提到日常待办事项是分为项目、任务、行动三种的，只有行动才是可以立马去执行的，项目和任务都需要进行分解，拆成行动。</p>
+<p>结合Logseq，我目前考虑使用属性来解决，也可以考虑使用标签，不过我认为会对内容有一定的污染，各有利弊吧。</p>
+<p>针对一个新的行动或者任务，添加属性type字段，然后根据具体的类型添加行动、任务、项目字段。</p>
+<p>样例：<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508175442.png" alt="20210508175442"></p>
+<h3 id="四象限查询条件"><a href="#四象限查询条件" class="headerlink" title="四象限查询条件"></a>四象限查询条件</h3><p>注意：<strong>所有的待办都必须要有明确的优先级和截止日期</strong>，这么做有几个原因：<br>    1. 要求自己对每个待办都设置明确的时间点，避免添加到收集箱中一直不处理<br>    2. 添加了优先级之后才好进行四象限统计<br>    3. 目前还没有找到Logseq的query条件中如何同时查找DDL在限定时间内以及无DDL限制的任务，只能查找其中一种case，这个后续解决</p>
+<p>实际使用过程中，可以把一下的查询条件汇总到一个模板中，</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">## #.v-eisenhower-matrix （用于CSS选择器，最好不要改）</span><br><span class="line">:PROPERTIES:</span><br><span class="line">:template: 四象限</span><br><span class="line">:END:</span><br><span class="line">#### [[重要且紧急]]</span><br><span class="line">##### </span><br><span class="line">#+BEGIN_QUERY</span><br><span class="line">...</span><br><span class="line">#+END_QUERY</span><br><span class="line">#### [[重要不紧急]]</span><br><span class="line">#### [[紧急不重要]]</span><br><span class="line">#### [[不重要不紧急]]</span><br></pre></td></tr></table></figure>
+
+<p>具体查询语句如下：可以根据自己的实际使用需求将属性限制移除或者修改时间限制，代码中均已经添加注释。</p>
+<blockquote>
+<p>2021-05-10 补充： 将设置为Later的事项移动到第四象限，这样就可以定期回顾；同时新增一个每周回顾的query语句，由于目前Logseq还不支持查询当前时间戳，因此用了个笨办法，每次查询的时候手动输入当前时间戳ms进行查询。</p>
+</blockquote>
+<h4 id="重要且紧急-避免太多进入该象限"><a href="#重要且紧急-避免太多进入该象限" class="headerlink" title="[[重要且紧急]] ==(避免太多进入该象限)=="></a>[[重要且紧急]] ==(避免太多进入该象限)==</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;:query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+<h4 id="重要不紧急-优先完成此象限"><a href="#重要不紧急-优先完成此象限" class="headerlink" title="[[重要不紧急]] ==(优先完成此象限)=="></a>[[重要不紧急]] ==(优先完成此象限)==</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&gt; ?d ?end)]  ;; DDL在5天以上</span><br><span class="line">    ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+<h4 id="紧急不重要-尽量委派给其他人"><a href="#紧急不重要-尽量委派给其他人" class="headerlink" title="[[紧急不重要]] ==(尽量委派给其他人)=="></a>[[紧急不重要]] ==(尽量委派给其他人)==</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [?b :block/priority ?priority]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            [(!= &quot;A&quot; ?priority)] ;; 优先级在A的才认为是重要</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+<h4 id="待办清单-不紧急不重要，定期回顾确认"><a href="#待办清单-不紧急不重要，定期回顾确认" class="headerlink" title="[[待办清单]] ==(不紧急不重要，定期回顾确认)=="></a>[[待办清单]] ==(不紧急不重要，定期回顾确认)==</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [(contains? #&#123;&quot;LATER&quot;&#125; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+
+<h4 id="本周已完成-近七天统计"><a href="#本周已完成-近七天统计" class="headerlink" title="[[本周已完成]] ==(近七天统计)=="></a>[[本周已完成]] ==(近七天统计)==</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;   :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;done&quot;) ?finishedTime]</span><br><span class="line">            [(- 1620657776000 604800000) ?weekbefore] ;; 由于目前Logseq不支持直接获取当前时间戳，只能使用trick的方式，每次查询前手动输入当前时间戳ms值,算出一周前的时间戳</span><br><span class="line">            [(&gt;= ?finishedTime ?weekbefore)] ;; 一周内完成的工作</span><br><span class="line">            [(= &quot;DONE&quot; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
+
+<h3 id="CSS优化"><a href="#CSS优化" class="headerlink" title="CSS优化"></a>CSS优化</h3><p>这里直接照抄了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>， 不过它的CSS中内容较多，我单独提取了四象限相关的部分，放在 <a href="https://github.com/samwei12/LogseqMisc/blob/master/%E5%9B%9B%E8%B1%A1%E9%99%90.css">四象限CSS</a> 中，查询模板也都放在这里，便于大家使用。</p>
+<h3 id="最终效果"><a href="#最终效果" class="headerlink" title="最终效果"></a>最终效果</h3><p>目前我的每日笔记大概长这样：</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508181043.png" alt="20210508181043"></p>
+<blockquote>
+<p>1.1 版本已经解决</p>
+</blockquote>
+<p><del>可以算是1.0 版本，目前存在的问题包括：</del></p>
+<ol>
+<li><del>没有地方定期回顾那些没有设置DDL和优先级的任务</del></li>
+<li><del>缺少查看已完成任务和行动的地方（做周报时候很有用）</del></li>
+</ol>
+<p>Logseq是个很棒的工具，期待尽快稳定下来，后面长期使用，作为笔记+GTD一站式平台~</p>
+]]></content>
+      <categories>
+        <category>Utilities</category>
+      </categories>
+      <tags>
+        <tag>Logseq</tag>
+        <tag>GTD</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>思维导图软件测评</title>
     <url>/2021/06/05/Utilities/%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%84/</url>
     <content><![CDATA[<p>最近连续写了两篇万字长文，有点累了，而且我也知道这种长文基本上也不太会有人阅读，周末写点测评放松一下。</p>
@@ -1713,58 +1834,6 @@
         <tag>测评</tag>
         <tag>Software</tag>
         <tag>思维导图</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用Logseq构建GTD系统</title>
-    <url>/2021/05/08/Utilities/%E4%BD%BF%E7%94%A8Logseq%E6%9E%84%E5%BB%BAGTD%E7%B3%BB%E7%BB%9F/</url>
-    <content><![CDATA[<blockquote>
-<p>2021-05-08： 1.0版本初步完成，待完善已完成任务回顾<br>2021-05-10： 1.1版本完成，修改不重要不紧急为将来清单，且新增每周回顾</p>
-</blockquote>
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在阅读《小强升职记》，感觉里面讲到的时间管理工具和方法十分有用，自己之前虽然也了解一些工具，例如四象限原则、两分钟方法等，但看完这本书之后感觉之前的理解还是太肤浅了。是时候升级一下自己的时间管理系统了。</p>
-<span id="more"></span>
-
-<p>在此之前我的工具大致包括： 稍后读软件、GTD工具（滴答清单）、写作工具（一般是VSCode+Hexo）。最近半年沉迷于使用双链笔记软件，目前在用的是 Logseq，后面专门展开介绍一下。目前在尝试将GTD工具、笔记都整合到 Logseq 里面，主要是受了这篇文章的启发 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>，下面就详细介绍一下我的实践过程。</p>
-<h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><h3 id="Datalog"><a href="#Datalog" class="headerlink" title="Datalog"></a>Datalog</h3><p>首先，需要简单学习一下Datalog语法。Logseq是基于Clojure开发的，它的底层可以简单地理解为是类似于数据库的结构，因此可以天然的支持各种查询，这也是我们能够利用它来实现 GTD 管理的前提。因此这里如果需要掌握如何使用 Logseq 来进行查询的话，最好先学习一下如何使用 Datalog。可以参考 <a href="https://logseq.github.io/#/page/advanced%20queries">官方的查询教程</a> 以及这篇 <a href="http://www.learndatalogtoday.org/">Learn Datalog Today</a>，粗略扫一遍，能够看懂大概意思就可以了。</p>
-<h3 id="CSS"><a href="#CSS" class="headerlink" title="CSS"></a>CSS</h3><p>其次，Logseq本身是列表大纲形式，无法直接支持四象限这种样式，因此需要一些 CSS功底，这里我是直接参考了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a> 里面的样式，原始版本在 <a href="https://discuss.logseq.com/t/css-template-eisenhower-matrix/526">[css+template] eisenhower matrix</a>，可以简单看下。</p>
-<h2 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h2><h3 id="块属性"><a href="#块属性" class="headerlink" title="块属性"></a>块属性</h3><p>《小强升职记》里面提到日常待办事项是分为项目、任务、行动三种的，只有行动才是可以立马去执行的，项目和任务都需要进行分解，拆成行动。</p>
-<p>结合Logseq，我目前考虑使用属性来解决，也可以考虑使用标签，不过我认为会对内容有一定的污染，各有利弊吧。</p>
-<p>针对一个新的行动或者任务，添加属性type字段，然后根据具体的类型添加行动、任务、项目字段。</p>
-<p>样例：<img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508175442.png" alt="20210508175442"></p>
-<h3 id="四象限查询条件"><a href="#四象限查询条件" class="headerlink" title="四象限查询条件"></a>四象限查询条件</h3><p>注意：<strong>所有的待办都必须要有明确的优先级和截止日期</strong>，这么做有几个原因：<br>    1. 要求自己对每个待办都设置明确的时间点，避免添加到收集箱中一直不处理<br>    2. 添加了优先级之后才好进行四象限统计<br>    3. 目前还没有找到Logseq的query条件中如何同时查找DDL在限定时间内以及无DDL限制的任务，只能查找其中一种case，这个后续解决</p>
-<p>实际使用过程中，可以把一下的查询条件汇总到一个模板中，</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">## #.v-eisenhower-matrix （用于CSS选择器，最好不要改）</span><br><span class="line">:PROPERTIES:</span><br><span class="line">:template: 四象限</span><br><span class="line">:END:</span><br><span class="line">#### [[重要且紧急]]</span><br><span class="line">##### </span><br><span class="line">#+BEGIN_QUERY</span><br><span class="line">...</span><br><span class="line">#+END_QUERY</span><br><span class="line">#### [[重要不紧急]]</span><br><span class="line">#### [[紧急不重要]]</span><br><span class="line">#### [[不重要不紧急]]</span><br></pre></td></tr></table></figure>
-
-<p>具体查询语句如下：可以根据自己的实际使用需求将属性限制移除或者修改时间限制，代码中均已经添加注释。</p>
-<blockquote>
-<p>2021-05-10 补充： 将设置为Later的事项移动到第四象限，这样就可以定期回顾；同时新增一个每周回顾的query语句，由于目前Logseq还不支持查询当前时间戳，因此用了个笨办法，每次查询的时候手动输入当前时间戳ms进行查询。</p>
-</blockquote>
-<h4 id="重要且紧急-避免太多进入该象限"><a href="#重要且紧急-避免太多进入该象限" class="headerlink" title="[[重要且紧急]] ==(避免太多进入该象限)=="></a>[[重要且紧急]] ==(避免太多进入该象限)==</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;:query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-<h4 id="重要不紧急-优先完成此象限"><a href="#重要不紧急-优先完成此象限" class="headerlink" title="[[重要不紧急]] ==(优先完成此象限)=="></a>[[重要不紧急]] ==(优先完成此象限)==</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/priority &quot;A&quot;] ;; 优先级在A的才认为是重要</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&gt; ?d ?end)]  ;; DDL在5天以上</span><br><span class="line">    ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-<h4 id="紧急不重要-尽量委派给其他人"><a href="#紧急不重要-尽量委派给其他人" class="headerlink" title="[[紧急不重要]] ==(尽量委派给其他人)=="></a>[[紧急不重要]] ==(尽量委派给其他人)==</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :in $ ?end</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [?b :block/priority ?priority]</span><br><span class="line">            [(get ?p &quot;type&quot;) ?t]</span><br><span class="line">            [(contains? #&#123;&quot;任务&quot; &quot;行动&quot; &quot;项目&quot;&#125; ?t)] ;; 属性中type字段包含这三种</span><br><span class="line">            [(contains? #&#123;&quot;TODO&quot; &quot;DOING&quot; &quot;NOW&quot;&#125; ?marker)] ;; 不包含已完成任务，不包含LATER</span><br><span class="line">            [(!= &quot;A&quot; ?priority)] ;; 优先级在A的才认为是重要</span><br><span class="line">            (or</span><br><span class="line">            [?b :block/scheduled ?d]</span><br><span class="line">            [?b :block/deadline ?d])</span><br><span class="line">            [(&lt;= ?d ?end)]</span><br><span class="line">            ]</span><br><span class="line">    :inputs [:5d-after] ;; 时间跨度，5天内的算作紧急</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-<h4 id="待办清单-不紧急不重要，定期回顾确认"><a href="#待办清单-不紧急不重要，定期回顾确认" class="headerlink" title="[[待办清单]] ==(不紧急不重要，定期回顾确认)=="></a>[[待办清单]] ==(不紧急不重要，定期回顾确认)==</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;    :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [(contains? #&#123;&quot;LATER&quot;&#125; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-
-<h4 id="本周已完成-近七天统计"><a href="#本周已完成-近七天统计" class="headerlink" title="[[本周已完成]] ==(近七天统计)=="></a>[[本周已完成]] ==(近七天统计)==</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#+BEGIN_QUERY</span><br><span class="line">&#123;   :query [:find (pull ?b [*])</span><br><span class="line">            :where</span><br><span class="line">            [?b :block/marker ?marker]</span><br><span class="line">            [?b :block/properties ?p]</span><br><span class="line">            [(get ?p &quot;done&quot;) ?finishedTime]</span><br><span class="line">            [(- 1620657776000 604800000) ?weekbefore] ;; 由于目前Logseq不支持直接获取当前时间戳，只能使用trick的方式，每次查询前手动输入当前时间戳ms值,算出一周前的时间戳</span><br><span class="line">            [(&gt;= ?finishedTime ?weekbefore)] ;; 一周内完成的工作</span><br><span class="line">            [(= &quot;DONE&quot; ?marker)]</span><br><span class="line">            ]</span><br><span class="line">    &#125;</span><br><span class="line">#+END_QUERY</span><br></pre></td></tr></table></figure>
-
-<h3 id="CSS优化"><a href="#CSS优化" class="headerlink" title="CSS优化"></a>CSS优化</h3><p>这里直接照抄了 <a href="https://www.bmpi.dev/self/okr-gtd-note-logseq/">OKR + GTD + Note =&gt; Logseq</a>， 不过它的CSS中内容较多，我单独提取了四象限相关的部分，放在 <a href="https://github.com/samwei12/LogseqMisc/blob/master/%E5%9B%9B%E8%B1%A1%E9%99%90.css">四象限CSS</a> 中，查询模板也都放在这里，便于大家使用。</p>
-<h3 id="最终效果"><a href="#最终效果" class="headerlink" title="最终效果"></a>最终效果</h3><p>目前我的每日笔记大概长这样：</p>
-<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20210508181043.png" alt="20210508181043"></p>
-<blockquote>
-<p>1.1 版本已经解决</p>
-</blockquote>
-<p><del>可以算是1.0 版本，目前存在的问题包括：</del></p>
-<ol>
-<li><del>没有地方定期回顾那些没有设置DDL和优先级的任务</del></li>
-<li><del>缺少查看已完成任务和行动的地方（做周报时候很有用）</del></li>
-</ol>
-<p>Logseq是个很棒的工具，期待尽快稳定下来，后面长期使用，作为笔记+GTD一站式平台~</p>
-]]></content>
-      <categories>
-        <category>Utilities</category>
-      </categories>
-      <tags>
-        <tag>Logseq</tag>
-        <tag>GTD</tag>
       </tags>
   </entry>
   <entry>
