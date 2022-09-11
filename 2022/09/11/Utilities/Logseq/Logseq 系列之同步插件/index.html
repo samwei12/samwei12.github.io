@@ -22,28 +22,32 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
 
 <script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;blog.samwei12.cn&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Gemini&quot;,&quot;version&quot;:&quot;8.4.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12,&quot;onmobile&quot;:false,&quot;dimmer&quot;:false},&quot;copycode&quot;:false,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:false,&quot;pangu&quot;:false,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:&quot;gitalk&quot;,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null,&quot;activeClass&quot;:&quot;gitalk&quot;},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script>
-<meta name="description" content="原文链接  前言 我们在使用 Cocoapods 过程中,如果发现它未能满足我们的要求该怎么办呢?  最简单的粗暴的办法就是 fork 一份 Cocoapods 源码,然后自己公司内部或者个人直接针对源码进行部分修改或者新增功能,但这样做完全没有兼容性和扩展性,如果后续 Cocoapods 升级版本,你是无法兼容的,还需要重新进行一次修改,费力不讨好. 其实 Cocoapods 提供了一套很方便">
+<meta name="description" content="原文地址：   前些天看到群友们讨论 Logseq 要是能够在不同设备间同步插件和主题就好了，目前 Logseq 官方同步已经在小规模测试中，预计再有一两个月就会发布，未来大概率会出同步插件的功能。不过考虑到官方同步的免费使用空间肯定不会很大，如果有大量的本地图片或者其他文档类文件，就不适合免费用了，且主要是现在的 Git 同步方案已经非常好用（重点是免费！），所以还是考虑完善一下现有的方案，短">
 <meta property="og:type" content="article">
-<meta property="og:title" content="如何创建一个 Cocoapods 插件">
-<meta property="og:url" content="http://blog.samwei12.cn/2019/04/22/Ruby/Gem/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6/index.html">
+<meta property="og:title" content="Logseq 系列之同步插件">
+<meta property="og:url" content="http://blog.samwei12.cn/2022/09/11/Utilities/Logseq/Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E5%90%8C%E6%AD%A5%E6%8F%92%E4%BB%B6/index.html">
 <meta property="og:site_name" content="samwei12&#39;s blog">
-<meta property="og:description" content="原文链接  前言 我们在使用 Cocoapods 过程中,如果发现它未能满足我们的要求该怎么办呢?  最简单的粗暴的办法就是 fork 一份 Cocoapods 源码,然后自己公司内部或者个人直接针对源码进行部分修改或者新增功能,但这样做完全没有兼容性和扩展性,如果后续 Cocoapods 升级版本,你是无法兼容的,还需要重新进行一次修改,费力不讨好. 其实 Cocoapods 提供了一套很方便">
+<meta property="og:description" content="原文地址：   前些天看到群友们讨论 Logseq 要是能够在不同设备间同步插件和主题就好了，目前 Logseq 官方同步已经在小规模测试中，预计再有一两个月就会发布，未来大概率会出同步插件的功能。不过考虑到官方同步的免费使用空间肯定不会很大，如果有大量的本地图片或者其他文档类文件，就不适合免费用了，且主要是现在的 Git 同步方案已经非常好用（重点是免费！），所以还是考虑完善一下现有的方案，短">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2019-04-22T03:07:35.000Z">
-<meta property="article:modified_time" content="2021-05-08T08:11:44.742Z">
+<meta property="og:image" content="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220911225437.png">
+<meta property="og:image" content="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220911230219.png">
+<meta property="article:published_time" content="2022-09-11T14:37:13.000Z">
+<meta property="article:modified_time" content="2022-09-11T15:09:29.589Z">
 <meta property="article:author" content="samwei12">
-<meta property="article:tag" content="Cocoapods">
+<meta property="article:tag" content="Logseq">
+<meta property="article:tag" content="Git">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220911225437.png">
 
 
-<link rel="canonical" href="http://blog.samwei12.cn/2019/04/22/Ruby/Gem/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6/">
+<link rel="canonical" href="http://blog.samwei12.cn/2022/09/11/Utilities/Logseq/Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E5%90%8C%E6%AD%A5%E6%8F%92%E4%BB%B6/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;blog.samwei12.cn&#x2F;2019&#x2F;04&#x2F;22&#x2F;Ruby&#x2F;Gem&#x2F;%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6&#x2F;&quot;,&quot;path&quot;:&quot;2019&#x2F;04&#x2F;22&#x2F;Ruby&#x2F;Gem&#x2F;如何创建一个Cocoapods 插件&#x2F;&quot;,&quot;title&quot;:&quot;如何创建一个 Cocoapods 插件&quot;}</script>
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;http:&#x2F;&#x2F;blog.samwei12.cn&#x2F;2022&#x2F;09&#x2F;11&#x2F;Utilities&#x2F;Logseq&#x2F;Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E5%90%8C%E6%AD%A5%E6%8F%92%E4%BB%B6&#x2F;&quot;,&quot;path&quot;:&quot;2022&#x2F;09&#x2F;11&#x2F;Utilities&#x2F;Logseq&#x2F;Logseq 系列之同步插件&#x2F;&quot;,&quot;title&quot;:&quot;Logseq 系列之同步插件&quot;}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
-<title>如何创建一个 Cocoapods 插件 | samwei12's blog</title><script src="/js/config.js"></script>
+<title>Logseq 系列之同步插件 | samwei12's blog</title><script src="/js/config.js"></script>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138655615-1"></script>
   <script class="next-config" data-name="google_analytics" type="application/json">{&quot;tracking_id&quot;:&quot;UA-138655615-1&quot;,&quot;only_pageview&quot;:false}</script>
@@ -143,7 +147,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+    <div class="sidebar-inner sidebar-overview-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -156,7 +160,6 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#How"><span class="nav-number">2.</span> <span class="nav-text">How</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Relations"><span class="nav-number">3.</span> <span class="nav-text">Relations</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B9%A6%E7%B1%8D"><span class="nav-number">3.1.</span> <span class="nav-text">书籍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">3.2.</span> <span class="nav-text">其他</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -235,7 +238,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.samwei12.cn/2019/04/22/Ruby/Gem/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6/">
+    <link itemprop="mainEntityOfPage" href="http://blog.samwei12.cn/2022/09/11/Utilities/Logseq/Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E5%90%8C%E6%AD%A5%E6%8F%92%E4%BB%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -248,7 +251,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          如何创建一个 Cocoapods 插件<a href="https://github.com/samwei12/samwei12.github.io/edit/hexo/source/_posts/Ruby/Gem/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+          Logseq 系列之同步插件<a href="https://github.com/samwei12/samwei12.github.io/edit/hexo/source/_posts/Utilities/Logseq/Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E5%90%8C%E6%AD%A5%E6%8F%92%E4%BB%B6.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
         </h1>
 
         <div class="post-meta-container">
@@ -258,23 +261,17 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2019-04-22 11:07:35" itemprop="dateCreated datePublished" datetime="2019-04-22T11:07:35+08:00">2019-04-22</time>
+      <time title="创建时间：2022-09-11 22:37:13 / 修改时间：23:09:29" itemprop="dateCreated datePublished" datetime="2022-09-11T22:37:13+08:00">2022-09-11</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-05-08 16:11:44" itemprop="dateModified" datetime="2021-05-08T16:11:44+08:00">2021-05-08</time>
-      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Ruby/" itemprop="url" rel="index"><span itemprop="name">Ruby</span></a>
+          <a href="/categories/Utilities/" itemprop="url" rel="index"><span itemprop="name">Utilities</span></a>
         </span>
     </span>
 
@@ -293,7 +290,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>805</span>
+      <span>1.3k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -312,25 +309,29 @@
     
     <div class="post-body" itemprop="articleBody">
         <blockquote>
-<p><a href="http://blog.samwei12.cn/2019/04/22/Ruby/Gem/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AACocoapods%20%E6%8F%92%E4%BB%B6/">原文链接</a></p>
+<p>原文地址： </p>
 </blockquote>
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
-<li>我们在使用 Cocoapods 过程中,如果发现它未能满足我们的要求该怎么办呢? </li>
-<li>最简单的粗暴的办法就是 fork 一份 Cocoapods 源码,然后自己公司内部或者个人直接针对源码进行部分修改或者新增功能,但这样做完全没有兼容性和扩展性,如果后续 Cocoapods 升级版本,你是无法兼容的,还需要重新进行一次修改,费力不讨好.</li>
-<li>其实 Cocoapods 提供了一套很方便的插件机制,只需要符合插件规则,即可定制各种自定义需求,接下来我们就看下应该如何自定义一个自己的插件.</li>
-</ul>
+<p>前些天看到群友们讨论 Logseq 要是能够在不同设备间同步插件和主题就好了，目前 Logseq 官方同步已经在小规模测试中，预计再有一两个月就会发布，未来大概率会出同步插件的功能。不过考虑到官方同步的免费使用空间肯定不会很大，如果有大量的本地图片或者其他文档类文件，就不适合免费用了，且主要是现在的 Git 同步方案已经非常好用（重点是免费！），所以还是考虑完善一下现有的方案，短时间内不迁移官方同步。</p>
 <span id="more"></span>
 
-<h2 id="How"><a href="#How" class="headerlink" title="How"></a>How</h2><ol>
-<li>确保 Gem 中安装了 <code>cocoapods-plugins</code> 模块,这个按理讲是安装 Cocoapods 时自带的,可以使用命令 <code>gem install cocoapods-plugins</code>进行安装</li>
-<li>新增插件 <code>pod plugins create NAME</code></li>
-<li>针对 gemspec 进行部分修改<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 这里是对外暴露的文件</span></span><br><span class="line">s.files = Dir[<span class="string">&quot;lib/**/*.rb&quot;</span>] + <span class="string">%w&#123; bin/pod bin/sandbox-pod README.md LICENSE CHANGELOG.md &#125;</span></span><br><span class="line">s.files = Dir[<span class="string">&quot;lib/**/*.rb&quot;</span>] + <span class="string">%w&#123; README.md LICENSE.txt &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 可执行文件, 没有的话可以使用默认生成的</span></span><br><span class="line">s.executables   = <span class="string">%w&#123; pod sandbox-pod &#125;</span></span><br><span class="line"><span class="comment"># 查找路径</span></span><br><span class="line">s.require_paths = <span class="string">%w&#123; lib &#125;</span></span><br></pre></td></tr></table></figure></li>
-<li>开发过程直接在 <code>lib/cocoapods_plugin</code> 文件中加载你 hook 的文件即可</li>
-<li>最终对外发布可以通过提 PR 给 <code>cocoapods-plugins</code> ,也可以放到自己公司的内部 Gem 源中</li>
+<p>因为之前在 <a href="https://blog.samwei12.cn/2022/08/28/Utilities/Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E6%96%87%E6%A1%A3%E7%AE%A1%E7%90%86/#more">Logseq 系列之文档管理 | samwei12’s blog</a> 已经分享过个人的文档管理方案，细心的同学可能会发现，我的资源文件中有一个 ebooks 的软链接文件夹，我用它来存放各种电子书，这样的话就可以在不同步电子书到 Git 仓库的同时还能直接使用 Logseq 的本地 PDF 标注功能，这一部分后面有机会可以详细说说。</p>
+<p>我这里主要是想提一下系统的文件软链接这个功能，尤其是对于 *nix（包括 Mac）系统来说，软链接几乎可以当作原始文件来使用，由于系统层面的抽象工作做的非常好，对于上层使用的软件来说，可以做到完全无感，这也是上面非 assets 目录下 PDF 标注功能能使用的前提。正因为之前使用过这个功能，所以在考虑插件同步方案的时候，我第一时间就想到了是否可以尝试用软链接来解决呢？答案是肯定的。</p>
+<p>对于 Logseq 来说，基本的配置信息都在用户目录下的一个隐藏文件夹 <code>.logseq</code> 中，如图：</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220911225437.png" alt="20220911225437"></p>
+<p>其中， plugins 目录存放的就是我们下载的各种插件，以及各种主题； settings 目录则是这些插件的配置信息，而 preferences.json 这个文件则记录了我们的各种配置信息，包括使用的是什么主题、启用了哪些插件等等，graphs 文件夹存放的是各个笔记库的一些数据索引信息，通常我们不需要关心，git 文件夹是开启 git 自动提交使用的，也不需要关心。我们只需要确保 plugins settings 和 preferences.json 这几个文件和目录在不同电脑上内容一致即可。</p>
+<p>这里我的思路是，将这几个我们需要同步的目录内容拷贝到自己的 Logseq 文件夹中，使用 git 进行同步，然后在每台电脑上，使用软链接将 <code>.logseq</code> 中这几个文件关联到我们 git 仓库中这一份，这样就做到了不同设备之间的插件和配置同步，流程大概长这样：</p>
+<p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220911230219.png" alt="20220911230219"></p>
+<p>确定了方案之后，具体的执行其实就很简单了：</p>
+<ol>
+<li>把用户目录下的 <code>.logseq</code> 中的内容拷贝到你的 git 仓库中，移除 graphs git 这两个我们不需要的目录。</li>
+<li>删除 <code>.logseq</code> 中 plugins settings preferences.json 文件</li>
+<li>进入到 <code>.logseq</code> 目录中，创建对应的软链接</li>
 </ol>
-<h2 id="Relations"><a href="#Relations" class="headerlink" title="Relations"></a>Relations</h2><h3 id="书籍"><a href="#书籍" class="headerlink" title="书籍"></a>书籍</h3><h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/CocoaPods/cocoapods-plugins">https://github.com/CocoaPods/cocoapods-plugins</a></li>
-</ul>
+<p>命令如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ln -s xxx/.logseq/preferences.json preferences.json</span><br><span class="line">ln -s xxx/.logseq/plugins plugins</span><br><span class="line">ln -s xxx/.logseq/settings settings</span><br></pre></td></tr></table></figure>
+
+<p>把其中的 xxx 替换为你电脑上 git 仓库的目录即可，之后在新的设备上重复上述操作。</p>
+<p>至此，我们就实现了多设备间插件、主题以及用户配置的同步，而且继续保持我们的优良传统，免费自建，希望本文对你有所帮助～</p>
 
     </div>
 
@@ -341,7 +342,16 @@
   <div class="popular-posts-header">相关文章</div>
   <ul class="popular-posts">
     <li class="popular-posts-item">
-      <div class="popular-posts-title"><a href="/2020/03/04/Ruby/Cocoapods插件机制浅析/" rel="bookmark">Cocoapods插件机制浅析</a></div>
+      <div class="popular-posts-title"><a href="/2022/08/12/Utilities/Logseq系列之Git同步/" rel="bookmark">Logseq 系列之 Git 同步</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2022/08/28/Utilities/Logseq 系列之文档管理/" rel="bookmark">Logseq 系列之文档管理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2021/05/08/Utilities/使用Logseq构建GTD系统/" rel="bookmark">使用Logseq构建GTD系统</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/2022/03/21/Utilities/简悦-Logseq-搭建本地知识库/" rel="bookmark">简悦+Logseq 搭建本地化个人知识库</a></div>
     </li>
   </ul>
 
@@ -365,21 +375,19 @@
 </div>
 
           <div class="post-tags">
-              <a href="/tags/Cocoapods/" rel="tag"><i class="fa fa-tag"></i> Cocoapods</a>
+              <a href="/tags/Logseq/" rel="tag"><i class="fa fa-tag"></i> Logseq</a>
+              <a href="/tags/Git/" rel="tag"><i class="fa fa-tag"></i> Git</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2019/04/21/Utilities/Mac/%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%20iCloud%20%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6/" rel="prev" title="如何恢复 iCloud 已删除文件">
-                  <i class="fa fa-chevron-left"></i> 如何恢复 iCloud 已删除文件
+                <a href="/2022/08/28/Utilities/Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E6%96%87%E6%A1%A3%E7%AE%A1%E7%90%86/" rel="prev" title="Logseq 系列之文档管理">
+                  <i class="fa fa-chevron-left"></i> Logseq 系列之文档管理
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2020/03/04/Ruby/Cocoapods%E6%8F%92%E4%BB%B6%E6%9C%BA%E5%88%B6%E6%B5%85%E6%9E%90/" rel="next" title="Cocoapods插件机制浅析">
-                  Cocoapods插件机制浅析 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
@@ -467,7 +475,7 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
 
-<script class="next-config" data-name="gitalk" type="application/json">{&quot;enable&quot;:true,&quot;github_id&quot;:&quot;samwei12&quot;,&quot;repo&quot;:&quot;Gitalk&quot;,&quot;client_id&quot;:&quot;d629796e781af87fd27f&quot;,&quot;client_secret&quot;:&quot;55b4645e66412cd3b68af0761c9da3949ca321fe&quot;,&quot;admin_user&quot;:&quot;samwei12&quot;,&quot;distraction_free_mode&quot;:true,&quot;proxy&quot;:&quot;https:&#x2F;&#x2F;cors-anywhere.azm.workers.dev&#x2F;https:&#x2F;&#x2F;github.com&#x2F;login&#x2F;oauth&#x2F;access_token&quot;,&quot;language&quot;:null,&quot;js&quot;:&quot;https:&#x2F;&#x2F;cdn.jsdelivr.net&#x2F;npm&#x2F;gitalk@1.7.2&#x2F;dist&#x2F;gitalk.min.js&quot;,&quot;path_md5&quot;:&quot;990caba55fd718e4e870fd898c0dc6d4&quot;}</script>
+<script class="next-config" data-name="gitalk" type="application/json">{&quot;enable&quot;:true,&quot;github_id&quot;:&quot;samwei12&quot;,&quot;repo&quot;:&quot;Gitalk&quot;,&quot;client_id&quot;:&quot;d629796e781af87fd27f&quot;,&quot;client_secret&quot;:&quot;55b4645e66412cd3b68af0761c9da3949ca321fe&quot;,&quot;admin_user&quot;:&quot;samwei12&quot;,&quot;distraction_free_mode&quot;:true,&quot;proxy&quot;:&quot;https:&#x2F;&#x2F;cors-anywhere.azm.workers.dev&#x2F;https:&#x2F;&#x2F;github.com&#x2F;login&#x2F;oauth&#x2F;access_token&quot;,&quot;language&quot;:null,&quot;js&quot;:&quot;https:&#x2F;&#x2F;cdn.jsdelivr.net&#x2F;npm&#x2F;gitalk@1.7.2&#x2F;dist&#x2F;gitalk.min.js&quot;,&quot;path_md5&quot;:&quot;918a68ed2c893356c07801d6ed161b42&quot;}</script>
 <script src="/js/third-party/comments/gitalk.js"></script>
 
 </body>

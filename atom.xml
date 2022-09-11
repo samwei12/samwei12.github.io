@@ -6,7 +6,7 @@
   <link href="http://blog.samwei12.cn/atom.xml" rel="self"/>
   
   <link href="http://blog.samwei12.cn/"/>
-  <updated>2022-08-28T15:10:52.522Z</updated>
+  <updated>2022-09-11T15:09:29.589Z</updated>
   <id>http://blog.samwei12.cn/</id>
   
   <author>
@@ -17,11 +17,37 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Logseq 系列之同步插件</title>
+    <link href="http://blog.samwei12.cn/2022/09/11/Utilities/Logseq/Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E5%90%8C%E6%AD%A5%E6%8F%92%E4%BB%B6/"/>
+    <id>http://blog.samwei12.cn/2022/09/11/Utilities/Logseq/Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E5%90%8C%E6%AD%A5%E6%8F%92%E4%BB%B6/</id>
+    <published>2022-09-11T14:37:13.000Z</published>
+    <updated>2022-09-11T15:09:29.589Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote><p>原文地址： </p></blockquote><p>前些天看到群友们讨论 Logseq 要是能够在不同设备间同步插件和主题就好了，目前 Logseq 官方同步已经在小规模测试中，预计再有一两个月就会发布，未来大概率会出同步插件的功能。不过考虑到官方同步的免费使用空间肯定不会很大，如果有大量的本地图片或者其他文档类文件，就不适合免费用了，且主要是现在的 Git 同步方案已经非常好用（重点是免费！），所以还是考虑完善一下现有的方案，短时间内不迁移官方同步。</p><span id="more"></span><p>因为之前在 <a href="https://blog.samwei12.cn/2022/08/28/Utilities/Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E6%96%87%E6%A1%A3%E7%AE%A1%E7%90%86/#more">Logseq 系列之文档管理 | samwei12’s blog</a> 已经分享过个人的文档管理方案，细心的同学可能会发现，我的资源文件中有一个 ebooks 的软链接文件夹，我用它来存放各种电子书，这样的话就可以在不同步电子书到 Git 仓库的同时还能直接使用 Logseq 的本地 PDF 标注功能，这一部分后面有机会可以详细说说。</p><p>我这里主要是想提一下系统的文件软链接这个功能，尤其是对于 *nix（包括 Mac）系统来说，软链接几乎可以当作原始文件来使用，由于系统层面的抽象工作做的非常好，对于上层使用的软件来说，可以做到完全无感，这也是上面非 assets 目录下 PDF 标注功能能使用的前提。正因为之前使用过这个功能，所以在考虑插件同步方案的时候，我第一时间就想到了是否可以尝试用软链接来解决呢？答案是肯定的。</p><p>对于 Logseq 来说，基本的配置信息都在用户目录下的一个隐藏文件夹 <code>.logseq</code> 中，如图：</p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220911225437.png" alt="20220911225437"></p><p>其中， plugins 目录存放的就是我们下载的各种插件，以及各种主题； settings 目录则是这些插件的配置信息，而 preferences.json 这个文件则记录了我们的各种配置信息，包括使用的是什么主题、启用了哪些插件等等，graphs 文件夹存放的是各个笔记库的一些数据索引信息，通常我们不需要关心，git 文件夹是开启 git 自动提交使用的，也不需要关心。我们只需要确保 plugins settings 和 preferences.json 这几个文件和目录在不同电脑上内容一致即可。</p><p>这里我的思路是，将这几个我们需要同步的目录内容拷贝到自己的 Logseq 文件夹中，使用 git 进行同步，然后在每台电脑上，使用软链接将 <code>.logseq</code> 中这几个文件关联到我们 git 仓库中这一份，这样就做到了不同设备之间的插件和配置同步，流程大概长这样：</p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220911230219.png" alt="20220911230219"></p><p>确定了方案之后，具体的执行其实就很简单了：</p><ol><li>把用户目录下的 <code>.logseq</code> 中的内容拷贝到你的 git 仓库中，移除 graphs git 这两个我们不需要的目录。</li><li>删除 <code>.logseq</code> 中 plugins settings preferences.json 文件</li><li>进入到 <code>.logseq</code> 目录中，创建对应的软链接</li></ol><p>命令如下</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ln -s xxx/.logseq/preferences.json preferences.json</span><br><span class="line">ln -s xxx/.logseq/plugins plugins</span><br><span class="line">ln -s xxx/.logseq/settings settings</span><br></pre></td></tr></table></figure><p>把其中的 xxx 替换为你电脑上 git 仓库的目录即可，之后在新的设备上重复上述操作。</p><p>至此，我们就实现了多设备间插件、主题以及用户配置的同步，而且继续保持我们的优良传统，免费自建，希望本文对你有所帮助～</p>]]></content>
+    
+    
+    <summary type="html">&lt;blockquote&gt;
+&lt;p&gt;原文地址： &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;前些天看到群友们讨论 Logseq 要是能够在不同设备间同步插件和主题就好了，目前 Logseq 官方同步已经在小规模测试中，预计再有一两个月就会发布，未来大概率会出同步插件的功能。不过考虑到官方同步的免费使用空间肯定不会很大，如果有大量的本地图片或者其他文档类文件，就不适合免费用了，且主要是现在的 Git 同步方案已经非常好用（重点是免费！），所以还是考虑完善一下现有的方案，短时间内不迁移官方同步。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Utilities" scheme="http://blog.samwei12.cn/categories/Utilities/"/>
+    
+    
+    <category term="Logseq" scheme="http://blog.samwei12.cn/tags/Logseq/"/>
+    
+    <category term="Git" scheme="http://blog.samwei12.cn/tags/Git/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Logseq 系列之文档管理</title>
     <link href="http://blog.samwei12.cn/2022/08/28/Utilities/Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E6%96%87%E6%A1%A3%E7%AE%A1%E7%90%86/"/>
     <id>http://blog.samwei12.cn/2022/08/28/Utilities/Logseq%20%E7%B3%BB%E5%88%97%E4%B9%8B%E6%96%87%E6%A1%A3%E7%AE%A1%E7%90%86/</id>
     <published>2022-08-28T10:07:05.000Z</published>
-    <updated>2022-08-28T15:10:52.522Z</updated>
+    <updated>2022-08-28T15:14:28.154Z</updated>
     
     <content type="html"><![CDATA[<p>本文主要是介绍一下我自己在使用 Logseq 进行文档管理时遇到的一些问题以及解决方案。</p><h2 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h2><p>目前 Logseq 针对各种文档、图片等外部资源的管理形式比较简单，统一放到 <code>assets</code> 这里目录下进行管理，在实际使用中通过相对路径进行引入，大概是下图这样：</p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220828181355.png" alt="20220828181355"></p><span id="more"></span><p>可以看到，这里面包含了 PDF 标注文件、音频文件、视频文件、各种图片资源等，这样做的好处非常明显，可以统一管控全部资源，做到各平台体验一致，包括在移动端上也能够正常查看图片、音频等，例如下图的思维导图，引入之后，点击链接电脑上可以打开进行文件编辑等，比较方便。</p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220828182234.png" alt="20220828182234"></p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220828182126.png" alt="20220828182126"></p><p>同样的，这样做的缺点也比较明显，你在 Logseq 中使用的全部资源都会拷贝一份到它自己的资源目录中，如果是截图这种偶尔使用一下的资源还好，如果是工作学习中使用到的文档，就会很不方便，无法进行管理，毕竟你并不是只在 Logseq 中使用这些文档。</p><h3 id="问题一：文件检索管理"><a href="#问题一：文件检索管理" class="headerlink" title="问题一：文件检索管理"></a>问题一：文件检索管理</h3><p>首先，Logseq 本身并不是一个用于管理文档的软件，只有最基本的检索和打开功能，一旦文件变多了之后，没有目录层级、没有标签，文档的检索会成为一个很严重的问题，当然你可以通过单独建立一个 page，把相关文档都放在其中，以实现打标等功能，但操作路径会比较别扭且略有成本。</p><p>同时当你拖拽文档进入 Logseq 之后，你的电脑中存放了两份相同内容的文档，且以后你只能以 Logseq 中这一份为准，之前的拷贝必须删掉，不然你就会面临更新编辑无法同步到 Logseq 的问题。之后，当你想要进行文件编辑的时候，只能通过 Logseq 点击打开进行，因为当你的 assets 文件夹中包含了成千上万截图、文档资料的时候，你几乎不可能在文件夹中进行查看管理。<br>有时候你可能并不是想编辑，而仅仅是想要分享给同事，你会发现，如何在本地文件中找到并发给他并不容易，我目前想到的路径是找到该资源对应的 block，点击查看 Logseq 进行改动后的文件名，然后把相对链接拼接你本地 Logseq 的路径，转换成绝对路径，这样就可以在系统资源管理器中打开了，毫无疑问，这个操作成本非常高（这里也可以考虑使用一些类似 Spotlight 或Alfred 这样的软件进行文件索引，相对成本低很多）。</p><h3 id="问题二：同步问题"><a href="#问题二：同步问题" class="headerlink" title="问题二：同步问题"></a>问题二：同步问题</h3><p>第二个问题，就是随着你的长期使用，assets 的大小会逐步膨胀，这在多设备之间同步的时候就会慢慢变成一个你无法忽视的问题。如果你用的是同步盘，这个问题还稍微好点（不过同步盘自身就有很大问题）。如果你像我一样，使用的是 Git 同步 （参考<br><a href="https://blog.samwei12.cn/2022/08/12/Utilities/Logseq%E7%B3%BB%E5%88%97%E4%B9%8BGit%E5%90%8C%E6%AD%A5/">Logseq 系列之 Git 同步 | samwei12’s blog</a> ），你会发现随着你的使用，你的 Logseq 文件夹膨胀速度比你想象中的快很多。这是因为 git 本身的原理是基于记录你每次提交的文件变化来进行跟踪，当你使用文本文件的时候（也就是非二进制文件），通常每次提交 git 会准确的把其中几行改动记录下来以便进行版本管理；但当你使用的是二进制文件，由于本身比对改动非常不方便（即使把改动的二进制变化贴给你你也看不懂，自然也就失去了意义），所以很多时候都会直接把改动前后的版本都记录下来，这也就意味着，假如你有一个 100MB 大小的 PS 文件，即使你只改动了其中一个像素，那么提交的时候也会把改动后的这 100MB 大小的新文件提交上去，不难想象，随着你改动的文档以及频次变多，你的 assets 文件夹会轻松变为一个几十 GB 的庞然大物，让你的同步变得非常困难。</p><blockquote><p>注： Git 本身提供了对于大文件管理的专用方案，<a href="https://git-lfs.github.com/">Git Large File Storage | Git Large File Storage (LFS) replaces large files such as audio samples, videos, datasets, and graphics with text pointers inside Git, while storing the file contents on a remote server like GitHub.com or GitHub Enterprise.</a>，但有一定的使用成本。</p></blockquote><h2 id="个人解决方案"><a href="#个人解决方案" class="headerlink" title="个人解决方案"></a>个人解决方案</h2><p>那么如何解决这些问题呢？首先，我们需要一个专门的文件管理软件，它能够进行正常的文件目录、标签、检索、预览编辑等操作，同时，我们还需要能够在 Logseq 中插入对应的文件链接，以便在笔记中进行引用。</p><p>针对上面的诉求，我第一时间想到的就是 <a href="https://www.devontechnologies.com/apps/devonthink">DEVONtechnologies | DEVONthink, professional document and information management for the Mac and iOS</a> 这款软件，它同时支持苹果全家桶，是专业的个人知识文档管理软件，不光能够进行检索、标签，甚至还可以进行网页抓取，防止网址失效，可以说是目前 Mac 平台里面最专业的最好用的管理工具了，唯一的问题大概就是价格过于高昂，当然可能这不是它的问题。</p><p>有了文档管理软件之后，我们再解决文件链接引用的问题，这里我们引入一个术语，URI scheme， 可以通过 <a href="https://en.wikipedia.org/wiki/List_of_URI_schemes">List of URI schemes - Wikipedia</a> 了解一下， 简单点来说就是一种约定好的资源标识链接格式，通过这个链接以及一些约定好的参数，就可以通过跳转链接来唯一定位软件中资源，然后就可以实现一些功能。 最常用的例子就是文件管理器中的文件路径，例如，文件管理器规范为 <code>file://[host]/path</code>， 这是大家统一约定好的，路径大概长这样 <code>file:///Users/samwei12/Downloads/docker/Dockerfile</code>，通过这个路径就能唯一定位到文件夹中的这个文件。</p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220828204040.png" alt="20220828204040"></p><p>通过 URI Scheme，我们就可以在 Logseq 中引入文件链接来做到点击跳转，跟普通使用一个网址没有什么区别，就像这样： </p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220828204645.png" alt="20220828204645"></p><p>同样的， Devonthink 也支持 URI Scheme，而且支持的更好。它的 Scheme 格式长这样 <code>x-devonthink-item://C81BB953-8659-4AE7-9E89-143C4F6036BC</code> ，看起来就是普通的 UUID，但它比 Finder 强大太多了，除了能够直接点击定位以外，它最大的优势就是<strong>可以在文件位置变更之后依然能够定位到文件</strong>！有没有感觉很棒？ 试想一下，当你的文件夹位置稍微有所调整，所有已经引用的文件路径全部作废，有没有很难受？这时候你就会发现 DevonThink 是多么的强大，甚至改了名字之后，这个链接依然有效！包括搜索的时候，不光可以名字搜索、标签搜索、文件夹搜索，还会根据你的文档使用和打开频率给他们打分，把分数高的排在前面，非常的方便。基本上使用了它之后，你就不会再想用系统文件夹进行文件管理了。</p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220828223456.png" alt="20220828223456"></p><p>那么我们的第一个问题，文件资源管理器以及引用就解决了，那么现在来解决第二个同步问题，这里目前我的解决方案还不是很完美，但基本满足我个人的诉求了。</p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220828224142.png" alt="20220828224142"></p><p>DevonThink 支持两种方式建立索引，方式一是 Import，也就是类似 Logseq 这种，把文档全部拷贝到自己的管理系统中统一处理，这样做的好处就是可以使用它自己的一整套管理体系，包括数据同步、客户端等，但也会受限于它的服务器连接速度，可以说各有利弊，毕竟自由控制跟统一管理总是没法同时满足需求的，想要做到统一的体验，就需要牺牲一些东西。如果你不愿意把自己限定在 DevonThink 的体系里面，它很人性的提供了方式二，也就是 Index 这种，它的使用方式是你自己提供一个已有的本地文件夹，它仅仅通过检索文件信息来进行管理，这样做最大的好处就是既能够享受它强大的标签、索引系统，还可以自己本地保留管理的权利，不必 Lock-in 在这个软件里面，如果你选择了方式一，想要自己手动进行管理会麻烦很多。</p><p>我选择使用方式二，我借鉴了 PARA 的概念，本地专门有一个名为 Resources 的文件夹，它的作用就是用于管理我的全部个人文档，可以使用树状目录，也可以使用 DevonThink 的标签系统，或者 Finder 的标签系统，然后使用方式二把它添加索引，拷贝链接到 Logseq 中进行使用即可。如果你需要的话，只要把这个文档文件夹使用同步盘进行同步，就可以做到跨电脑使用，而 Logseq 目录中仅包含文本文件，体积非常可控。不过日常使用中为了方便，图片资源我还是都使用 assets 文件夹，而 pdf 文件，我有单独的管理方式，也可以认为不在 assets 中，后面有机会再分享。这样做的好处就是我整个包含了全部笔记的 Logseq 文件夹，也就不到 500MB，对 Git 的压力就非常小了。<br>当然，有利就有弊，方式二最大的问题就是多平台体验会不一致，由于文档文件本身还是在电脑设备上，通过云盘还可以做到跨电脑使用，但移动端就不可用了，原因是 iOS 端苹果的系统限制，软件通常只能访问自己应用目录下的文件，无法跨应用进行访问，DevonThink 移动端也只能访问方式一那种自己管理的数据，不过由于我个人在移动端仅仅是查看笔记居多，几乎也没有这方面的诉求，所以这个影响可以忽略不计。</p><h3 id="提效小-tips"><a href="#提效小-tips" class="headerlink" title="提效小 tips"></a>提效小 tips</h3><p>这里不得不赞一下国外软件的开放特性，通常大家都是在思考如何把自己的功能做的标准化，可以让更多的软件融入进来，而国内软件大部分都是思考如何让自己的软件封闭化，全部功能只靠自己就可以做到，好像做开放一点自己的用户就会被其他人抢走一样，思考一下你平时用的国产软件有多少支持 URI Scheme？又有多少国外软件支持 URI Scheme？<br>扯远了，回到正题，DevonThink 有一款 Alfred 插件。Alfred 同样是一款非常棒的软件，类似于 Windows 下的 everything，但功能要强大太多了。不光可以替代掉各种剪切板软件、计算器、文本替代软件，还提供了非常棒的插件功能。 </p><p><img src="https://learner.oss-cn-hangzhou.aliyuncs.com/img/20220828230343.png" alt="20220828230343"></p><p>安装了这个插件之后，可以直接在 Alfred 中输入 dnt 或者 dnw 缩写，即可实现与检索本地的 DevonThink 软件相同的功能，非常方便，详见 <a href="https://github.com/mpco/AlfredWorkflow-DEVONthink-Search">mpco/AlfredWorkflow-DEVONthink-Search: Powerful Tool for Searching in DEVONthink.</a> 。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，本文就介绍完了我自己如何在 Logseq 中进行文档的管理和使用，虽然是依托了 DevonThink 这个非常棒的软件，但整体思路是不受限于此的，但凡是可以提供稳定 URI Scheme 的软件均可以替换掉它，比如 Obsidian 也很棒。只是说在文档管理本身上功能略有偏差，但对于减负 Logseq 来说足够用了，再配合一个同步盘，可以做到多设备同步。<br>如果本文对你有所帮助或者你有其他方式，欢迎留言交流~</p>]]></content>
     
@@ -530,37 +556,6 @@
     <category term="Objective-C" scheme="http://blog.samwei12.cn/tags/Objective-C/"/>
     
     <category term="ARC" scheme="http://blog.samwei12.cn/tags/ARC/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>NSView subview blocking drag/drop event</title>
-    <link href="http://blog.samwei12.cn/2016/01/26/Objective-C/subview-blocking-drag-event/"/>
-    <id>http://blog.samwei12.cn/2016/01/26/Objective-C/subview-blocking-drag-event/</id>
-    <published>2016-01-26T05:41:57.000Z</published>
-    <updated>2021-05-08T08:11:44.829Z</updated>
-    
-    <content type="html"><![CDATA[<blockquote><p><a href="http://blog.samwei12.cn/2016/01/26/Objective-C/subview-blocking-drag-event/">原文链接</a></p></blockquote><p>近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:</p><ol><li>从 NSView 继承得到一个子类</li><li>覆盖处理拖拽事件相关方法</li><li>注册拖拽事件</li></ol><span id="more"></span><p>开始的时候一切都很正常,直到某次发现拖拽到屏幕边缘响应较为灵敏,而<strong>拖拽到屏幕中间则不响应事件</strong>,APP页面大致是这样的:</p><p><img src="http://7xlmda.com1.z0.glb.clouddn.com/2016-01-28_19-27-12.png"></p><h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>开始我一直以为是系统事件不太灵光, 后来发现只有在拖动到屏幕中间时候出现这个问题, 这个现象十分奇怪, 后来联想到页面中间有一张图片，猜测是否是因为图片截获了拖拽事件。</p><p>那么如何验证呢？其实也很简单，在自定义的NSView 中重载<code>draggingEnded：</code>方法，同时添加 log，发现鼠标拖拽到页面中间时， 该方法就不再被调用。因此可以得出结论，在自定义的 <code>NSView</code> 中添加的<code>NSImageView</code>作为 subview 会阻止拖拽事件的传递，原因是<code> NSImageView</code>本身可以处理拖拽事件，于是截获了本该自定义<code>NSView</code>处理的消息。</p><h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>在网上搜索了一下这个问题，发现已经有人给出了解决方案，具体链接：<a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></p><p>提供的解决方案有以下几种：</p><ol><li>不使用 <code>NSImageView</code>，而是采用自定义<code> NSView</code>的方式，然后重写<code>drawRect：</code>方法进行图片渲染。这个办法十分笨拙，并且不太方便。</li><li>调用<code>unregisterDraggedTypes </code>方法，这样<code> NSImageView</code>就不会监听拖拽事件了，完美解决。</li></ol><h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul><li><a href="http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop">http://stackoverflow.com/questions/5892464/cocoa-nsview-subview-blocking-drag-drop</a></li><li><a href="http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation">http://stackoverflow.com/questions/4782636/nsview-subviews-interrupting-drag-operation</a></li></ul>]]></content>
-    
-    
-    <summary type="html">&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;http://blog.samwei12.cn/2016/01/26/Objective-C/subview-blocking-drag-event/&quot;&gt;原文链接&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;近期在Mac项目中有一个处理鼠标拖拽事件的需求, 大致处理流程是这样的:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;从 NSView 继承得到一个子类&lt;/li&gt;
-&lt;li&gt;覆盖处理拖拽事件相关方法&lt;/li&gt;
-&lt;li&gt;注册拖拽事件&lt;/li&gt;
-&lt;/ol&gt;</summary>
-    
-    
-    
-    <category term="Mac" scheme="http://blog.samwei12.cn/categories/Mac/"/>
-    
-    
-    <category term="Cocoa" scheme="http://blog.samwei12.cn/tags/Cocoa/"/>
-    
-    <category term="NSView" scheme="http://blog.samwei12.cn/tags/NSView/"/>
     
   </entry>
   
