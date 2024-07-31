@@ -140,13 +140,13 @@ markdown:
 # - hexo-generator-baidu-sitemap
 
 # 统计字数及阅读时间
-symbols_count_time:
-  symbols: true
-  time: true
-  total_symbols: true
-  total_time: true
-  # awl: 4
-  # wpm: 275
+# symbols_count_time:
+#   symbols: true
+#   time: true
+#   total_symbols: true
+#   total_time: true
+#   # awl: 4
+#   # wpm: 275
 
 # RSS
 feed:
