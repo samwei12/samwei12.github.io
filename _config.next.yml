@@ -21,6 +21,12 @@ scheme: Gemini
 darkmode: true
 
 
+open_graph:
+  enable: true
+  # Add pairs each line to customize
+  options:
+    type: blog
+
 # ---------------------------------------------------------------
 # Menu Settings
 # ---------------------------------------------------------------
@@ -45,6 +51,10 @@ menu:
 menu_settings:
   icons: true
   badges: true
+
+# Easily enable fast Ajax navigation on your website.
+# For more information: https://github.com/next-theme/pjax
+pjax: true
 
 # ---------------------------------------------------------------
 # Sidebar Settings
@@ -355,7 +365,7 @@ disable_baidu_transformation: false
 canonical: true
 
 # Change headers hierarchy on site-subtitle (will be main site description) and on all post / page titles for better SEO-optimization.
-seo: false
+seo: true
 
 # If true, will add site-subtitle to index page, added in main hexo config.
 # subtitle: Subtitle
@@ -447,6 +457,19 @@ google_analytics:
 # Baidu Analytics ID
 baidu_analytics: 0e544ca0deddf3c9254cfe12d87a504c
 
+
+# Show number of visitors to each article.
+# You can visit https://www.leancloud.cn get AppID and AppKey.
+leancloud_visitors:
+  enable: true
+  app_id: VPDYe1jWZ6OTKyIIN5LLntkR-MdYXbMMI
+  app_key: 96K0LxMMLefKMgoLIahE1KFH
+  # Required for apps from CN region
+  server_url: https://vpdye1jw.api.lncldglobal.com
+  # Dependencies: https://github.com/theme-next/hexo-leancloud-counter-security
+  # If you don't care about security in lc counter and just want to use it directly
+  # (without hexo-leancloud-counter-security plugin), set the `security` to `false`.
+  security: false
 
 # Show Views / Visitors of the website / page with busuanzi.
 # Get more information on http://ibruce.info/2015/04/04/busuanzi
