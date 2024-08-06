@@ -2,9 +2,9 @@
 title: '跨平台书签同步:Xmarks'
 date: 2015-09-07 19:04:08
 tags:
-- Xmarks
+    - Xmarks
 categories:
-- Utilities
+    - Utilities
 ---
 
 > [原文链接](http://blog.samwei12.cn/2015/09/07/Utilities/%E8%B7%A8%E5%B9%B3%E5%8F%B0%E4%B9%A6%E7%AD%BE%E5%90%8C%E6%AD%A5-Xmarks/)
