@@ -3,7 +3,7 @@ name: Hexo Build and Deploy
 on:
   push:
     branches:
-      - master # default branch
+      - hexo # default branch
 
 jobs:
   build:
