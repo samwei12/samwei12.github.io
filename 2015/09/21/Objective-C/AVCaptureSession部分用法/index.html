@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="IVnB92k7tcKIU6EbcSbfeUZyHe6iZXfr8n8MLn5Dicw">
+  <meta name="baidu-site-verification" content="code-t8FLQNbxbq">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.samwei12.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12,"onmobile":false,"dimmer":false},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="原文链接  AVCaptureSession阻塞主线程问题前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在viewWillDisappear:中开销最大，这其中只调用了一个相机关闭的代码： 123if ([[self.avCameraManager session] isRunning]) &amp;#1">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="AVCaptureSession部分用法">
+<meta property="og:url" content="http://blog.samwei12.cn/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/index.html">
+<meta property="og:site_name" content="samwei12&#39;s blog">
+<meta property="og:description" content="原文链接  AVCaptureSession阻塞主线程问题前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在viewWillDisappear:中开销最大，这其中只调用了一个相机关闭的代码： 123if ([[self.avCameraManager session] isRunning]) &amp;#1">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2015-09-21T05:58:46.000Z">
+<meta property="article:modified_time" content="2024-07-31T18:16:36.785Z">
+<meta property="article:author" content="samwei12">
+<meta property="article:tag" content="AVCaptureSession">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.samwei12.cn/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.samwei12.cn/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/","path":"2015/09/21/Objective-C/AVCaptureSession部分用法/","title":"AVCaptureSession部分用法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>AVCaptureSession部分用法 | samwei12's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138655615-1"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-138655615-1","only_pageview":false,"measure_protocol_api_secret":null}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?0e544ca0deddf3c9254cfe12d87a504c"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="samwei12's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">samwei12's blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Stay hungry, stay foolish.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">46</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">9</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">31</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#AVCaptureSession%E9%98%BB%E5%A1%9E%E4%B8%BB%E7%BA%BF%E7%A8%8B%E9%97%AE%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">AVCaptureSession阻塞主线程问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E6%9C%BA%E5%89%8D%E5%90%8E%E5%8F%B0%E5%88%87%E6%8D%A2%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">相机前后台切换问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="samwei12"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">samwei12</p>
+  <div class="site-description" itemprop="description">I hear and I forget. I see and I remember. I do and I understand.</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">46</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/samwei12" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;samwei12" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:dongxiaosen@icloud.com" title="E-Mail → mailto:dongxiaosen@icloud.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+        <div class="pjax">
+        </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.samwei12.cn/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="samwei12">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="samwei12's blog">
+      <meta itemprop="description" content="I hear and I forget. I see and I remember. I do and I understand.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="AVCaptureSession部分用法 | samwei12's blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AVCaptureSession部分用法<a href="https://github.com/samwei12/samwei12.github.io/edit/hexo/source/_posts/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2015-09-21 13:58:46" itemprop="dateCreated datePublished" datetime="2015-09-21T13:58:46+08:00">2015-09-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-08-01 02:16:36" itemprop="dateModified" datetime="2024-08-01T02:16:36+08:00">2024-08-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/" class="post-meta-item leancloud_visitors" data-flag-title="AVCaptureSession部分用法" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p><a href="http://blog.samwei12.cn/2015/09/21/Objective-C/AVCaptureSession%E9%83%A8%E5%88%86%E7%94%A8%E6%B3%95/">原文链接</a></p>
+</blockquote>
+<h2 id="AVCaptureSession阻塞主线程问题"><a href="#AVCaptureSession阻塞主线程问题" class="headerlink" title="AVCaptureSession阻塞主线程问题"></a>AVCaptureSession阻塞主线程问题</h2><p>前阵子程序中出现了一个奇怪的 bug，在 iOS 系统上，页面弹出的时候会卡很久，相机始终黑屏，大概6-7秒钟，跟踪具体每个步骤花费时间的时候发现在<code>viewWillDisappear:</code>中开销最大，这其中只调用了一个相机关闭的代码：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>仔细看了文档之后，发现问题出在<code> stopRunning</code>这里，</p>
+<span id="more"></span>
+<p>苹果文档描述如下：</p>
+<blockquote>
+<p>Clients invoke -stopRunning to stop the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    stopped.</p>
+</blockquote>
+<p>重点是这个函数在 session 完全停止下来之前会始终阻塞线程， 同样的，在<code> startRunning</code>中：</p>
+<blockquote>
+<p>Clients invoke -startRunning to start the flow of data from inputs to outputs connected to<br>    the AVCaptureSession instance.  This call blocks until the session object has completely<br>    started up or failed.  A failure to start running is reported through the AVCaptureSessionRuntimeErrorNotification<br>    mechanism.</p>
+</blockquote>
+<p>因此这里必须放在后台线程中处理，否则，就会导致界面不响应，iOS8之后应该在这里做了优化，即使放在主线程做也没有很卡顿的现象，但 iOS7中，尤其是测试设备为4s，界面卡死问题很严重。</p>
+<p>开启和关闭相机部分代码改为：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^&#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 开启相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		[[<span class="keyword">self</span>.avCameraManager session] startRunning];</span><br><span class="line">	&#125;);</span><br><span class="line">	</span><br><span class="line"><span class="built_in">dispatch_async</span>(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, <span class="number">0</span>), ^(<span class="type">void</span>) &#123;</span><br><span class="line">		DDLogDebug(<span class="string">@&quot;Function: %s,line : %d 关闭相机&quot;</span>,__FUNCTION__,__LINE__);</span><br><span class="line">		<span class="keyword">if</span> ([[<span class="keyword">self</span>.avCameraManager session] isRunning]) &#123;</span><br><span class="line">			[[<span class="keyword">self</span>.avCameraManager session] stopRunning];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这里除了使用系统提供的队列以外还可以自己创建 FIFO 类型后台线程进行管理，包括切换前后摄像头、改变闪光灯模式、切换拍照和录像等，都可以放入子线程操作。</p>
+<h2 id="相机前后台切换问题"><a href="#相机前后台切换问题" class="headerlink" title="相机前后台切换问题"></a>相机前后台切换问题</h2><p>另一个问题与前后台切花相关，项目中在程序进入后台时有这么一段代码：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(startRunningSession) withObject:<span class="literal">nil</span> afterDelay:<span class="number">0.5</span>];</span><br></pre></td></tr></table></figure>
+
+<p>当时我很奇怪，这里为什么要加延时呢？进入到前台时不是应该直接开启相机吗？于是我直接把这里改成了：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span> startRunningSession];</span><br></pre></td></tr></table></figure>
+
+<p>没过多久，问题出现了，多次切换前后台之后发现，相机始终黑屏，这时，进入后台再回来，问题解决了，仔细加了 log 之后发现，出现黑屏的时候，确实也正确调用了启动 session，但是并没有收到系统相机启动成功的消息，反而收到了两次相机关闭的通知。</p>
+<p>那么之前代码中加了0.5秒延时的原因也就清楚了，是为了等待系统关闭相机之后，再调用开启相机，以免相机启动失败，但这种方式真的合理吗？其实并没有解决本质问题，如果0.5秒钟的时间并没有完全关闭系统相机呢？这里仍然会出现黑屏问题。</p>
+<p>于是继续查看系统文档，发现系统的 sampleCode AVCam-iOS中并没有专门用于前后台处理的逻辑，原来这里并不需要我们自己手动管理相机，系统会自动根据程序状态来判断是否需要关闭或者开启相机，如果按 home 进入<code>UIApplicationStateBackground</code> 状态，那么系统自动关闭相机并在进入<code>UIApplicationStateActive</code>状态时开启相机；如果是进入<code>UIApplicationStateInactive</code>状态，例如，双击 home 调出任务管理器，这时，相机并没有被关闭，仍然能够看到 preview 画面。</p>
+<p>我们在程序切换前后台时，仅需要捕获相继开启或者关闭的通知来刷新界面即可，否则可能会由于快速开启切换前后台导致系统相机执行命令错乱，无法正确启动相机。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>AVCaptureSession 中绝大部分操作需要在后台线程完成，最好使用一个 FIFO 的队列来进行操作</li>
+<li>前后台切换时，无需手动管理 CaptureSession</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <span class="social-link">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">WeChat</span>
+          </span>
+
+          <img class="social-item-img" src="/images/wechat_channel.jpg">
+      </div>
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/AVCaptureSession/" rel="tag"><i class="fa fa-tag"></i> AVCaptureSession</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2015/09/09/Objective-C/%E5%A6%82%E4%BD%95%E5%8F%96%E6%B6%88UIView%E5%8A%A8%E7%94%BB/" rel="prev" title="如何取消 UIView 动画？">
+                  <i class="fa fa-angle-left"></i> 如何取消 UIView 动画？
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/01/19/Objective-C/UITabbarController-State-Preservation/" rel="next" title="如何实现 UITabbarController 的 State Preservation?">
+                  如何实现 UITabbarController 的 State Preservation? <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙公网安备33010502005477号 </a>
+  </div>
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">samwei12</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/samwei12" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script><script src="/js/pjax.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"VPDYe1jWZ6OTKyIIN5LLntkR-MdYXbMMI","app_key":"96K0LxMMLefKMgoLIahE1KFH","server_url":"https://vpdye1jw.api.lncldglobal.com","security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"samwei12","repo":"Gitalk","client_id":"d629796e781af87fd27f","client_secret":"55b4645e66412cd3b68af0761c9da3949ca321fe","admin_user":"samwei12","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":null,"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"769b9a6bcc6c29a0de77f469abb2737a"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>
