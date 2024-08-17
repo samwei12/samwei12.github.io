@@ -10,11 +10,6 @@ categories:
 ---
 
 
-参考文档地址：
-
-> [Plugins](https://github.com/hexojs/hexo/wiki/Plugins), Hexo官方插件列表地址
-> [theme-next/awesome-next: :sunglasses: Theme NexT, AWESOME NexT!](https://github.com/theme-next/awesome-next?tab=readme-ov-file)
-
 这里汇总一下自己比较常用的插件以及相关的配置，希望对你有所帮助。
 注意： 我使用的是 `next` 主题，很多配置可能是主题专用！
 
@@ -79,7 +74,7 @@ follow_me:
 
 ### 阅读进度
 
-可以在文章顶部显示阅读进度条，简介美观。
+可以在文章顶部显示阅读进度条，简洁美观。
 
 ```yaml
 # Reading progress bar
@@ -249,3 +244,9 @@ related_posts:
 ```
 
 这样就可以做到本地调试的时候没有推荐文章功能，远程部署的时候带上该功能。
+
+
+参考文档地址：
+
+- [Plugins](https://github.com/hexojs/hexo/wiki/Plugins), Hexo官方插件列表地址
+- [theme-next/awesome-next: :sunglasses: Theme NexT, AWESOME NexT!](https://github.com/theme-next/awesome-next?tab=readme-ov-file)

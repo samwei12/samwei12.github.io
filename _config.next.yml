@@ -413,18 +413,36 @@ comments:
   style: tabs
   # Choose a comment system to be displayed by default
   # Available values: disqus | disqusjs | changyan | livere | gitalk | utterances | isso
-  active: gitalk
+  active: 
+    - changyan
+    - disqus
   # Setting `true` means remembering the comment system selected by the visitor
   storage: true
   # Lazyload all comment systems.
-  lazyload: false
+  lazyload: true
   # Modify icons and texts for any style, here are some examples
   nav:
-    #disqus:
-    #  text: Load Disqus
-    #  order: -1
-    #gitalk:
-    #  order: -2
+    changyan:
+      text: 畅言
+      order: -2
+    disqus:
+      text: Load Disqus
+      order: -3
+    gitalk:
+      order: -1
+
+disqus:
+  enable: true
+  shortname: blog-samwei12-cn
+  count: true
+
+# changyan
+changyan:
+  enable: true
+  appid: cyxs4giNL
+  appkey: prod_5ac306fa03af24f693a5047767c4e28d
+  count: true
+
 
 # Gitalk
 # Demo: https://gitalk.github.io
@@ -443,6 +461,9 @@ gitalk:
   proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token'
   # Available values: en, es-ES, fr, ru, zh-CN, zh-TW
   language:
+    - en
+    - zh-CN
+    - zh-TW
 
 # ---------------------------------------------------------------
 # Statistics and Analytics
