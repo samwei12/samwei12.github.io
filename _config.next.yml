@@ -416,7 +416,7 @@ comments:
   active: 
     # - changyan
     - disqus
-    - gitalk
+    # - gitalk
   # Setting `true` means remembering the comment system selected by the visitor
   storage: true
   # Lazyload all comment systems.
@@ -429,9 +429,9 @@ comments:
     disqus:
       text: Load Disqus
       order: -3
-    gitalk:
-      text: Load Gitalk
-      order: -1
+    # gitalk:
+    #   text: Load Gitalk
+    #   order: -1
 
 disqus:
   enable: true
@@ -448,7 +448,7 @@ changyan:
 # Gitalk
 # Demo: https://gitalk.github.io
 gitalk:
-  enable: true
+  enable: false
   github_id: samwei12  # Github repo owner
   repo: Gitalk # Repository name to store issues
   client_id: d629796e781af87fd27f # Github Application Client ID
