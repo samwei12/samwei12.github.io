@@ -440,7 +440,7 @@ disqus:
 changyan:
   enable: true
   appid: cyxs4giNL
-  appkey: prod_5ac306fa03af24f693a5047767c4e28d
+  appkey: d0fbb9b1d7ceae53411c897dc0eea5f6
   count: true
 
 
