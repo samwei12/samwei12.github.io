@@ -414,21 +414,23 @@ comments:
   # Choose a comment system to be displayed by default
   # Available values: disqus | disqusjs | changyan | livere | gitalk | utterances | isso
   active: 
-    - changyan
+    # - changyan
     - disqus
+    - gitalk
   # Setting `true` means remembering the comment system selected by the visitor
   storage: true
   # Lazyload all comment systems.
   lazyload: true
   # Modify icons and texts for any style, here are some examples
   nav:
-    changyan:
-      text: 畅言
-      order: -2
+    # changyan:
+    #   text: 畅言
+    #   order: -2
     disqus:
       text: Load Disqus
       order: -3
     gitalk:
+      text: Load Gitalk
       order: -1
 
 disqus:
@@ -438,11 +440,10 @@ disqus:
 
 # changyan
 changyan:
-  enable: true
+  enable: false
   appid: cyxs4giNL
   appkey: d0fbb9b1d7ceae53411c897dc0eea5f6
   count: true
-
 
 # Gitalk
 # Demo: https://gitalk.github.io

@@ -140,9 +140,20 @@ deploy:
 
 不过建议直接使用 Github Actions，见 [Hexo-Github Actions 自动部署方案 | samwei12's blog](https://blog.samwei12.cn/2024/08/17/Utilities/Writing/Hexo-Github-%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/)
 
-### Gitalk-待优化
+### 评论系统
 
-用于管理评论
+用于管理评论，参考： https://theme-next.js.org/docs/third-party-services/comments#Changyan-China
+
+#### disqus
+
+```
+disqus:
+  enable: true
+  shortname: blog-samwei12-cn
+  count: true
+```
+
+#### Gitalk
 
 ```yaml
 # Gitalk
@@ -159,7 +170,14 @@ gitalk:
   # If you want everyone visiting your site to see a uniform language, you can set a force language value
   # Available values: en, es-ES, fr, ru, zh-CN, zh-TW
   language:
+    - en
+    - zh-CN
+    - zh-TW
 ```
+
+#### 畅言
+
+> 有点过于废旧了，感觉很久没维护了，界面非常丑，放弃
 
 ### 阅读时间统计
 
