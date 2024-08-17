@@ -118,7 +118,7 @@ deploy:
   # branch: gitcafe-pages
   # repo: https://github.com/samwei12/samwei12.github.io.git
   repo: git@github.com:samwei12/samwei12.github.io.git
-  branch: master
+  branch: main
 
 
 # Markdown语法

@@ -1,5 +1,5 @@
 ---
-title: Hexo-Github 自动部署方案
+title: Hexo-Github Actions 自动部署方案
 date: 2024-08-17 10:44:43
 tags:
     - Hexo
