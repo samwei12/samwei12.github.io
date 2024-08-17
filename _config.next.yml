@@ -259,6 +259,19 @@ follow_me:
   WeChat: /images/wechat_channel.jpg || fab fa-weixin
   RSS: /atom.xml || fa fa-rss
 
+# Related popular posts
+# Dependencies: https://github.com/tea3/hexo-related-popular-posts
+related_posts:
+  enable: true
+  # title: "相关文章" # custom header, leave empty to use the default one
+  display_in_home: false
+  params:
+    maxCount: 5
+    #PPMixingRate: 0.0
+    #isDate: false
+    #isImage: false
+    #isExcerpt: false
+
 # Post edit
 # Dependencies: https://github.com/hexojs/hexo-deployer-git
 post_edit:

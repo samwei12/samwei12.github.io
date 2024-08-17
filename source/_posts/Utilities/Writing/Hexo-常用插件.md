@@ -209,7 +209,12 @@ related_posts:
 
 但这个已经是被废弃的插件依赖，最新的配置方案参考： [sergeyzwezdin/hexo-related-posts: Hexo plugin that generates related posts list with TF/IDF algorithm](https://github.com/sergeyzwezdin/hexo-related-posts)
 
-配置开启记得直接在 `_config.yml` 中进行。
+配置开启记得直接在 `_config.yml` 中进行。使用 Next 主题的话，需要同时在 `_config.next.yml` 中也要补充 
+
+```yaml
+related_posts:
+  enable: true
+```
 
 效果图：
 
