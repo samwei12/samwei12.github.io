@@ -141,13 +141,13 @@ markdown:
 # - hexo-generator-baidu-sitemap
 
 # 统计字数及阅读时间
-# symbols_count_time:
-#   symbols: true
-#   time: true
-#   total_symbols: true
-#   total_time: true
-#   # awl: 4
-#   # wpm: 275
+symbols_count_time:
+  symbols: true
+  time: true
+  total_symbols: true
+  total_time: true
+  # awl: 2
+  wpm: 275
 
 # RSS
 feed:
@@ -175,4 +175,26 @@ leancloud_counter_security:
   app_key: 96K0LxMMLefKMgoLIahE1KFH
   username: samwei12 # Will be asked while deploying if is left blank
   password: XUUSEuGbd1vBFCMn8NM4Pxh8 # Recommmended to be left blank. Will be asked while deploying if is left blank
+
+# 推荐文章
+related_posts:
+  enabled: true
+  enable_env_name: prod
+  filter_threshold: 0.3
+  related_count: 5
+  weight:
+      title: 0.05
+      description: 0.05
+      keywords: 0.01
+      tags: 0.005
+      categories: 0.005
+      text: 1
+  stemmers:
+    - en
+    - ru
+  reserved:
+    - asp.net
+    - vs.net
+    - ado.net
+    - .net
 

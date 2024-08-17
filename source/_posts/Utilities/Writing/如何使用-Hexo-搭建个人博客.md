@@ -2,10 +2,10 @@
 title: 如何使用 Hexo 搭建个人博客
 date: 2015-09-01 17:49:16
 tags:
-- Hexo
-- Blog
+    - Hexo
+    - Blog
 categories:
-- Utilities
+    - Utilities
 ---
 
 > [原文链接](http://blog.samwei12.cn/2015/09/01/Utilities/Writing/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Hexo-%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/)
@@ -148,106 +148,7 @@ hexo new page "about"
 
 ### Hexo 常用插件
 
-[Plugins](https://github.com/hexojs/hexo/wiki/Plugins), Hexo官方插件列表地址
-
-####  RSS
-
-安装hexo-generator-feed插件即可
-
-`npm install hexo-generator-feed`
-
-#### 阅读进度
-
-- https://github.com/theme-next/theme-next-reading-progress
-
-#### Sitemap 
-
-给搜索引擎使用
-
-```
-npm install hexo-generator-sitemap
-```
-
-
-装完之后 记得在全局配置里面开启插件
-
-```
-plugins:
-- hexo-generator-feed
-- hexo-generator-sitemap
-```
-
-#### Git
-
-用于发布
-
-```
-npm install hexo-deployer-git --save
-```
-
-#### baidu sitemap
-
-```
-npm install hexo-generator-baidu-sitemap@0.1.1 --save
-```
-
-#### sitemap
-
-```
-npm install hexo-generator-sitemap --save
-```
-
-* 重新clean发布
-* 之后访问： https://search.google.com/search-console/settings?resource_id=http%3A%2F%2Fsamwei12.com%2F&hl=zh-CN 填写生成sitemap地址即可
-
-#### Gitalk
-
-* 用于管理评论
-
-```yaml
-# Gitalk
-# Demo: https://gitalk.github.io
-gitalk:
-  enable: true
-  github_id: samwei12  # Github repo owner
-  repo: Gitalk # Repository name to store issues 注意这里必须要填名称，而不是链接
-  client_id:  # Github Application Client ID
-  client_secret:  # Github Application Client Secret
-  admin_user: samwei12 # GitHub repo owner and collaborators, only these guys can initialize github issues 这里填名称即可，可以是数组
-  distraction_free_mode: true # Facebook-like distraction free mode
-  # Gitalk's display language depends on user's browser or system environment
-  # If you want everyone visiting your site to see a uniform language, you can set a force language value
-  # Available values: en, es-ES, fr, ru, zh-CN, zh-TW
-  language:
-```
-
-#### GoogleAnalytics
-
-* 用于分析数据
-* https://analytics.google.com/analytics/web/#/report-home/a138655615w199342623p193811219
-
-#### 阅读时间统计
-
-* 参考:https://github.com/theme-next/hexo-symbols-count-time
-* 这里有个注意点,必须要在主配置文件即`_config.yml`中提前开启,才能在 next 主题中进行配置,否则失效
-
-#### local_search
-
-* 本地搜索
-
-```yaml
-# Local search
-# Dependencies: https://github.com/theme-next/hexo-generator-searchdb
-local_search:
-  enable: true
-  # If auto, trigger search by changing input.
-  # If manual, trigger search by pressing enter key or search button.
-  trigger: auto
-  # Show top n results per article, show all results by setting to -1
-  top_n_per_article: 1
-  # Unescape html strings to the readable one.
-  unescape: false
-```
+详见： 
 
 ## 发布到 Github
 

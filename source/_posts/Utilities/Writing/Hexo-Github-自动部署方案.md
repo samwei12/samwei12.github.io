@@ -10,6 +10,9 @@ categories:
 
 
 前阵子因为很久没有捡起来写博客，导致电脑的 node 环境各种版本问题，本地压根运行不起来，所以折腾了一下 Hugo 方案，感觉 Hugo 相较于 Hexo 还是有很多优势的，让我印象比较深的是：
+
+<!-- more -->
+
 1. 整个环境较为独立，不再像 Hexo 需要依赖电脑 Node 版本，各种插件需要独立版本，随着 Hexo 或者 Node 版本升级还需要考虑插件版本问题，减少了很多折腾的工作。
     1. Hugo 搭建和配置非常简单， ![202408171050885](https://learner.oss-cn-hangzhou.aliyuncs.com/img/202408171050885.png)
     2. Hexo 的环境依赖：
@@ -61,7 +64,7 @@ on:
 
 ![202408171146444](https://learner.oss-cn-hangzhou.aliyuncs.com/img/202408171146444.png)
 
-在 Github 中开启 Actions 即可
+在 Github 中开启 Actions 即可。
 
 ### 总结
 
