@@ -148,7 +148,7 @@ hexo new page "about"
 
 ### Hexo 常用插件
 
-详见： [Hexo - 常用插件 & 配置 | samwei12's blog](https://blog.samwei12.cn/2024/08/17/Utilities/Writing/Hexo-%E5%B8%B8%E7%94%A8%E6%8F%92%E4%BB%B6/)
+详见： [Hexo-常用插件&配置 | samwei12's blog](https://blog.samwei12.cn/2024/08/17/Utilities/Writing/Hexo-%E5%B8%B8%E7%94%A8%E6%8F%92%E4%BB%B6/)
 
 ## 发布到 Github
 
