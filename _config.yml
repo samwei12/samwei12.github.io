@@ -18,8 +18,8 @@ url: http://blog.samwei12.cn
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
-  trailing_index: true # Set to false to remove trailing 'index.html' from permalinks
-  trailing_html: true # Set to false to remove trailing '.html' from permalinks
+    trailing_index: true # Set to false to remove trailing 'index.html' from permalinks
+    trailing_html: true # Set to false to remove trailing '.html' from permalinks
 
 # Directory
 source_dir: source
@@ -30,42 +30,42 @@ category_dir: categories
 code_dir: downloads/code
 i18n_dir: :lang
 skip_render:
-  - "_posts/Utilities/Wekan.md"
+    - '_posts/Utilities/Wekan.md'
 
 # Writing
 new_post_name: :title.md # File name of new posts
 default_layout: post
 titlecase: false # Transform title into titlecase
 external_link:
-  enable: true # Open external links in new tab
-  field: site # Apply to the whole site
-  exclude: ''
+    enable: true # Open external links in new tab
+    field: site # Apply to the whole site
+    exclude: ''
 filename_case: 0
 render_drafts: false
 post_asset_folder: false
 relative_link: false
 future: true
 highlight:
-  enable: true
-  line_number: true
-  auto_detect: false
-  tab_replace: ''
-  wrap: true
-  hljs: false
+    enable: true
+    line_number: true
+    auto_detect: false
+    tab_replace: ''
+    wrap: true
+    hljs: false
 prismjs:
-  enable: false
-  preprocess: true
-  line_number: true
-  tab_replace: ''
+    enable: false
+    preprocess: true
+    line_number: true
+    tab_replace: ''
 
 # Home page setting
 # path: Root path for your blogs index page. (default = '')
 # per_page: Posts displayed per page. (0 = disable pagination)
 # order_by: Posts order. (Order by date descending by default)
 index_generator:
-  path: ''
-  per_page: 10
-  order_by: -date
+    path: ''
+    per_page: 10
+    order_by: -date
 
 # Category & Tag
 default_category: uncategorized
@@ -91,7 +91,7 @@ meta_generator: true
 date_format: YYYY-MM-DD
 time_format: HH:mm:ss
 ## updated_option supports 'mtime', 'date', 'empty'
-updated_option: 'mtime'
+updated_option: 'date'
 
 # Pagination
 ## Set per_page to 0 to disable pagination
@@ -113,24 +113,23 @@ theme: next
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
-  type: git
-  # repo: https://gitcafe.com/samwei12/samwei12.git
-  # branch: gitcafe-pages
-  # repo: https://github.com/samwei12/samwei12.github.io.git
-  repo: git@github.com:samwei12/samwei12.github.io.git
-  branch: main
-
+    type: git
+    # repo: https://gitcafe.com/samwei12/samwei12.git
+    # branch: gitcafe-pages
+    # repo: https://github.com/samwei12/samwei12.github.io.git
+    repo: git@github.com:samwei12/samwei12.github.io.git
+    branch: main
 
 # Markdown语法
 ## https://github.com/chjj/marked
 markdown:
-  gfm: true
-  pedantic: false
-  sanitize: false
-  tables: true
-  breaks: true
-  smartLists: true
-  smartypants: true
+    gfm: true
+    pedantic: false
+    sanitize: false
+    tables: true
+    breaks: true
+    smartLists: true
+    smartypants: true
 
 # 插件列表
 # plugins:
@@ -142,12 +141,12 @@ markdown:
 
 # 统计字数及阅读时间
 symbols_count_time:
-  symbols: true
-  time: true
-  total_symbols: true
-  total_time: true
-  # awl: 2
-  wpm: 275
+    symbols: true
+    time: true
+    total_symbols: true
+    total_time: true
+    # awl: 2
+    wpm: 275
 
 # RSS
 feed:
@@ -157,11 +156,10 @@ feed:
     limit: 20
 
 search:
-  path: search.xml
-  field: post
-  content: true
-  format: html
-
+    path: search.xml
+    field: post
+    content: true
+    format: html
 
 sitemap:
     path: sitemap.xml
@@ -170,31 +168,30 @@ baidusitemap:
     path: sitemap.xml
 
 leancloud_counter_security:
-  enable_sync: true
-  app_id: VPDYe1jWZ6OTKyIIN5LLntkR-MdYXbMMI
-  app_key: 96K0LxMMLefKMgoLIahE1KFH
-  username: samwei12 # Will be asked while deploying if is left blank
-  password: XUUSEuGbd1vBFCMn8NM4Pxh8 # Recommmended to be left blank. Will be asked while deploying if is left blank
+    enable_sync: true
+    app_id: VPDYe1jWZ6OTKyIIN5LLntkR-MdYXbMMI
+    app_key: 96K0LxMMLefKMgoLIahE1KFH
+    username: samwei12 # Will be asked while deploying if is left blank
+    password: XUUSEuGbd1vBFCMn8NM4Pxh8 # Recommmended to be left blank. Will be asked while deploying if is left blank
 
 # 推荐文章
 related_posts:
-  enabled: true
-  enable_env_name: prod
-  filter_threshold: 0.3
-  related_count: 5
-  weight:
-      title: 0.05
-      description: 0.05
-      keywords: 0.01
-      tags: 0.005
-      categories: 0.005
-      text: 1
-  stemmers:
-    - en
-    - ru
-  reserved:
-    - asp.net
-    - vs.net
-    - ado.net
-    - .net
-
+    enabled: true
+    enable_env_name: prod
+    filter_threshold: 0.3
+    related_count: 5
+    weight:
+        title: 0.05
+        description: 0.05
+        keywords: 0.01
+        tags: 0.005
+        categories: 0.005
+        text: 1
+    stemmers:
+        - en
+        - ru
+    reserved:
+        - asp.net
+        - vs.net
+        - ado.net
+        - .net
